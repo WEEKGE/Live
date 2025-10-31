@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weeksy</title>
+
+  <!-- fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* scrollbar */
+     ::-webkit-scrollbar { 
+      width: 0.4rem; 
+      background-color: #00000000; 
+    }
+    ::-webkit-scrollbar-track { 
+      border-radius: 10px; 
+      background-color: #18181800; 
+    }
+    ::-webkit-scrollbar-thumb { 
+      background: #16b438; 
+      border-radius: 20px; 
+    }
+ 
+ 
+    /* theme */
+    :root {
+      --bg:#0B1216;
+      --top:#1C2A2F;
+      --card:#2A3A40;
+      --line:#83919922;
+      --text:#EDEFF2;
+      --muted:#B7C0C6;
+      --accent:#F2C200;  /* current */
+      --done:#38D98A;    /* past */
+      --pending:#6B7780; /* future */
+      --danger:#ED3737;
+      --shadow:0 8px 28px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Saira", system-ui, -apple-system, Segoe UI, Arial;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* top nav */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: 64px;
+      background: var(--top);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid #00000044;
+    }
+
+    .brand { font-weight: 700; letter-spacing: .3px; }
+
+    .signin-btn {
+      background: #fff;
+      color: #0B1216;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      object-fit: cover;
+      display: none;
+    }
+
+    .menu {
+      position: absolute;
+      right: 16px;
+      top: 60px;
+      width: 220px;
+      background: #2B2F31;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      display: none;
+      overflow: hidden;
+    }
+
+    .menu.open { display: block; }
+
+    .menu a, .menu button {
+      display: block;
+      padding: 14px 12px;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #D7DBDE;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .menu .sep { height: 1px; background: #FFFFFF22; }
+
+    /* layout */
+    .wrap {
+      height: calc(100% - 64px);
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+    }
+
+    .left {
+      border-right: 1px solid var(--line);
+      padding: 24px 18px;
+      overflow: auto;
+      scroll-behavior: smooth;
+    }
+
+    .week-item {
+      display: grid;
+      grid-template-columns: 66px 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .week-item.active { background: #1a2328; }
+
+    .dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 6px solid #fff;
+      background: var(--pending);
+    }
+
+    .dot.current { background: var(--accent); }
+    .dot.done { background: var(--done); }
+
+    .wk-title { font-weight: 700; }
+    .wk-dates { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    .right-panel { overflow: auto; }
+
+    .card-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      border: 1px solid #00000055;
+    }
+
+    .card .subhead { font-weight: 700; text-align: center; opacity: .85; }
+    .card .title { font-size: 22px; font-weight: 700; text-align: center; margin: 12px 0 18px; }
+
+    .btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    .pill {
+      min-width: 140px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .pill.slides { background: #FFC423; color: #231f20; }
+    .pill.video { background: var(--danger); color: #fff; }
+    .pill.disabled { opacity: .35; pointer-events: none; }
+
+    /* modal (profile) */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: #0B1216;
+      z-index: 100;
+      display: none;
+      animation: zoomIn .18s ease-out;
+    }
+
+    .modal.open { display: block; }
+
+    @keyframes zoomIn {
+      from { transform: scale(.96); opacity: .2; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-inner { max-width: 1100px; margin: 0 auto; padding: 22px; }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+    }
+
+    .close {
+      background: #2b2f31;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .catalog { display: grid; grid-template-columns: 1fr 320px; gap: 18px; }
+
+    .list, .sidebox {
+      background: #121A1F;
+      border-radius: 14px;
+      padding: 12px;
+      border: 1px solid #00000066;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 8px;
+      border-bottom: 1px solid #ffffff10;
+    }
+
+    .item:last-child { border-bottom: none; }
+
+    .item button {
+      background: #2e3a40;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .item .added { background: #38d98a; color: #111; cursor: default; }
+
+    .save {
+      margin-top: 10px;
+      background: #38D98A;
+      color: #0B1216;
+      font-weight: 800;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 12px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .empty { opacity: .7; text-align: center; margin-top: 14vh; font-size: 18px; }
+
+    @media (max-width: 900px) {
+      .wrap { grid-template-columns: 1fr; }
+      .left { height: 44vh; }
+      .right-panel { height: 56vh; }
+      .catalog { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- top nav -->
+  <div class="nav">
+    <div class="brand">Weeksy</div>
+
+    <div class="right">
+      <button id="signinBtn" class="signin-btn" style="display:none;">Sign in with Google</button>
+
+      <img id="avatar" class="avatar" src="" alt="profile" />
+      <div id="menu" class="menu">
+        <a id="openProfile">Profile Settings</a>
+        <div class="sep"></div>
+        <button id="logoutBtn">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- layout -->
+  <div class="wrap">
+    <div id="weeksList" class="left"></div>
+
+    <div class="right-panel">
+      <div id="cardsCanvas" class="card-stack">
+        <div class="empty">აირჩიე მარცხნივ კვირა ან ჩართე საგნები Profile Settings-ში.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- modal -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-inner">
+
+      <div class="modal-head">
+        <div style="font-weight:800">Profile Settings</div>
+        <button id="closeModal" class="close">Close</button>
+      </div>
+
+      <div class="catalog">
+        <div>
+          <input id="searchBox" type="search" placeholder="ძებნა კატალოგში..." style="width:100%;padding:10px;">
+
+          <div id="catalogList" class="list" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="sidebox">
+          <div style="font-weight:800;margin-bottom:6px;">ჩემი საგნები</div>
+          <div id="mySubjects"></div>
+          <button id="saveSubjects" class="save">Save</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<!-- firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+
+<script>
+  /* category: firebase init */
+  const firebaseConfig = {
+    apiKey: "AIzaSyBwjZEdit040PKScyrIA3E1J1U2yzr7Wh4",
+    authDomain: "ugstuff-c351a.firebaseapp.com",
+    projectId: "ugstuff-c351a",
+    storageBucket: "ugstuff-c351a.firebasestorage.app",
+    messagingSenderId: "1033721470814",
+    appId: "1:1033721470814:web:e7d53feee2765445dc39cf",
+    measurementId: "G-QE68REWZYQ"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  /* category: state */
+  let user = null;
+  let catalog = []; // will come from Firestore
+  let selectedSubjects = [];
+  let subjectCache = {};
+  let weekDates = [];
+
+  /* category: helpers */
+  const $  = s => document.querySelector(s);
+  const el = (t, p = {}, kids = []) => { const e = document.createElement(t); Object.assign(e, p); kids.forEach(k => e.append(k)); return e; };
+  const todayISO = () => new Date().toISOString().slice(0,10);
+  const isBetween = (d, s, e) => d >= s && d <= e;
+  const hasPassed = (d, e) => d > e;
+  const fmtRange = (s, e) => {
+    const f = d => new Date(d + "T12:00:00").toLocaleString(undefined, { month: "short", day: "numeric" });
+    return f(s) + " → " + f(e);
+  };
+
+  /* category: local week setup (2 semesters) */
+  const SEMESTER_WEEKS = [
+    { n:1,  start1:"2025-09-22", end1:"2025-09-28", start2:"2026-03-02", end2:"2026-03-08" },
+    { n:2,  start1:"2025-09-29", end1:"2025-10-05", start2:"2026-03-09", end2:"2026-03-15" },
+    { n:3,  start1:"2025-10-06", end1:"2025-10-12", start2:"2026-03-16", end2:"2026-03-22" },
+    { n:4,  start1:"2025-10-13", end1:"2025-10-19", start2:"2026-03-23", end2:"2026-03-29" },
+    { n:5,  start1:"2025-10-20", end1:"2025-10-26", start2:"2026-03-30", end2:"2026-04-05" },
+    { n:6,  start1:"2025-10-27", end1:"2025-11-02", start2:"2026-04-06", end2:"2026-04-12" },
+    { n:7,  start1:"2025-11-03", end1:"2025-11-09", start2:"2026-04-20", end2:"2026-04-26" },
+    { n:8,  start1:"2025-11-10", end1:"2025-11-16", start2:"2026-04-27", end2:"2026-05-03" },
+    { n:9,  start1:"2025-11-17", end1:"2025-11-23", start2:"2026-05-04", end2:"2026-05-10" },
+    { n:10, start1:"2025-11-24", end1:"2025-11-30", start2:"2026-05-11", end2:"2026-05-17" },
+    { n:11, start1:"2025-12-01", end1:"2025-12-07", start2:"2026-05-18", end2:"2026-05-24" },
+    { n:12, start1:"2025-12-08", end1:"2025-12-14", start2:"2026-05-25", end2:"2026-05-31" }
+  ];
+
+  function flattenWeeks() {
+    weekDates = [];
+    SEMESTER_WEEKS.forEach(w => {
+      if (w.start1 && w.end1) weekDates.push({ n: w.n, start: w.start1, end: w.end1 });
+      if (w.start2 && w.end2) weekDates.push({ n: w.n, start: w.start2, end: w.end2 });
+    });
+  }
+
+  /* category: auth ui */
+  const provider = new firebase.auth.GoogleAuthProvider();
+  $("#signinBtn").onclick = () => auth.signInWithPopup(provider);
+  $("#logoutBtn").onclick = () => auth.signOut();
+  $("#avatar").onclick = () => $("#menu").classList.toggle("open");
+  document.addEventListener("click", e => { if(!e.target.closest(".avatar") && !e.target.closest(".menu")) $("#menu").classList.remove("open"); });
+
+  auth.onAuthStateChanged(async u => {
+    user = u || null;
+    guardUI(!!user);
+    if (user) {
+      $("#avatar").src = user.photoURL || "https://i.pravatar.cc/100";
+      await bootAfterLogin();
+    }
+  });
+
+  function guardUI(signed) {
+    $("#signinBtn").style.display = signed ? "none" : "inline-flex";
+    $("#avatar").style.display = signed ? "block" : "none";
+    if (!signed) $("#cardsCanvas").innerHTML = `<div class="empty">შედი Google-ით რომ ნახო საგნები.</div>`;
+  }
+
+  /* category: firestore subjects */
+  async function loadCatalog() {
+    catalog = [];
+    const snap = await db.collection("subjects").get();
+    snap.forEach(doc => {
+      const data = doc.data();
+      catalog.push({
+        id: doc.id,
+        name: data.name,
+        weeks: data.weeks || []
+      });
+    });
+  }
+
+  async function ensureSubjectsLoaded() {
+    const toLoad = selectedSubjects.filter(id => !subjectCache[id]);
+    for (const id of toLoad) {
+      const subj = catalog.find(c => c.id === id);
+      if (subj) subjectCache[id] = subj;
+    }
+  }
+
+  /* category: firestore persistence */
+  async function loadUserSelection() {
+    const key = `weeksy:selected:${user.uid}`;
+    try {
+      const snap = await db.collection("users").doc(user.uid).get();
+      selectedSubjects = (snap.exists && snap.data().subjects) ? snap.data().subjects : [];
+      localStorage.setItem(key, JSON.stringify(selectedSubjects));
+    } catch {
+      selectedSubjects = JSON.parse(localStorage.getItem(key) || "[]");
+    }
+  }
+
+  async function saveUserSelection(immediate=false) {
+    if (!user) return;
+    await db.collection("users").doc(user.uid).set({ subjects: selectedSubjects }, { merge: true });
+    localStorage.setItem(`weeksy:selected:${user.uid}`, JSON.stringify(selectedSubjects));
+    if (immediate) {
+      await ensureSubjectsLoaded();
+      paintWeeks();
+      const iso = todayISO();
+      const cur = weekDates.find(w => isBetween(iso, w.start, w.end)) || weekDates[0];
+      if (cur) showWeek(cur.n);
+    }
+  }
+
+/* category: ui - weeks */
+function paintWeeks() {
+  const iso = todayISO();
+  const list = $("#weeksList");
+  list.innerHTML = "";
+
+  // determine only one active week — whichever semester range matches today
+  let activeWeekN = null;
+  for (const w of SEMESTER_WEEKS) {
+    if (isBetween(iso, w.start1, w.end1) || isBetween(iso, w.start2, w.end2)) {
+      activeWeekN = w.n;
+      break;
+    }
+  }
+
+  SEMESTER_WEEKS.forEach(w => {
+    const isCurrent = activeWeekN === w.n;
+    const done = hasPassed(iso, w.end1) && hasPassed(iso, w.end2);
+    const status = isCurrent ? "current" : done ? "done" : "pending";
+
+    const row = el("div", { className: `week-item${isCurrent ? " active" : ""}` });
+    row.setAttribute("data-week", w.n);
+
+    row.append(
+      el("div", { className: "dot " + status }),
+      el("div", {}, [
+        el("div", { className: "wk-title", textContent: `Week ${w.n}` }),
+        el("div", { className: "wk-dates", textContent: fmtRange(w.start1, w.end1) + " / " + fmtRange(w.start2, w.end2) })
+      ])
+    );
+
+    row.addEventListener("click", () => {
+      document.querySelectorAll(".week-item").forEach(x => x.classList.remove("active"));
+      row.classList.add("active");
+      showWeek(w.n);
+    });
+
+    list.append(row);
+  });
+}
+
+/* category: ui - cards */
+function showWeek(n) {
+  const stack = el("div", { className: "card-stack" });
+  let any = false;
+
+  selectedSubjects.forEach(id => {
+    const subj = subjectCache[id];
+    if (!subj) return;
+
+    const wk = subj.weeks.find(w => w.week === n);
+    if (!wk) return;
+
+    any = true;
+
+    const card = el("div", { className: "card" });
+    card.append(
+      el("div", { className: "subhead", textContent: subj.name }),
+      el("div", { className: "title", textContent: wk.title || "—" })
+    );
+
+    const slidesBtn = el("button", { className: "pill slides" + (wk.slides ? "" : " disabled"), textContent: "Slides" });
+    const videoBtn  = el("button", { className: "pill video"  + (wk.video  ? "" : " disabled"), textContent: "Video"  });
+
+    if (wk.slides) slidesBtn.addEventListener("click", () => window.open(wk.slides, "_blank"));
+    if (wk.video)  videoBtn.addEventListener("click", () => window.open(wk.video, "_blank"));
+
+    card.append(el("div", { className: "btns" }, [slidesBtn, videoBtn]));
+    stack.append(card);
+  });
+
+  $("#cardsCanvas").innerHTML = "";
+  $("#cardsCanvas").append(any ? stack : el("div", { className: "empty", textContent: "ამ კვირისთვის მასალა ჯერ არაა." }));
+}
+
+  /* category: ui - profile modal */
+  $("#openProfile").onclick = ()=>{$("#menu").classList.remove("open");$("#modal").classList.add("open");renderProfile();};
+  $("#closeModal").onclick = ()=> $("#modal").classList.remove("open");
+  $("#searchBox").oninput = renderProfile;
+
+  function renderProfile() {
+    const q = ($("#searchBox").value||"").toLowerCase();
+    const list = $("#catalogList"); list.innerHTML="";
+    catalog.filter(x=>x.name.toLowerCase().includes(q)||x.id.toLowerCase().includes(q)).forEach(x=>{
+      const added=selectedSubjects.includes(x.id);
+      const row=el("div",{className:"item"});
+      row.append(
+        el("div",{},[
+          el("div",{textContent:x.name,style:"font-weight:700"}),
+          el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
+        ]),
+        added?el("button",{className:"added",textContent:"✓ Added"}):el("button",{textContent:"Add",onclick:async()=>{
+          if(!selectedSubjects.includes(x.id))selectedSubjects.push(x.id);
+          await saveUserSelection(true); renderProfile();
+        }})
+      );
+      list.append(row);
+    });
+    const mine=$("#mySubjects"); mine.innerHTML="";
+    selectedSubjects.forEach(id=>{
+      const subj=catalog.find(c=>c.id===id);
+      const row=el("div",{className:"item"});
+      row.append(
+        el("div",{},[
+          el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
+          el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
+        ]),
+        el("button",{textContent:"Remove",onclick:async()=>{
+          selectedSubjects=selectedSubjects.filter(s=>s!==id);
+          delete subjectCache[id];
+          await saveUserSelection(true); renderProfile();
+        }})
+      );
+      mine.append(row);
+    });
+  }
+
+  /* category: boot */
+  async function bootAfterLogin() {
+    await Promise.all([loadCatalog(), loadUserSelection()]);
+    await ensureSubjectsLoaded();
+    flattenWeeks();
+    paintWeeks();
+    const iso=todayISO();
+    const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
+    if(cur) showWeek(cur.n);
+  }
+
+  guardUI(false);
+</script>
+
+
+
+
+
+</body>
+</html>

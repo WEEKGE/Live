@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Weeksy Admin Panel</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<style>
+  :root {
+    --bg: #0b1216;
+    --surface: #1c2a2f;
+    --text: #fff;
+    --accent: #ffc423;
+    --success: #38d98a;
+    --danger: #ed3737;
+  }
+  *{box-sizing:border-box;font-family:Arial, sans-serif;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    margin:0;
+    height:100vh;
+    display:grid;
+    grid-template-rows:60px 1fr;
+  }
+  header{
+    background:var(--surface);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+  }
+  h1{font-size:20px;color:var(--accent);}
+  button{
+    background:var(--accent);
+    color:#111;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  main{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    height:100%;
+  }
+  aside{
+    background:var(--surface);
+    padding:10px;
+    overflow:auto;
+  }
+  .search{
+    width:100%;
+    padding:8px;
+    border:none;
+    border-radius:6px;
+    background:#2a3a40;
+    color:#fff;
+    margin-bottom:10px;
+  }
+  .subject-item{
+    padding:8px;
+    border-radius:6px;
+    background:#2a3a40;
+    margin-bottom:6px;
+    cursor:pointer;
+  }
+  .subject-item:hover{background:#37464d;}
+  .active{background:#ffc423;color:#111;}
+  section{
+    padding:16px;
+    overflow:auto;
+  }
+  input{
+    width:100%;
+    padding:8px;
+    margin:4px 0 10px 0;
+    border:none;
+    border-radius:6px;
+    background:#2a3a40;
+    color:#fff;
+  }
+  label{font-weight:bold;}
+  .week{
+    border:1px solid #333;
+    border-radius:8px;
+    background:#121a1f;
+    padding:10px;
+    margin-bottom:10px;
+  }
+  .btn-row{display:flex;gap:10px;margin-top:10px;}
+  .success{background:var(--success);color:#111;}
+  .danger{background:var(--danger);color:#fff;}
+  .status{text-align:center;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Weeksy Admin</h1>
+  <div>
+    <button id="signinBtn">Sign in with Google</button>
+    <button id="logoutBtn" style="display:none;">Logout</button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <input type="search" id="searchBox" class="search" placeholder="Search subjects...">
+    <div id="subjectList"></div>
+    <div class="btn-row">
+      <button id="addSubjectBtn">➕ New Subject</button>
+    </div>
+  </aside>
+
+  <section>
+    <h2 id="editorTitle">Select a subject to edit</h2>
+    <div id="editor" style="display:none;">
+      <label>Subject ID</label>
+      <input id="subjectId" disabled>
+
+      <label>Subject Name</label>
+      <input id="subjectName">
+
+      <div id="weeksContainer"></div>
+
+      <div class="btn-row">
+        <button class="success" id="saveBtn">💾 Save</button>
+        <button class="danger" id="deleteBtn">🗑️ Delete</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* category: firebase init */
+const firebaseConfig = {
+  apiKey: "AIzaSyBwjZEdit040PKScyrIA3E1J1U2yzr7Wh4",
+  authDomain: "ugstuff-c351a.firebaseapp.com",
+  projectId: "ugstuff-c351a",
+  storageBucket: "ugstuff-c351a.firebasestorage.app",
+  messagingSenderId: "1033721470814",
+  appId: "1:1033721470814:web:e7d53feee2765445dc39cf",
+  measurementId: "G-QE68REWZYQ"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+/* category: state */
+let user = null;
+let isAdmin = false;
+let subjects = [];
+let currentId = null;
+
+/* category: helpers */
+const $  = s => document.querySelector(s);
+const el = (t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
+const ADMIN_EMAILS = ["davit.gvakharia@gmail.com"];
+
+function showStatus(msg,color="white"){
+  const st=$("#status");
+  if(st){st.textContent=msg;st.style.color=color;}
+}
+
+/* category: auth */
+const provider = new firebase.auth.GoogleAuthProvider();
+$("#signinBtn").onclick = ()=> auth.signInWithPopup(provider);
+$("#logoutBtn").onclick = ()=> auth.signOut();
+
+auth.onAuthStateChanged(async u=>{
+  user = u || null;
+  if(user){
+    $("#signinBtn").style.display="none";
+    $("#logoutBtn").style.display="inline-block";
+    if(ADMIN_EMAILS.includes(user.email)){
+      isAdmin=true;
+      showStatus("Loading subjects...", "#ffc423");
+      await loadSubjects();
+    }else{
+      document.body.innerHTML=`<h1 style="text-align:center;color:red;">Access denied</h1>`;
+    }
+  } else {
+    $("#signinBtn").style.display="inline-block";
+    $("#logoutBtn").style.display="none";
+  }
+});
+
+/* category: firestore subjects */
+async function loadSubjects(){
+  try{
+    const snap = await db.collection("subjects").get();
+    subjects = snap.docs.map(doc => {
+      const data = doc.data();
+      return { id: doc.id, name: data.name || doc.id, weeks: data.weeks || [] };
+    });
+    renderSubjectList();
+    showStatus(`✅ Loaded ${subjects.length} subjects.`, "#38d98a");
+  }catch(err){
+    showStatus("Error loading subjects: "+err.message,"#ed3737");
+    console.error(err);
+  }
+}
+
+function renderSubjectList(){
+  const list=$("#subjectList"); list.innerHTML="";
+  if(!subjects.length){list.innerHTML="<div style='opacity:.7;padding:8px;'>No subjects found.</div>";return;}
+
+  const q=$("#searchBox").value.toLowerCase();
+  subjects
+    .filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q))
+    .forEach(s=>{
+      const div=el("div",{className:"subject-item",textContent:`${s.name} (${s.id})`});
+      div.onclick=()=>openSubject(s.id);
+      list.append(div);
+    });
+}
+$("#searchBox").oninput = renderSubjectList;
+
+/* category: editor logic */
+$("#addSubjectBtn").onclick=()=>{
+  currentId=null;
+  $("#editor").style.display="block";
+  $("#editorTitle").textContent="🆕 New Subject";
+  $("#subjectId").value="";
+  $("#subjectName").value="";
+  renderWeeks([]);
+};
+
+async function openSubject(id){
+  const doc=await db.collection("subjects").doc(id).get();
+  if(!doc.exists)return alert("Subject not found");
+  const data=doc.data();
+  currentId=id;
+  $("#editor").style.display="block";
+  $("#editorTitle").textContent=`Editing: ${data.name}`;
+  $("#subjectId").value=id;
+  $("#subjectName").value=data.name||"";
+  renderWeeks(data.weeks||[]);
+}
+
+function renderWeeks(weeks){
+  const box=$("#weeksContainer"); box.innerHTML="";
+  for(let i=1;i<=12;i++){
+    const w=weeks.find(x=>x.week===i)||{};
+    const div=el("div",{className:"week"});
+    div.innerHTML=`
+      <h3>Week ${i}</h3>
+      <label>Title</label><input id="title-${i}" value="${w.title||""}">
+      <label>Slides</label><input id="slides-${i}" value="${w.slides||""}">
+      <label>Video</label><input id="video-${i}" value="${w.video||""}">
+    `;
+    box.append(div);
+  }
+}
+
+/* category: firestore write */
+$("#saveBtn").onclick=async()=>{
+  const id=currentId || prompt("Enter Subject ID:");
+  if(!id)return;
+  const name=$("#subjectName").value.trim();
+  const weeks=[];
+  for(let i=1;i<=12;i++){
+    weeks.push({
+      week:i,
+      title:$("#title-"+i).value.trim(),
+      slides:$("#slides-"+i).value.trim(),
+      video:$("#video-"+i).value.trim()
+    });
+  }
+
+  try{
+    await db.collection("subjects").doc(id).set({id,name,weeks});
+    showStatus("✅ Saved successfully!","#38d98a");
+    await loadSubjects();
+  }catch(e){
+    showStatus("❌ Save failed: "+e.message,"#ed3737");
+  }
+};
+
+$("#deleteBtn").onclick=async()=>{
+  if(!currentId||!confirm("Delete this subject?"))return;
+  try{
+    await db.collection("subjects").doc(currentId).delete();
+    showStatus("🗑️ Deleted","#ed3737");
+    await loadSubjects();
+    $("#editor").style.display="none";
+  }catch(e){
+    showStatus("Error deleting: "+e.message,"#ed3737");
+  }
+};
+</script>
+
+</body>
+</html>
