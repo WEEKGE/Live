@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GE Speech — Stage 1.5 (Listen & Understand • Centered Controls)</title>
+
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0b1216; --surface:#121c22; --panel:#17242b;
+    --line:#243540; --text:#f2f6f8; --muted:#9fb0bb;
+    --accent:#2f86ff; --accent-h:#5aa1ff;
+    --active:#38d98a; --active-h:#59e4a2;
+    --disabled:#3a4852;
+    --shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Inter,-apple-system,Segoe UI;}
+  .shell{
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+    gap:20px;
+    min-height:100dvh;
+    padding:20px;
+    max-width:1500px;
+    margin:auto;
+  }
+  header{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
+  .title{font-size:clamp(18px,2vw,22px);margin:0;font-weight:700;}
+  .hint{color:var(--muted);font-size:13px;}
+  .grid{display:grid;gap:16px;}
+  @media(min-width:950px){.grid{grid-template-columns:repeat(3,1fr);}}
+  .card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;box-shadow:var(--shadow);padding:14px;display:grid;gap:8px;
+  }
+  .label{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+  .box{
+    background:var(--surface);border:1px solid #1f2c35;border-radius:10px;
+    padding:10px;min-height:110px;line-height:1.5;overflow:auto;white-space:pre-wrap;
+  }
+  .box[contenteditable="true"]{outline:none;}
+  .off{opacity:.7;color:#c2cbd0;}
+
+  /* ====== Controls dock ====== */
+  .dock{
+    position:sticky;bottom:0;padding:20px 0;
+    background:linear-gradient(180deg,rgba(11,18,22,0) 0%,rgba(11,18,22,.8) 50%,rgba(11,18,22,1) 100%);
+    backdrop-filter:blur(4px);
+  }
+  .controls{
+    display:flex;align-items:center;justify-content:center;
+    gap:clamp(36px,7vw,64px);  /* ← ზუსტი დაშორება */
+    margin:auto;
+  }
+
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    display:grid;place-items:center;border-radius:50%;
+    transition:background-color .2s ease,border-color .2s ease,transform .2s ease;
+    box-shadow:var(--shadow);
+  }
+  .btn svg{width:26px;height:26px;fill:#fff;transition:fill .2s ease;}
+
+  /* გვერდითა ღილაკები */
+  .btn-neutral{
+    width:clamp(46px,8vw,60px);height:clamp(46px,8vw,60px);
+    background:#15222a;border:1px solid var(--line);
+  }
+  .btn-neutral:hover{background:#1a2a33;}
+
+  /* მიკროფონი */
+  .btn-mic{
+    width:clamp(70px,12vw,90px);height:clamp(70px,12vw,90px);
+    background:color-mix(in srgb,var(--accent) 22%,#0e1a21 78%);
+    border:1px solid color-mix(in srgb,var(--accent) 60%,#fff 0%);
+  }
+  .btn-mic:hover{
+    background:color-mix(in srgb,var(--accent-h) 26%,#0e1a21 74%);
+    border-color:color-mix(in srgb,var(--accent-h) 70%,#fff 0%);
+  }
+  .btn-mic.on{
+    background:color-mix(in srgb,var(--active) 28%,#0e1a21 72%);
+    border-color:color-mix(in srgb,var(--active) 75%,#fff 0%);
+  }
+  .btn-mic.on:hover{
+    background:color-mix(in srgb,var(--active-h) 32%,#0e1a21 68%);
+    border-color:color-mix(in srgb,var(--active-h) 78%,#fff 0%);
+  }
+  .btn-mic.disabled{cursor:not-allowed;filter:saturate(.7);
+    background:color-mix(in srgb,var(--disabled) 30%,#0e1a21 70%);
+    border-color:color-mix(in srgb,var(--disabled) 70%,#fff 0%);
+  }
+
+  .status{font-size:12px;color:var(--muted);}
+
+
+  mjx-container[jax="CHTML"]{
+    font-size:1.8em;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-top:10px;
+  }
+  mjx-math{color:#fff;}
+  mjx-mi,mjx-mo,mjx-mn{font-weight:600;}
+  mjx-mrow{line-height:1.6;}
+
+
+
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1 class="title">🎤 GE Speech — ეტაპი 1.5 (Listen & Understand)</h1>
+      <div class="hint">ამ ეტაპზე მხოლოდ მოსმენა და გააზრება ჩანს. LaTeX მოგვიანებით დაემატება.</div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <div class="label">რას ისმენს (Raw)</div>
+        <div id="heard" class="box" contenteditable="true" spellcheck="false"></div>
+        <div class="status">სტატუსი: <span id="status">მზადაა</span></div>
+      </article>
+      <article class="card">
+        <div class="label">გააზრებული ტექსტი</div>
+        <div id="understood" class="box">—</div>
+      </article>
+      <article class="card">
+        <div class="label">LaTeX (გამორთულია)</div>
+        <div id="latex" class="box off">—</div>
+        <div class="label">Render (გამორთულია)</div>
+        <div id="render" class="box off">—</div>
+      </article>
+    </section>
+
+    <div class="dock">
+      <div class="controls">
+        <button id="backspaceBtn" class="btn btn-neutral" title="ნელა წაშლა">
+          <svg viewBox="0 0 24 24"><path d="M7.17 5.17C7.53 4.46 8.26 4 9.05 4H19a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9.05a2 2 0 0 1-1.88-1.17L3 12l4.17-6.83ZM10 9l2 2 2-2 1.5 1.5-2 2 2 2L14 16l-2-2-2 2-1.5-1.5 2-2-2-2L10 9Z"/></svg>
+        </button>
+
+        <button id="micBtn" class="btn btn-mic" title="მოსმენის დაწყება">
+          <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 1 1-10 0H5a7 7 0 0 0 14 0h-2Zm-5 7a7.002 7.002 0 0 1-6.32-4H3.9A9.002 9.002 0 0 0 11 21.95V24h2v-2.05A9.002 9.002 0 0 0 20.1 14h-1.78A7.002 7.002 0 0 1 12 18Z"/></svg>
+        </button>
+
+        <button id="clearBtn" class="btn btn-neutral" title="გასუფთავება">
+          <svg viewBox="0 0 24 24"><path d="M16 9v10H8V9h8Zm-1-5h-2.5l-.71-.71A.996.996 0 0 0 10.67 3H9c-.55 0-1 .45-1 1H4v2h16V4h-4c0-.55-.45-1-1-1ZM6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9H6v10Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+<!-- MathJax Loader -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<script>
+// ===================================================
+// 🎤 GE Speech Stage 2.2 — fixed operator spacing (now + works always)
+// ===================================================
+
+const micBtn=document.getElementById('micBtn');
+const statusEl=document.getElementById('status');
+const heardEl=document.getElementById('heard');
+const understoodEl=document.getElementById('understood');
+const latexEl=document.getElementById('latex');
+const renderEl=document.getElementById('render');
+const clearBtn=document.getElementById('clearBtn');
+const backspaceBtn=document.getElementById('backspaceBtn');
+
+let rec=null,listening=false,interimText="";
+
+/* === მოსმენა და გააზრება === */
+function normalizeUnderstanding(t){
+  return (t||"").toLowerCase()
+    .replace(/\b(ღია\s*ფრჩხილ(ი|ში)?|გაქ?ს(ე|ენი)\s*ფრჩხილ(ი)?)\b/g,"(")
+    .replace(/\b(დახურ(ე|ული|ეთ)?\s*ფრჩხილ(ი|ში)?|დახურე)\b/g,")")
+    .replace(/\s+/g," ").trim();
+}
+
+function ensureSR(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){micBtn.classList.add("disabled");statusEl.textContent="მიკროფონი არ მუშაობს";return null;}
+  return SR;
+}
+
+function startListen(){
+  const SR=ensureSR(); if(!SR)return;
+  if(!rec){
+    rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang="ka-GE";
+    rec.onstart=()=>{micBtn.classList.add("on");listening=true;statusEl.textContent="🎤 მოსმენა...";};
+    rec.onend=()=>{micBtn.classList.remove("on");listening=false;statusEl.textContent="გაჩერებულია";};
+    rec.onerror=e=>statusEl.textContent="შეცდომა: "+(e.error||"");
+    rec.onresult=e=>{
+      let final="",interim="";
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const tr=e.results[i][0].transcript;
+        e.results[i].isFinal?final+=tr+" ":interim+=tr;
+      }
+      if(final)heardEl.textContent+=final;
+      interimText=interim;
+      updateUnderstanding();
+      updateLatexFromHeard();
+    };
+  }
+  try{rec.start();}catch(_){}
+}
+function stopListen(){if(rec&&listening)rec.stop();}
+micBtn.addEventListener("click",()=>{if(micBtn.classList.contains("disabled"))return;listening?stopListen():startListen();});
+
+/* === ტექსტის გარდაქმნა LaTeX ფორმულად === */
+function kaToLatex(raw){
+  if(!raw)return"";
+  let s=raw.toLowerCase().trim();
+
+  // ✅ ოპერატორების space — ყველა ოპერატორი ცალკე ტოკენად
+  s = s.replace(/([+\-*/=])/g, ' $1 '); // + - * / = გარშემო space
+  s = s.replace(/\s+/g, ' ');
+
+  // ✅ სწრაფად ნათქვამების და typo-ს გასწორება
+  s=s
+    .replace(/პლუს(ი)?/g,"პლიუს")
+    .replace(/შვიც|შვილ(ი|ს|ზე)?/g,"შვიდი")
+    .replace(/ოზდამ|ოსდამ|ოცდამ/g,"ოცდამ")
+    .replace(/ორსპლიუს/g,"ორი პლიუს")
+    .replace(/სამპლიუს/g,"სამი პლიუს");
+
+  // ✅ ფუძეები
+  const numRoots={
+    "ერთ":"1","ორ":"2","სამ":"3","ოთხ":"4","ხუთ":"5",
+    "ექვს":"6","შვიდ":"7","რვ":"8","ცხრ":"9","ათ":"10",
+    "თორმეტ":"12","ოც":"20","ოცდახუთ":"25","ოცდაოთხ":"24","ოცდათვრამ":"28"
+  };
+
+  const ops={
+    "პლიუს":"+","მინუს":"-","დამატებული":"+","გამოკლებული":"-",
+    "+":"+","-":"-","*":"\\times","/":"\\div",
+    "შეფარდებული":"\\frac","გაყოფილი":"\\frac"
+  };
+
+  const words=s.split(/\s+/);
+  let result="",lastNum="",isFrac=false;
+
+  function detectNum(w){
+    if(/^\d+$/.test(w)) return w; // ციფრი პირდაპირ
+    let core=w.replace(/(ზე|ში|ს|დან|თან)$/,"");
+    for(const [root,num] of Object.entries(numRoots)){
+      if(core.startsWith(root)) return num;
+    }
+    return null;
+  }
+
+  for(let i=0;i<words.length;i++){
+    const w=words[i];
+    const n=detectNum(w);
+    if(n){
+      if(isFrac){result+=n+"} ";isFrac=false;}
+      else {result+=n+" ";lastNum=n;}
+      continue;
+    }
+
+    if(ops[w]){
+      if(ops[w]==="\\frac"){result+="\\frac{"+(lastNum||"")+"}{";isFrac=true;}
+      else result+=ops[w]+" ";
+      continue;
+    }
+
+    if(isFrac&&(w.startsWith("თან")||w.startsWith("ზე")||w.endsWith("ედი"))){
+      result+="} ";isFrac=false;
+    }
+  }
+
+  if(isFrac)result+="}";
+  return result.trim();
+}
+
+/* === MathJax render === */
+function getRaw(){return(heardEl.textContent+" "+interimText).trim();}
+function updateUnderstanding(){const raw=getRaw();const u=normalizeUnderstanding(raw);understoodEl.textContent=u||"—";}
+function updateLatexFromHeard(){
+  const text=heardEl.textContent.trim();
+  const latex=kaToLatex(text);
+  latexEl.textContent=latex||"—";
+  if(latex){renderEl.innerHTML=`$$${latex}$$`;if(window.MathJax)MathJax.typesetPromise([renderEl]);}
+  else renderEl.innerHTML="—";
+}
+
+/* === დამატებითი ღილაკები === */
+heardEl.addEventListener("input",()=>{updateUnderstanding();updateLatexFromHeard();});
+backspaceBtn.addEventListener("click",()=>{const t=heardEl.textContent;if(!t)return;heardEl.textContent=t.slice(0,-1);updateUnderstanding();updateLatexFromHeard();});
+clearBtn.addEventListener("click",()=>{if(rec&&listening)stopListen();heardEl.textContent="";interimText="";understoodEl.textContent="—";latexEl.textContent="—";renderEl.innerHTML="—";statusEl.textContent="მზადაა";});
+(function init(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)micBtn.classList.add("disabled");updateUnderstanding();})();
+</script>
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
