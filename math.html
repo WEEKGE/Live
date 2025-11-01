@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -131,9 +132,9 @@
         <div id="understood" class="box">—</div>
       </article>
       <article class="card">
-        <div class="label">LaTeX (გამორთულია)</div>
+        <div class="label">LaTeX)</div>
         <div id="latex" class="box off">—</div>
-        <div class="label">Render (გამორთულია)</div>
+        <div class="label">Render</div>
         <div id="render" class="box off">—</div>
       </article>
     </section>
@@ -162,9 +163,12 @@
 <!-- MathJax Loader -->
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+
+
+
 <script>
 // ===================================================
-// 🎤 GE Speech Stage 2.2 — fixed operator spacing (now + works always)
+// 🎤 GE Speech — Stage 3.4 (Full Parenthesis + Fuzzy Fix)
 // ===================================================
 
 const micBtn=document.getElementById('micBtn');
@@ -178,20 +182,20 @@ const backspaceBtn=document.getElementById('backspaceBtn');
 
 let rec=null,listening=false,interimText="";
 
-/* === მოსმენა და გააზრება === */
+/* === Understanding normalization === */
 function normalizeUnderstanding(t){
   return (t||"").toLowerCase()
-    .replace(/\b(ღია\s*ფრჩხილ(ი|ში)?|გაქ?ს(ე|ენი)\s*ფრჩხილ(ი)?)\b/g,"(")
-    .replace(/\b(დახურ(ე|ული|ეთ)?\s*ფრჩხილ(ი|ში)?|დახურე)\b/g,")")
+    .replace(/\b(ღია\s*ფრცხილ(ი|ში)?|ფრხილ(ი|ში)?|ფხილ(ი|ში)?|გა(ქს|ხს)(ე|ენი)?\s*ფრცხილ(ი)?)\b/g,"(")
+    .replace(/\b(დახურ(ე|ული|ეთ)?\s*ფრცხილ(ი|ში)?|ფრხილ(ი|ში)?|ფხილ(ი|ში)?|დახურე)\b/g,")")
     .replace(/\s+/g," ").trim();
 }
 
+/* === Speech Recognition === */
 function ensureSR(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){micBtn.classList.add("disabled");statusEl.textContent="მიკროფონი არ მუშაობს";return null;}
   return SR;
 }
-
 function startListen(){
   const SR=ensureSR(); if(!SR)return;
   if(!rec){
@@ -216,75 +220,141 @@ function startListen(){
 function stopListen(){if(rec&&listening)rec.stop();}
 micBtn.addEventListener("click",()=>{if(micBtn.classList.contains("disabled"))return;listening?stopListen():startListen();});
 
-/* === ტექსტის გარდაქმნა LaTeX ფორმულად === */
+/* === Dictionaries === */
+const fuzzyMap={
+  "ერთი":["ერთს","ერთად"],
+  "ორი":["ორს","ორად","ორით","ორას","ვარ"],
+  "სამი":["სამს","სამად","სამით"],
+  "ოთხი":["ოთხს","ოთხად","ოთხით"],
+  "ხუთი":["ხუთს","ხუთად","ხუთით"],
+  "ექვსი":["ექვსს","ექვსად","ექვსით"],
+  "შვიდი":["შვიდს","შვიც","შვდი"],
+  "რვა":["რვას","რვად","რვაზე","რავა","რას"],
+  "ცხრა":["ცხრას","ცხრად"],
+  "ათი":["ათს","ათად"],
+  "ინტეგრალი":["ინტეგალ","ინტეგრალიი"],
+  "პლიუს":["პლიუსი","პლიუ","პლიო","პიო","პლიუზ","წლის"],
+  "მინუს":["მინუშ","მინუსი","მინუში"],
+  "შეფარდებული":["გაყოფილი","გაყოფილია","შეფარდებუ"],
+  "ტოლია":["უდრის","უდრისა"]
+};
+
+const rootsToNum={
+  "ერთ":"1","ორ":"2","სამ":"3","ოთხ":"4","ხუთ":"5","ექვს":"6",
+  "შვიდ":"7","რვ":"8","ცხრ":"9","ათ":"10",
+  "თერთმეტ":"11","თორმეტ":"12","ცამეტ":"13","თოთხმეტ":"14",
+  "თხუთმეტ":"15","თექვსმეტ":"16","ჩვიდმეტ":"17",
+  "თვრამეტ":"18","ცხრამეტ":"19","ოც":"20","ოცდაორ":"22","ოცდახუთ":"25","ოცდათვრამეტ":"28","ოთხმოცდაშვიდ":"87"
+};
+
+/* === Smart Splitter (glued & operator fix) === */
+function autoSplitSmart(raw){
+  let s=" "+raw.toLowerCase()+" ";
+
+  // Replace fuzzy variants (numbers, operators, etc)
+  for(const [corr,vars] of Object.entries(fuzzyMap)){
+    for(const v of vars){s=s.replaceAll(v,corr);}
+  }
+
+  // ✅ ფრჩხილების ყველა ბგერითი ვარიანტი
+  const parenFuzzy = {
+    "(": [
+      "ღია ფრჩხილი","გაახსენი ფრჩხილი","გახსენი ფრჩხილი","გაქსენი ფრჩხილი",
+      "გა ფრჩხილი","გახსენი","ფრცხილი გახსენი","ფრხილი გახსენი","ფხილი გახსენი"
+    ],
+    ")": [
+      "დახურე","დახურე ფრჩხილი","ფრჩხილი დახურე","დახურული ფრჩხილი",
+      "დახურე ფრცხილი","დახურე ფრხილი","დახურე ფხილი"
+    ]
+  };
+  for(const [sym,arr] of Object.entries(parenFuzzy)){
+    for(const v of arr){
+      const re=new RegExp(v,"gi");
+      s=s.replace(re,` ${sym} `);
+    }
+  }
+
+  // ✅ Always enforce spaces around parentheses
+  s = s.replace(/\(/g, " ( ");
+  s = s.replace(/\)/g, " ) ");
+
+  // Handle glued numeric+operator combos
+  const numRoots=Object.keys(rootsToNum);
+  const opForms=["პლიუს","პლიო","პიო","პლიუ","მინუს","შეფარდებული"];
+  for(const n of numRoots){
+    for(const o of opForms){
+      const pattern=new RegExp(`${n}${o}`,"g");
+      s=s.replace(pattern,`${n} ${o}`);
+    }
+  }
+  for(const o of opForms){
+    for(const n of numRoots){
+      const pattern=new RegExp(`${o}${n}`,"g");
+      s=s.replace(pattern,`${o} ${n}`);
+    }
+  }
+
+  // Common fast-speech merges
+  s=s.replace(/ორსპიო/gi,"ორი პლიუს ");
+  s=s.replace(/ორსპლიუს/gi,"ორი პლიუს ");
+  s=s.replace(/სამიპლიუს/gi,"სამი პლიუს ");
+  s=s.replace(/სამიპიო/gi,"სამი პლიუს ");
+  s=s.replace(/ოთხპიო/gi,"ოთხი პლიუს ");
+  s=s.replace(/რვაპიო/gi,"რვა პლიუს ");
+
+  return s.replace(/\s+/g," ").trim();
+}
+
+/* === Detect number === */
+function detectNum(w){
+  if(/^\d+$/.test(w))return w;
+  let core=w.replace(/(ზე|ში|ს|დან|ად|ით)$/,'');
+  for(const [r,n] of Object.entries(rootsToNum))
+    if(core.startsWith(r))return n;
+  return null;
+}
+
+/* === Convert to LaTeX === */
 function kaToLatex(raw){
   if(!raw)return"";
-  let s=raw.toLowerCase().trim();
+  if(/[0-9]+[\+\-\*\/]?[0-9]*/.test(raw.trim())){
+    const safe = raw.replace(/[^0-9+\-*/().=]/g,"");
+    return safe.trim();
+  }
 
-  // ✅ ოპერატორების space — ყველა ოპერატორი ცალკე ტოკენად
-  s = s.replace(/([+\-*/=])/g, ' $1 '); // + - * / = გარშემო space
-  s = s.replace(/\s+/g, ' ');
-
-  // ✅ სწრაფად ნათქვამების და typo-ს გასწორება
-  s=s
-    .replace(/პლუს(ი)?/g,"პლიუს")
-    .replace(/შვიც|შვილ(ი|ს|ზე)?/g,"შვიდი")
-    .replace(/ოზდამ|ოსდამ|ოცდამ/g,"ოცდამ")
-    .replace(/ორსპლიუს/g,"ორი პლიუს")
-    .replace(/სამპლიუს/g,"სამი პლიუს");
-
-  // ✅ ფუძეები
-  const numRoots={
-    "ერთ":"1","ორ":"2","სამ":"3","ოთხ":"4","ხუთ":"5",
-    "ექვს":"6","შვიდ":"7","რვ":"8","ცხრ":"9","ათ":"10",
-    "თორმეტ":"12","ოც":"20","ოცდახუთ":"25","ოცდაოთხ":"24","ოცდათვრამ":"28"
-  };
-
-  const ops={
-    "პლიუს":"+","მინუს":"-","დამატებული":"+","გამოკლებული":"-",
-    "+":"+","-":"-","*":"\\times","/":"\\div",
-    "შეფარდებული":"\\frac","გაყოფილი":"\\frac"
-  };
-
+  let s=autoSplitSmart(raw);
+  const ops={"პლიუს":"+","მინუს":"-","შეფარდებული":"\\frac","=":"=","ინტეგრალი":"\\int"};
   const words=s.split(/\s+/);
   let result="",lastNum="",isFrac=false;
 
-  function detectNum(w){
-    if(/^\d+$/.test(w)) return w; // ციფრი პირდაპირ
-    let core=w.replace(/(ზე|ში|ს|დან|თან)$/,"");
-    for(const [root,num] of Object.entries(numRoots)){
-      if(core.startsWith(root)) return num;
-    }
-    return null;
-  }
-
   for(let i=0;i<words.length;i++){
     const w=words[i];
+    if(w==="f(x)"){result+="f(x) ";continue;}
+    if(w==="("||w===")"){result+=w+" ";continue;}
+
+    if(ops[w]){
+      const prev=words[i-1]||"",next=words[i+1]||"";
+      result+=ops[w]+" ";
+      if(/^\d+$/.test(prev)&&/^\d+$/.test(next)) result=" "+result+" ";
+      continue;
+    }
+
     const n=detectNum(w);
     if(n){
       if(isFrac){result+=n+"} ";isFrac=false;}
-      else {result+=n+" ";lastNum=n;}
+      else{result+=n+" ";lastNum=n;}
       continue;
-    }
-
-    if(ops[w]){
-      if(ops[w]==="\\frac"){result+="\\frac{"+(lastNum||"")+"}{";isFrac=true;}
-      else result+=ops[w]+" ";
-      continue;
-    }
-
-    if(isFrac&&(w.startsWith("თან")||w.startsWith("ზე")||w.endsWith("ედი"))){
-      result+="} ";isFrac=false;
     }
   }
 
-  if(isFrac)result+="}";
+  result=result.replace(/(\d)\s*(\+)/g,"$1 +");
+  result=result.replace(/\+\s*(\d)/g,"+ $1");
   return result.trim();
 }
 
-/* === MathJax render === */
+/* === UI binding === */
 function getRaw(){return(heardEl.textContent+" "+interimText).trim();}
-function updateUnderstanding(){const raw=getRaw();const u=normalizeUnderstanding(raw);understoodEl.textContent=u||"—";}
+function updateUnderstanding(){const raw=getRaw();understoodEl.textContent=normalizeUnderstanding(raw)||"—";}
 function updateLatexFromHeard(){
   const text=heardEl.textContent.trim();
   const latex=kaToLatex(text);
@@ -293,15 +363,12 @@ function updateLatexFromHeard(){
   else renderEl.innerHTML="—";
 }
 
-/* === დამატებითი ღილაკები === */
+/* === Buttons === */
 heardEl.addEventListener("input",()=>{updateUnderstanding();updateLatexFromHeard();});
-backspaceBtn.addEventListener("click",()=>{const t=heardEl.textContent;if(!t)return;heardEl.textContent=t.slice(0,-1);updateUnderstanding();updateLatexFromHeard();});
+backspaceBtn.addEventListener("click",()=>{heardEl.textContent=heardEl.textContent.slice(0,-1);updateUnderstanding();updateLatexFromHeard();});
 clearBtn.addEventListener("click",()=>{if(rec&&listening)stopListen();heardEl.textContent="";interimText="";understoodEl.textContent="—";latexEl.textContent="—";renderEl.innerHTML="—";statusEl.textContent="მზადაა";});
 (function init(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)micBtn.classList.add("disabled");updateUnderstanding();})();
 </script>
-
-
-
 
 
 
