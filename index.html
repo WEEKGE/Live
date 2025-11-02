@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -18,7 +19,6 @@
   <link rel="icon" href="https://weekge.github.io/favicon.ico">
 
 <style>
-
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@100..900&display=swap');
 
   :root {
@@ -157,6 +157,18 @@
   .card-section:hover { background: #ffffff05; }
   .card-section h4 { margin: 0 0 30px; font-weight: 700; color: var(--subject-title); font-size: 1rem; }
 
+  .global-files {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.13);
+    padding: 14px 16px;
+  }
+  .global-files h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--subject-title);
+    font-weight: 700;
+  }
+
   .btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
   .pill {
     border: none; border-radius: 0px; padding: 10px 20px;
@@ -165,78 +177,17 @@
 
   .empty { opacity: .75; text-align: center; margin-top: 14vh; }
 
-  /* MODAL */
-  .modal {
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(11,18,22,.75); backdrop-filter: blur(12px);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity .35s ease;
-  }
-  .modal.open { opacity: 1; pointer-events: auto; }
-  .modal-inner {
-    background: #121A1F; width: 96%; max-width: 1100px; height: 92vh;
-    border-radius: 0; box-shadow: 0 8px 40px rgba(0,0,0,.4);
-    transform: scale(.9); opacity: 0;
-    transition: transform .35s cubic-bezier(.22,1,.36,1), opacity .35s;
-    display: flex; flex-direction: column; overflow: hidden;
-  }
-  .modal.open .modal-inner { transform: scale(1); opacity: 1; }
-  .modal-head {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 16px 20px; background: #1C2A2F; border-bottom: 1px solid #0005;
-  }
-  .close {
-    background: #2b2f31; color: #fff; border: none; border-radius: 0;
-    padding: 8px 12px; font-weight: 700; cursor: pointer;
-  }
-
-  .modal-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 20px; }
-
-  .catalog {
-    flex: 1; display: grid;
-    grid-template-columns: minmax(0,1fr) minmax(350px,400px);
-    gap: 14px; padding: 16px 20px;
-  }
-
-  .list, .sidebox {
-    background: #0e161a; border: 1px solid #0006; border-radius: 0;
-    padding: 10px; overflow: auto;
-  }
-
-  /* Search bar */
-  .search-box {
-    background: #0e161a; border: 1px solid #0006; border-radius: 0;
-    padding: 10px 12px; color: var(--text); width: 100%; margin-bottom: 10px;
-    font-size: 1rem; font-family: "Noto Sans Georgian", sans-serif; outline: none;
-    transition: border .2s;
-  }
-  .search-box:focus { border-color: var(--accent); }
-
-  /* Scroll limit */
-  #mySubjects { max-height: 55vh; overflow-y: auto; }
-  @media(max-width:900px){ #mySubjects{ max-height:45vh; } }
-
-  .item { display:flex; justify-content:space-between; align-items:center; padding:8px 6px; border-bottom:1px solid #fff1; }
-  .item:last-child{border-bottom:none;}
-  .item button{background:#2e3a40;color:#fff;border:none;padding:10px 10px;border-radius:0;cursor:pointer;min-width:100px;}
-  .item .added{background:#38d98a;color:#111;}
-  .save{width:100%;margin-top:10px;background:#38D98A;color:#111;border:none;padding:15px 10px;border-radius:0;font-weight:700;cursor:pointer;font-size:1rem;}
-
   /* Responsive */
   @media(max-width:900px){
     .wrap{grid-template-columns:1fr;}
     .left{position:absolute;left:0;top:64px;bottom:0;width:100%;transform:translateY(-100%);z-index:30;}
     .left.open{transform:translateY(0);}
-    .modal-inner{width:100%;height:100%;border-radius:0;}
-    .modal-body{overflow-y:auto;}
-    .catalog{grid-template-columns:1fr;}
     .card-sections{flex-direction:column;}
     .card-stack{width:100%;max-width:100vw;min-width:50px;}
   }
   @media(min-width:901px){
     #weekToggle,#todayBtn{display:none!important;pointer-events:none;}
   }
-
 </style>
 </head>
 
@@ -266,30 +217,6 @@
   </div>
 </div>
 
-<div id="modal" class="modal">
-  <div class="modal-inner">
-    <div class="modal-head"><div>Profile Settings</div><button id="closeModal" class="close">✕</button></div>
-    <div class="modal-body">
-      <div class="catalog">
-        
-        <!-- LEFT SIDE — SUBJECTS LIST WITH SEARCH -->
-        <div class="list">
-          <input type="text" id="searchCatalog" class="search-box" placeholder="🔍 მოძებნე საგანი...">
-          <div id="catalogList"><div class="empty">იტვირთება...</div></div>
-        </div>
-
-        <!-- RIGHT SIDE — MY SUBJECTS -->
-        <div class="sidebox">
-          <div style="margin-bottom:6px;font-weight:700;">ჩემი საგნები</div>
-          <div id="mySubjects"></div>
-          <button id="saveSubjects" class="save">Save</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -298,10 +225,10 @@
 <script>
 fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 .then(r=>r.json())
-.then(cfg=>{firebase.initializeApp(cfg);startWeeksy();})
+.then(cfg=>{firebase.initializeApp(cfg);startWeekge();})
 .catch(()=>alert("⚠️ config.json ვერ ჩაიტვირთა."));
 
-function startWeeksy(){
+function startWeekge(){
   const auth=firebase.auth(),db=firebase.firestore();
   let user=null,catalog=[],selected=[],cache={},weekDates=[];
   const $=s=>document.querySelector(s);
@@ -333,26 +260,13 @@ function startWeeksy(){
   document.addEventListener("click",e=>{if(!e.target.closest(".avatar")&&!e.target.closest(".menu"))$("#menu").classList.remove("open");});
   $("#weekToggle").onclick=()=>toggleWeeks();
   $("#todayBtn").onclick=goToday;
-  $("#openProfile").onclick=async()=>{$("#menu").classList.remove("open");$("#modal").classList.add("open");if(!catalog.length)await loadCatalog();renderProfile();};
+  $("#openProfile").onclick=async()=>{$("#menu").classList.remove("open");};
 
-  const searchInput=document.getElementById("searchCatalog");
-  if(searchInput){
-    searchInput.addEventListener("input",e=>{
-      const term=e.target.value.toLowerCase().trim();
-      const items=document.querySelectorAll("#catalogList .item");
-      items.forEach(it=>{
-        const text=it.textContent.toLowerCase();
-        it.style.display=text.includes(term)?"flex":"none";
-      });
-    });
-  }
-
-  $("#closeModal").onclick=()=>$("#modal").classList.remove("open");
   auth.onAuthStateChanged(async u=>{user=u||null;guardUI(!!user);if(user){$("#avatar").src=user.photoURL||"https://i.pravatar.cc/100";await bootAfterLogin();}});
 
   function guardUI(signed){$("#signinBtn").style.display=signed?"none":"inline-flex";$("#avatar").style.display=signed?"block":"none";if(!signed)$("#cardsCanvas").innerHTML="<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";}
   async function loadCatalog(){catalog=[];const snap=await db.collection("subjects").get();snap.forEach(d=>catalog.push({id:d.id,...d.data()}));}
-  async function loadUserSelection(){const key=`weeksy:selected:${user.uid}`;try{const snap=await db.collection("users").doc(user.uid).get();selected=(snap.exists&&snap.data().subjects)||[];localStorage.setItem(key,JSON.stringify(selected));}catch{selected=JSON.parse(localStorage.getItem(key)||"[]");}}
+  async function loadUserSelection(){const snap=await db.collection("users").doc(user.uid).get();selected=(snap.exists&&snap.data().subjects)||[];}
   async function ensureSubjectsLoaded(){const toLoad=selected.filter(id=>!cache[id]);for(const id of toLoad){const subj=catalog.find(c=>c.id===id);if(subj)cache[id]=subj;}}
   function flattenWeeks(){weekDates=[];SEMESTER_WEEKS.forEach(w=>{if(w.start1)weekDates.push({n:w.n,start:w.start1,end:w.end1});if(w.start2)weekDates.push({n:w.n,start:w.start2,end:w.end2});});}
 
@@ -373,6 +287,31 @@ function startWeeksy(){
   }
 
   function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`;}
+
+  function addBtns(wrap,weekObj){
+    const btns=el("div",{className:"btns"});
+    const add=(label,url,color,textColor)=>{const b=el("button",{className:"pill",textContent:label,style:`background:${color};color:${textColor}`});if(url)b.onclick=()=>window.open(url,"_blank");btns.append(b);};
+    if(weekObj.slides)add("Slides",weekObj.slides,"#ffc423","#111");
+    if(weekObj.video)add("Video",weekObj.video,"#ed3737","#fff");
+    (weekObj.buttons||[]).forEach(b=>add(b.label,b.link||"",b.color||"#38d98a",b.textColor||"#111"));
+    wrap.append(btns);
+  }
+
+  function addGlobalBtns(card,subj){
+    if(subj.globalButtons && subj.globalButtons.length>0){
+      const box=el("div",{className:"global-files"});
+      box.append(el("h4",{textContent:"მთავარი ფაილები:"}));
+      const btns=el("div",{className:"btns"});
+      subj.globalButtons.forEach(b=>{
+        const btn=el("button",{className:"pill",textContent:b.label,style:`background:${b.color||"#ffc423"};color:${b.textColor||"#111"}`});
+        if(b.link) btn.onclick=()=>window.open(b.link,"_blank");
+        btns.append(btn);
+      });
+      box.append(btns);
+      card.append(box);
+    }
+  }
+
   function showWeek(n){
     const canvas=$("#cardsCanvas");canvas.style.opacity="0";canvas.style.filter="blur(8px)";
     setTimeout(()=>{
@@ -384,33 +323,23 @@ function startWeeksy(){
         if(!cur&&!prev)return;any=true;
         const card=el("div",{className:"card"});
         card.append(el("div",{className:"subhead",textContent:subj.name}));
+        addGlobalBtns(card,subj);
         const wrap=el("div",{className:"card-sections"});
-        if(prev){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`ამ კვირისთვის`}));addBtns(sec,prev);wrap.append(sec);}
-        if(cur){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`შემდეგი კვირისთვის`}));addBtns(sec,cur);wrap.append(sec);}
+        if(prev){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`ამ კვირისთვის:`}));addBtns(sec,prev);wrap.append(sec);}
+        if(cur){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`შემდეგი კვირისთვის:`}));addBtns(sec,cur);wrap.append(sec);}
         card.append(wrap);stack.append(card);
       });
       canvas.innerHTML="";canvas.append(any?stack:el("div",{className:"empty",textContent:"ამ კვირისთვის მასალა ჯერ არაა."}));canvas.style.filter="blur(0)";canvas.style.opacity="1";
     },300);
   }
 
-  function addBtns(wrap,weekObj){
-    const btns=el("div",{className:"btns"});
-    const add=(label,url,color,textColor)=>{const b=el("button",{className:"pill",textContent:label,style:`background:${color};color:${textColor}`});if(url)b.onclick=()=>window.open(url,"_blank");btns.append(b);};
-    if(weekObj.slides)add("Slides",weekObj.slides,"#ffc423","#111");
-    if(weekObj.video)add("Video",weekObj.video,"#ed3737","#fff");
-    (weekObj.buttons||[]).forEach(b=>add(b.label,b.link||"",b.color||"#38d98a",b.textColor||"#111"));
-    wrap.append(btns);
+  function goToday(){
+    const iso=todayISO();
+    const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
+    if(cur){showWeek(cur.n);updateWeekLabel(cur.n);document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));const currentEl=document.querySelector(`.week-item[data-week="${cur.n}"]`);if(currentEl)currentEl.classList.add("active");}
+    toggleWeeks(false);
   }
 
-  function renderProfile(){
-    const list=$("#catalogList");list.innerHTML="";const mine=$("#mySubjects");mine.innerHTML="";
-    catalog.forEach(x=>{const added=selected.includes(x.id);const row=el("div",{className:"item"});row.append(el("div",{},[el("div",{textContent:x.name,style:"font-weight:700"}),el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})]),added?el("button",{className:"added",textContent:"✓ Added"}):el("button",{textContent:"Add",onclick:async()=>{if(!selected.includes(x.id))selected.push(x.id);await saveSelection(true);renderProfile();}}));list.append(row);});
-    selected.forEach(id=>{const subj=catalog.find(c=>c.id===id);const row=el("div",{className:"item"});row.append(el("div",{},[el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),el("div",{textContent:id,style:"font-size:12px;opacity:.7"})]),el("button",{textContent:"Remove",onclick:async()=>{selected=selected.filter(s=>s!==id);delete cache[id];await saveSelection(true);renderProfile();}}));mine.append(row);});
-    $("#saveSubjects").onclick=async()=>{await saveSelection(true);};
-  }
-
-  async function saveSelection(immediate=false){if(!user)return;await db.collection("users").doc(user.uid).set({subjects:selected},{merge:true});localStorage.setItem(`weeksy:selected:${user.uid}`,JSON.stringify(selected));if(immediate){await ensureSubjectsLoaded();paintWeeks();goToday();}}
-  function goToday(){const iso=todayISO();const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];if(cur){showWeek(cur.n);updateWeekLabel(cur.n);document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));const currentEl=document.querySelector(`.week-item[data-week="${cur.n}"]`);if(currentEl)currentEl.classList.add("active");}toggleWeeks(false);}
   function toggleWeeks(force){const left=$("#weeksList");left.classList.toggle("open",force!==undefined?force:!left.classList.contains("open"));}
   async function bootAfterLogin(){await Promise.all([loadCatalog(),loadUserSelection()]);await ensureSubjectsLoaded();flattenWeeks();paintWeeks();goToday();}
 }
