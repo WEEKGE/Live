@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -9,13 +8,7 @@
 
   <!-- ===== META TAGS FOR SEO ===== -->
   <meta name="description" content="Weekge (Week.ge) — უნივერსიტეტის საგნების და სილაბუსების პლატფორმა. ნახე შენი საგნები კვირების მიხედვით და იოლი ნავიგაციით.">
-  <meta name="keywords" content="weekge, week.ge, weekgy, week, silabus, syllabus, university platform, study platform, UG, უნივერსიტეტი, სტუდენტი">
-  <meta name="author" content="weekge">
   <meta name="theme-color" content="#0B1216">
-  <meta property="og:title" content="Weekge — University Platform">
-  <meta property="og:description" content="მართე სილაბუსი და საგნები მარტივად — კვირების მიხედვით, Today ღილაკით და სუფთა UI-ით.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://weekge.github.io/preview.png">
   <link rel="icon" href="https://weekge.github.io/favicon.ico">
 
 <style>
@@ -37,8 +30,8 @@
   }
 
   * { box-sizing: border-box; }
-
   html, body {
+    overflow-y: hidden;
     height: 100%;
     margin: 0;
     background: var(--bg);
@@ -92,14 +85,12 @@
     opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
     display: flex; flex-direction: column; align-items: center; text-align: center;
   }
-
   .menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 
   .menu a, .menu button {
     display: block; width: 100%; padding: 14px 0; background: transparent;
     border: none; color: #D7DBDE; font-size: 1rem; cursor: pointer; transition: background .2s;
   }
-
   .menu a:hover, .menu button:hover { background: rgba(255,255,255,0.1); }
   .menu .sep { height: 1px; width: 100%; background: #FFFFFF22; }
 
@@ -177,6 +168,26 @@
 
   .empty { opacity: .75; text-align: center; margin-top: 14vh; }
 
+  /* MODAL */
+  .modal{position:fixed;inset:0;z-index:200;background:rgba(11,18,22,.75);backdrop-filter:blur(12px);
+    display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.35s;}
+  .modal.open{opacity:1;pointer-events:auto;}
+  .modal-inner{background:#121A1F;width:96%;max-width:1100px;height:92vh;box-shadow:0 8px 40px rgba(0,0,0,.4);
+    transform:scale(.9);opacity:0;transition:.35s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow:hidden;}
+  .modal.open .modal-inner{transform:scale(1);opacity:1;}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#1C2A2F;border-bottom:1px solid #0005;}
+  .close{background:0;color:#fff;border:0;padding:4px 8px;font-weight:700;cursor:pointer;font-size:1rem;}
+  .modal-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding-bottom:20px;}
+  .catalog{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,400px);gap:14px;padding:16px 20px;}
+  .list,.sidebox{background:hsl(200,30%,7%);padding:10px;overflow:auto;}
+  .search-box{background:#23343b;border:0;padding:10px 12px;color:var(--text);width:100%;margin-bottom:10px;font-size:1rem;outline:none;}
+  #mySubjects{max-height:55vh;overflow-y:auto;}
+  .item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid #fff1;}
+  .item button{background:#2e3a40;color:#fff;border:0;padding:10px 12px;cursor:pointer;min-width:100px;}
+  .item .added{background:#38d98a;color:#111;}
+  .save{width:100%;margin-top:10px;background:#38D98A;color:#111;border:none;padding:15px 10px;font-weight:700;cursor:pointer;font-size:1rem;}
+
+
   /* Responsive */
   @media(max-width:900px){
     .wrap{grid-template-columns:1fr;}
@@ -217,6 +228,29 @@
   </div>
 </div>
 
+<!-- ✅ Profile Popup -->
+<div id="modal" class="modal">
+  <div class="modal-inner">
+    <div class="modal-head">
+      <div>Profile Settings</div>
+      <button id="closeModal" class="close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="catalog">
+        <div class="list">
+          <input type="text" id="searchCatalog" class="search-box" placeholder="🔍 მოძებნე საგანი...">
+          <div id="catalogList"><div class="empty">იტვირთება...</div></div>
+        </div>
+        <div class="sidebox">
+          <div style="margin-bottom:6px;font-weight:700;">ჩემი საგნები</div>
+          <div id="mySubjects"></div>
+          <button id="saveSubjects" class="save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -238,6 +272,7 @@ function startWeekge(){
   const hasPassed=(d,e)=>d>e;
   const fmtRange=(s,e)=>{const f=d=>new Date(d+"T12:00:00").toLocaleString(undefined,{month:"short",day:"numeric"});return f(s)+" → "+f(e);};
 
+  // === Weeks List ===
   const SEMESTER_WEEKS=[
     {n:1,start1:"2025-09-22",end1:"2025-09-28",start2:"2026-03-02",end2:"2026-03-08"},
     {n:2,start1:"2025-09-29",end1:"2025-10-05",start2:"2026-03-09",end2:"2026-03-15"},
@@ -253,44 +288,133 @@ function startWeekge(){
     {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"}
   ];
 
+    $("#weekToggle").onclick=()=>toggleWeeks();
+
+function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`;}
+
+  // === AUTH ===
   const provider=new firebase.auth.GoogleAuthProvider();
   $("#signinBtn").onclick=()=>auth.signInWithPopup(provider);
   $("#logoutBtn").onclick=()=>auth.signOut();
   $("#avatar").onclick=()=>$("#menu").classList.toggle("open");
-  document.addEventListener("click",e=>{if(!e.target.closest(".avatar")&&!e.target.closest(".menu"))$("#menu").classList.remove("open");});
-  $("#weekToggle").onclick=()=>toggleWeeks();
-  $("#todayBtn").onclick=goToday;
-  $("#openProfile").onclick=async()=>{$("#menu").classList.remove("open");};
+  document.addEventListener("click",e=>{
+    if(!e.target.closest(".avatar")&&!e.target.closest(".menu"))
+      $("#menu").classList.remove("open");
+  });
 
-  auth.onAuthStateChanged(async u=>{user=u||null;guardUI(!!user);if(user){$("#avatar").src=user.photoURL||"https://i.pravatar.cc/100";await bootAfterLogin();}});
+  // === POPUP open / close ===
+  $("#openProfile").onclick=async()=>{
+    $("#menu").classList.remove("open");
+    $("#modal").classList.add("open");
+    if(!catalog.length) await loadCatalog();
+    renderProfile();
+  };
+  $("#closeModal").onclick=()=>$("#modal").classList.remove("open");
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape") $("#modal").classList.remove("open");
+  });
 
-  function guardUI(signed){$("#signinBtn").style.display=signed?"none":"inline-flex";$("#avatar").style.display=signed?"block":"none";if(!signed)$("#cardsCanvas").innerHTML="<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";}
-  async function loadCatalog(){catalog=[];const snap=await db.collection("subjects").get();snap.forEach(d=>catalog.push({id:d.id,...d.data()}));}
-  async function loadUserSelection(){const snap=await db.collection("users").doc(user.uid).get();selected=(snap.exists&&snap.data().subjects)||[];}
-  async function ensureSubjectsLoaded(){const toLoad=selected.filter(id=>!cache[id]);for(const id of toLoad){const subj=catalog.find(c=>c.id===id);if(subj)cache[id]=subj;}}
-  function flattenWeeks(){weekDates=[];SEMESTER_WEEKS.forEach(w=>{if(w.start1)weekDates.push({n:w.n,start:w.start1,end:w.end1});if(w.start2)weekDates.push({n:w.n,start:w.start2,end:w.end2});});}
+  // === AUTH STATE ===
+  auth.onAuthStateChanged(async u=>{
+    user=u||null;
+    guardUI(!!user);
+    if(user){
+      $("#avatar").src=user.photoURL||"https://i.pravatar.cc/100";
+      await bootAfterLogin();
+    }
+  });
 
-  function paintWeeks(){
-    const iso=todayISO();const list=$("#weeksList");list.innerHTML="";
-    let activeWeekN=null;
-    for(const w of SEMESTER_WEEKS){if(isBetween(iso,w.start1,w.end1)||isBetween(iso,w.start2,w.end2)){activeWeekN=w.n;break;}}
+  // === HELPER ===
+  function guardUI(signed){
+    $("#signinBtn").style.display=signed?"none":"inline-flex";
+    $("#avatar").style.display=signed?"block":"none";
+    if(!signed)
+      $("#cardsCanvas").innerHTML="<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";
+  }
+
+  async function loadCatalog(){
+    catalog=[];
+    const snap=await db.collection("subjects").get();
+    snap.forEach(d=>catalog.push({id:d.id,...d.data()}));
+  }
+
+  async function loadUserSelection(){
+    const snap=await db.collection("users").doc(user.uid).get();
+    selected=(snap.exists&&snap.data().subjects)||[];
+  }
+
+  async function ensureSubjectsLoaded(){
+    const toLoad=selected.filter(id=>!cache[id]);
+    for(const id of toLoad){
+      const subj=catalog.find(c=>c.id===id);
+      if(subj) cache[id]=subj;
+    }
+  }
+
+  function flattenWeeks(){
+    weekDates=[];
     SEMESTER_WEEKS.forEach(w=>{
-      const isCurrent=activeWeekN===w.n;const done=hasPassed(iso,w.end1)&&hasPassed(iso,w.end2);
+      if(w.start1)weekDates.push({n:w.n,start:w.start1,end:w.end1});
+      if(w.start2)weekDates.push({n:w.n,start:w.start2,end:w.end2});
+    });
+  }
+
+  async function bootAfterLogin(){
+    await Promise.all([loadCatalog(),loadUserSelection()]);
+    await ensureSubjectsLoaded();
+    flattenWeeks();
+    paintWeeks();
+    goToday();
+  }
+
+  // === WEEKS & SUBJECTS ===
+  function paintWeeks(){
+    const iso=todayISO();
+    const list=$("#weeksList");
+    list.innerHTML="";
+    let activeWeekN=null;
+    for(const w of SEMESTER_WEEKS){
+      if(isBetween(iso,w.start1,w.end1)||isBetween(iso,w.start2,w.end2)){
+        activeWeekN=w.n;break;
+      }
+    }
+
+    SEMESTER_WEEKS.forEach(w=>{
+      const isCurrent=activeWeekN===w.n;
+      const done=hasPassed(iso,w.end1)&&hasPassed(iso,w.end2);
       const status=isCurrent?"current":done?"done":"pending";
       const row=el("div",{className:`week-item${isCurrent?" active":""}`});
       row.setAttribute("data-week",w.n);
-      row.append(el("div",{className:"dot "+status}),el("div",{},[el("div",{className:"wk-title",textContent:`Week ${w.n}`}),el("div",{className:"wk-dates",textContent:fmtRange(w.start1,w.end1)+" / "+fmtRange(w.start2,w.end2)})]));
-      row.onclick=()=>{document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));row.classList.add("active");showWeek(w.n);toggleWeeks(false);updateWeekLabel(w.n);};
+      row.append(
+        el("div",{className:"dot "+status}),
+        el("div",{},[
+          el("div",{className:"wk-title",textContent:`Week ${w.n}`}),
+          el("div",{className:"wk-dates",textContent:fmtRange(w.start1,w.end1)+" / "+fmtRange(w.start2,w.end2)})
+        ])
+      );
+      row.onclick=()=>{
+        document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));
+        row.classList.add("active");
+        showWeek(w.n);
+        toggleWeeks(false);
+        updateWeekLabel(w.n);
+      };
       list.append(row);
     });
     updateWeekLabel(activeWeekN);
   }
 
-  function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`;}
+  function updateWeekLabel(n){
+    $("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`;
+  }
 
   function addBtns(wrap,weekObj){
     const btns=el("div",{className:"btns"});
-    const add=(label,url,color,textColor)=>{const b=el("button",{className:"pill",textContent:label,style:`background:${color};color:${textColor}`});if(url)b.onclick=()=>window.open(url,"_blank");btns.append(b);};
+    const add=(label,url,color,textColor)=>{
+      const b=el("button",{className:"pill",textContent:label,style:`background:${color};color:${textColor}`});
+      if(url) b.onclick=()=>window.open(url,"_blank");
+      btns.append(b);
+    };
     if(weekObj.slides)add("Slides",weekObj.slides,"#ffc423","#111");
     if(weekObj.video)add("Video",weekObj.video,"#ed3737","#fff");
     (weekObj.buttons||[]).forEach(b=>add(b.label,b.link||"",b.color||"#38d98a",b.textColor||"#111"));
@@ -313,9 +437,12 @@ function startWeekge(){
   }
 
   function showWeek(n){
-    const canvas=$("#cardsCanvas");canvas.style.opacity="0";canvas.style.filter="blur(8px)";
+    const canvas=$("#cardsCanvas");
+    canvas.style.opacity="0";
+    canvas.style.filter="blur(8px)";
     setTimeout(()=>{
-      const stack=el("div",{className:"card-stack"});let any=false;
+      const stack=el("div",{className:"card-stack"});
+      let any=false;
       selected.forEach(id=>{
         const subj=cache[id];if(!subj)return;
         const cur=subj.weeks?.find(w=>w.week===n);
@@ -325,24 +452,99 @@ function startWeekge(){
         card.append(el("div",{className:"subhead",textContent:subj.name}));
         addGlobalBtns(card,subj);
         const wrap=el("div",{className:"card-sections"});
-        if(prev){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`ამ კვირისთვის:`}));addBtns(sec,prev);wrap.append(sec);}
-        if(cur){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`შემდეგი კვირისთვის:`}));addBtns(sec,cur);wrap.append(sec);}
-        card.append(wrap);stack.append(card);
+        if(prev){
+          const sec=el("div",{className:"card-section"});
+          sec.append(el("h4",{textContent:`ამ კვირისთვის:`}));
+          addBtns(sec,prev);
+          wrap.append(sec);
+        }
+        if(cur){
+          const sec=el("div",{className:"card-section"});
+          sec.append(el("h4",{textContent:`შემდეგი კვირისთვის:`}));
+          addBtns(sec,cur);
+          wrap.append(sec);
+        }
+        card.append(wrap);
+        stack.append(card);
       });
-      canvas.innerHTML="";canvas.append(any?stack:el("div",{className:"empty",textContent:"ამ კვირისთვის მასალა ჯერ არაა."}));canvas.style.filter="blur(0)";canvas.style.opacity="1";
+      canvas.innerHTML="";
+      canvas.append(any?stack:el("div",{className:"empty",textContent:"ამ კვირისთვის მასალა ჯერ არაა."}));
+      canvas.style.filter="blur(0)";
+      canvas.style.opacity="1";
     },300);
   }
 
   function goToday(){
     const iso=todayISO();
     const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
-    if(cur){showWeek(cur.n);updateWeekLabel(cur.n);document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));const currentEl=document.querySelector(`.week-item[data-week="${cur.n}"]`);if(currentEl)currentEl.classList.add("active");}
+    if(cur){
+      showWeek(cur.n);
+      updateWeekLabel(cur.n);
+      document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));
+      const currentEl=document.querySelector(`.week-item[data-week="${cur.n}"]`);
+      if(currentEl)currentEl.classList.add("active");
+    }
     toggleWeeks(false);
   }
 
-  function toggleWeeks(force){const left=$("#weeksList");left.classList.toggle("open",force!==undefined?force:!left.classList.contains("open"));}
-  async function bootAfterLogin(){await Promise.all([loadCatalog(),loadUserSelection()]);await ensureSubjectsLoaded();flattenWeeks();paintWeeks();goToday();}
+  function toggleWeeks(force){
+    const left=$("#weeksList");
+    left.classList.toggle("open",force!==undefined?force:!left.classList.contains("open"));
+  }
+
+  // === PROFILE POPUP ===
+  function renderProfile(){
+    const list=$("#catalogList");list.innerHTML="";
+    const mine=$("#mySubjects");mine.innerHTML="";
+    catalog.forEach(x=>{
+      const added=selected.includes(x.id);
+      const row=el("div",{className:"item"});
+      row.append(
+        el("div",{},[
+          el("div",{textContent:x.name,style:"font-weight:700"}),
+          el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
+        ]),
+        added
+          ? el("button",{className:"added",textContent:"✓ Added"})
+          : el("button",{textContent:"Add",onclick:async()=>{
+              if(!selected.includes(x.id))selected.push(x.id);
+              await saveSelection(true);
+              renderProfile();
+            }})
+      );
+      list.append(row);
+    });
+    selected.forEach(id=>{
+      const subj=catalog.find(c=>c.id===id);
+      const row=el("div",{className:"item"});
+      row.append(
+        el("div",{},[
+          el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
+          el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
+        ]),
+        el("button",{textContent:"Remove",onclick:async()=>{
+          selected=selected.filter(s=>s!==id);
+          delete cache[id];
+          await saveSelection(true);
+          renderProfile();
+        }})
+      );
+      mine.append(row);
+    });
+    $("#saveSubjects").onclick=async()=>{await saveSelection(true);};
+  }
+
+  async function saveSelection(immediate=false){
+    if(!user)return;
+    await db.collection("users").doc(user.uid).set({subjects:selected},{merge:true});
+    if(immediate){
+      await ensureSubjectsLoaded();
+      paintWeeks();
+      goToday();
+    }
+  }
 }
+
 </script>
 </body>
 </html>
