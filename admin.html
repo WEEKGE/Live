@@ -1,103 +1,144 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ka">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Weeksy Admin Panel</title>
+<title>Weekge Admin — University Platform</title>
+
+<!-- SEO META -->
+<meta name="description" content="Weekge Admin Panel — Manage university syllabus subjects, weeks, slides and videos.">
+<meta name="keywords" content="weekge, week, weekge admin, syllabus editor, study admin, ug, university admin">
+<meta name="author" content="weekge">
+<meta name="theme-color" content="#0B1216">
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root {
-  --bg:#0b1216;
-  --surface:#1c2a2f;
-  --text:#fff;
-  --accent:#ffc423;
-  --success:#38d98a;
-  --danger:#ed3737;
+  --bg:#0B1216;
+  --surface:#1C2A2F;
+  --card:#2A3A40;
+  --text:#EDEFF2;
+  --muted:#B7C0C6;
+  --accent:#F2C200;
+  --success:#38D98A;
+  --danger:#ED3737;
+  --shadow:0 8px 28px rgba(0,0,0,.35);
 }
-
-*{box-sizing:border-box;font-family:"Saira",sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Saira",sans-serif;}
 body{
   background:var(--bg);
   color:var(--text);
-  margin:0;
   height:100vh;
   display:grid;
-  grid-template-rows:60px 1fr;
+  grid-template-rows:64px 1fr;
 }
+
+/* ===== HEADER ===== */
 header{
   background:var(--surface);
   display:flex;
   align-items:center;
   justify-content:space-between;
   padding:0 16px;
-  flex-wrap:wrap;
+  border-bottom:1px solid #0006;
 }
-h1{font-size:20px;color:var(--accent);}
-button{
+header h1{font-size:20px;color:var(--accent);font-weight:700;}
+header button{
   background:var(--accent);
   color:#111;
   border:none;
-  padding:8px 12px;
-  border-radius:6px;
+  padding:8px 16px;
+  border-radius:0;
+  font-weight:700;
   cursor:pointer;
-  font-weight:bold;
 }
+
+/* ===== LAYOUT ===== */
 main{
   display:grid;
-  grid-template-columns:300px 1fr;
+  grid-template-columns:320px 1fr;
   height:100%;
 }
 aside{
-  background:var(--surface);
-  padding:10px;
+  background:#0E161A;
+  border-right:1px solid #0006;
   overflow:auto;
+  padding:10px;
 }
+section{
+  overflow:auto;
+  padding:20px;
+}
+
+/* ===== SUBJECT LIST ===== */
 .search{
   width:100%;
-  padding:8px;
+  padding:10px;
   border:none;
-  border-radius:6px;
-  background:#2a3a40;
+  border-radius:0;
+  background:#23343B;
   color:#fff;
   margin-bottom:10px;
 }
 .subject-item{
-  padding:8px;
-  border-radius:6px;
-  background:#2a3a40;
-  margin-bottom:6px;
+  padding:10px;
+  background:#1A2328;
+  border:1px solid #0006;
+  margin-bottom:8px;
   cursor:pointer;
+  font-weight:600;
+  transition:background .2s;
 }
-.subject-item:hover{background:#37464d;}
-.active{background:#ffc423;color:#111;}
-section{padding:16px;overflow:auto;}
+.subject-item:hover{background:#2A3A40;}
+.subject-item.active{background:var(--accent);color:#111;}
+
+.btn-row{display:flex;gap:10px;margin-top:10px;}
+.btn-row button{
+  flex:1;
+  padding:10px;
+  background:var(--accent);
+  color:#111;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+  border-radius:0;
+}
+
+/* ===== EDITOR ===== */
+#editor h2{
+  font-size:22px;
+  margin-bottom:10px;
+  color:var(--accent);
+}
+label{
+  display:block;
+  font-weight:600;
+  margin:8px 0 4px;
+}
 input,textarea{
   width:100%;
   padding:8px;
-  margin:4px 0 10px 0;
   border:none;
-  border-radius:6px;
-  background:#2a3a40;
+  background:#1A2328;
   color:#fff;
+  font-size:1rem;
+  border-radius:0;
 }
-label{font-weight:bold;}
 .week{
-  border:1px solid #333;
-  border-radius:8px;
-  background:#121a1f;
+  border:1px solid #0006;
+  background:#121A1F;
   padding:10px;
-  margin-bottom:10px;
+  margin-bottom:14px;
 }
-.btn-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
-.success{background:var(--success);color:#111;}
-.danger{background:var(--danger);color:#fff;}
-.status{text-align:center;margin-top:10px;}
-/* --- custom buttons --- */
+.week h3{margin-bottom:8px;color:var(--accent);}
 .customBtnRow{
   display:flex;
   align-items:center;
@@ -105,13 +146,30 @@ label{font-weight:bold;}
   margin:6px 0;
   flex-wrap:wrap;
 }
-.customBtnRow input[type=text]{flex:1;min-width:90px;}
+.customBtnRow input[type=text]{flex:1;min-width:100px;background:#23343B;color:#fff;border:none;padding:6px;}
 .palette{display:flex;gap:4px;}
 .colorCircle{
   width:22px;height:22px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  font-size:14px;cursor:pointer;border:1px solid #00000055;
+  font-size:13px;cursor:pointer;border:1px solid #00000055;
 }
+.colorCircle:hover{filter:brightness(1.2);}
+.textColor{width:32px;height:32px;border:none;}
+.removeBtn{background:var(--danger);color:#fff;border:none;padding:6px 10px;cursor:pointer;}
+.addBtn{
+  background:var(--accent);
+  color:#111;
+  border:none;
+  padding:8px 12px;
+  cursor:pointer;
+  font-weight:700;
+  margin-top:8px;
+}
+.success{background:var(--success);color:#111;}
+.danger{background:var(--danger);color:#fff;}
+.status{text-align:center;margin-top:10px;}
+
+/* ===== RESPONSIVE ===== */
 @media(max-width:900px){
   main{grid-template-columns:1fr;}
   aside{order:2;}
@@ -122,7 +180,7 @@ label{font-weight:bold;}
 <body>
 
 <header>
-  <h1>📚 Weeksy Admin</h1>
+  <h1>Weekge Admin</h1>
   <div>
     <button id="signinBtn">Sign in with Google</button>
     <button id="logoutBtn" style="display:none;">Logout</button>
@@ -134,7 +192,7 @@ label{font-weight:bold;}
     <input type="search" id="searchBox" class="search" placeholder="Search subjects...">
     <div id="subjectList"></div>
     <div class="btn-row">
-      <button id="addSubjectBtn">➕ New Subject</button>
+      <button id="addSubjectBtn">➕ Add Subject</button>
     </div>
   </aside>
 
@@ -158,180 +216,262 @@ label{font-weight:bold;}
   </section>
 </main>
 
+
 <script>
-/* === Firebase Init === */
-const firebaseConfig={
-  apiKey:"AIzaSyBwjZEdit040PKScyrIA3E1J1U2yzr7Wh4",
-  authDomain:"ugstuff-c351a.firebaseapp.com",
-  projectId:"ugstuff-c351a",
-  storageBucket:"ugstuff-c351a.firebasestorage.app",
-  messagingSenderId:"1033721470814",
-  appId:"1:1033721470814:web:e7d53feee2765445dc39cf",
-  measurementId:"G-QE68REWZYQ"
-};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth(),db=firebase.firestore();
-
-/* === State === */
-let user=null,isAdmin=false,subjects=[],currentId=null;
-const $=s=>document.querySelector(s);
-const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
-const ADMIN_EMAILS=["davit.gvakharia@gmail.com"];
-function showStatus(msg,color="white"){const st=$("#status");if(st){st.textContent=msg;st.style.color=color;}}
-
-/* === Auth === */
-const provider=new firebase.auth.GoogleAuthProvider();
-$("#signinBtn").onclick=()=>auth.signInWithPopup(provider);
-$("#logoutBtn").onclick=()=>auth.signOut();
-auth.onAuthStateChanged(async u=>{
-  user=u||null;
-  if(user){
-    $("#signinBtn").style.display="none";
-    $("#logoutBtn").style.display="inline-block";
-    if(ADMIN_EMAILS.includes(user.email)){
-      isAdmin=true;showStatus("Loading subjects...","#ffc423");await loadSubjects();
-    }else document.body.innerHTML=`<h1 style="text-align:center;color:red;">Access denied</h1>`;
-  }else{
-    $("#signinBtn").style.display="inline-block";$("#logoutBtn").style.display="none";
-  }
-});
-
-/* === Load Subjects === */
-async function loadSubjects(){
-  try{
-    const snap=await db.collection("subjects").get();
-    subjects=snap.docs.map(doc=>({id:doc.id,...doc.data()}));
-    renderSubjectList();
-    showStatus(`✅ Loaded ${subjects.length} subjects.`,"#38d98a");
-  }catch(err){showStatus("Error: "+err.message,"#ed3737");}
-}
-function renderSubjectList(){
-  const list=$("#subjectList");list.innerHTML="";
-  if(!subjects.length){list.innerHTML="<div style='opacity:.7;padding:8px;'>No subjects found.</div>";return;}
-  const q=$("#searchBox").value.toLowerCase();
-  subjects.filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q))
-  .forEach(s=>{
-    const div=el("div",{className:"subject-item",textContent:`${s.name} (${s.id})`});
-    div.onclick=()=>openSubject(s.id);
-    list.append(div);
+/* === Firebase dynamic config === */
+fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
+  .then(r => {
+    if (!r.ok) throw new Error("Config fetch failed: " + r.status);
+    return r.json();
+  })
+  .then(cfg => {
+    console.log("✅ Firebase config loaded:", cfg);
+    firebase.initializeApp(cfg);
+    startAdmin();
+  })
+  .catch(err => {
+    console.error("❌ Config load error:", err);
+    document.body.innerHTML = `<h2 style="color:red;text-align:center;margin-top:30vh;">⚠️ Firebase config not loaded.<br>${err}</h2>`;
   });
-}
-$("#searchBox").oninput=renderSubjectList;
 
-/* === Editor === */
-$("#addSubjectBtn").onclick=()=>{
-  currentId=null;
-  $("#editor").style.display="block";
-  $("#editorTitle").textContent="🆕 New Subject";
-  $("#subjectId").value="";
-  $("#subjectName").value="";
-  renderWeeks([]);
-};
-async function openSubject(id){
-  const doc=await db.collection("subjects").doc(id).get();
-  if(!doc.exists)return alert("Subject not found");
-  const data=doc.data();
-  currentId=id;
-  $("#editor").style.display="block";
-  $("#editorTitle").textContent=`Editing: ${data.name}`;
-  $("#subjectId").value=id;
-  $("#subjectName").value=data.name||"";
-  renderWeeks(data.weeks||[]);
-}
+function startAdmin() {
+  const auth = firebase.auth(),
+        db = firebase.firestore();
+  let user = null,
+      subjects = [],
+      currentId = null;
 
-/* === Render Weeks with Custom Buttons === */
-function renderWeeks(weeks){
-  const box=$("#weeksContainer");box.innerHTML="";
-  for(let i=1;i<=12;i++){
-    const w=weeks.find(x=>x.week===i)||{};
-    const div=el("div",{className:"week"});
-    div.innerHTML=`
-      <h3>Week ${i}</h3>
-      <label>Title</label><input id="title-${i}" value="${w.title||""}">
-      <label>Slides</label><input id="slides-${i}" value="${w.slides||""}">
-      <label>Video</label><input id="video-${i}" value="${w.video||""}">
-      <div id="buttons-${i}" class="custom-btns"></div>
-      <button class="addBtn" data-week="${i}">➕ Add Custom Button</button>
-    `;
-    box.append(div);
-
-    const btnBox=div.querySelector(`#buttons-${i}`);
-    (w.buttons||[]).forEach((b,j)=>btnBox.append(createButtonEditor(i,j,b)));
+  const ADMIN_EMAILS = ["davit.gvakharia@gmail.com"];
+  const $ = s => document.querySelector(s);
+  const el = (t, p = {}, kids = []) => {
+    const e = document.createElement(t);
+    Object.assign(e, p);
+    kids.forEach(k => e.append(k));
+    return e;
+  };
+  function showStatus(msg, color = "#fff") {
+    const s = $("#status");
+    if (s) {
+      s.textContent = msg;
+      s.style.color = color;
+    }
   }
 
-  document.querySelectorAll(".addBtn").forEach(btn=>{
-    btn.onclick=()=>{
-      const week=parseInt(btn.dataset.week);
-      const target=box.querySelector(`#buttons-${week}`);
-      const newBtn={label:"New Button",color:"#ffc423",textColor:"#111",link:""};
-      target.append(createButtonEditor(week,target.children.length,newBtn));
-    };
-  });
-}
+  /* === Auth === */
+  const provider = new firebase.auth.GoogleAuthProvider();
+  $("#signinBtn").onclick = () => auth.signInWithPopup(provider);
+  $("#logoutBtn").onclick = () => auth.signOut();
 
-function createButtonEditor(week,index,data){
-  const wrapper=el("div",{className:"customBtnRow"});
-  wrapper.innerHTML=`
-    <input class="btnLabel" type="text" value="${data.label||''}" placeholder="Name">
-    <input class="btnLink" type="text" value="${data.link||''}" placeholder="Link (optional)">
-    <div class="palette">
-      ${["#ffc423","#38d98a","#ed3737","#2979ff","#9c27b0","#ff9800","#00bcd4","#607d8b"].map(c=>
-        `<div class="colorCircle" data-color="${c}" style="background:${c};color:#fff">${data.color===c?"✓":""}</div>`
-      ).join("")}
-    </div>
-    <input class="textColor" type="color" value="${data.textColor||'#111'}" title="Text color">
-    <button class="removeBtn">❌</button>
-  `;
-  wrapper.querySelectorAll(".colorCircle").forEach(circ=>{
-    circ.onclick=()=>{
-      wrapper.querySelectorAll(".colorCircle").forEach(x=>x.textContent="");
-      circ.textContent="✓";
-      wrapper.dataset.color=circ.dataset.color;
-    };
+  auth.onAuthStateChanged(async u => {
+    user = u || null;
+    if (user) {
+      $("#signinBtn").style.display = "none";
+      $("#logoutBtn").style.display = "inline-block";
+      console.log("👤 Signed in as:", user.email);
+      if (ADMIN_EMAILS.includes(user.email)) {
+        showStatus("Loading subjects...", "#ffc423");
+        await loadSubjects();
+      } else {
+        document.body.innerHTML = `<h1 style="text-align:center;margin-top:30vh;color:red;">Access Denied: ${user.email}</h1>`;
+      }
+    } else {
+      $("#signinBtn").style.display = "inline-block";
+      $("#logoutBtn").style.display = "none";
+    }
   });
-  wrapper.querySelector(".removeBtn").onclick=()=>wrapper.remove();
-  wrapper.dataset.color=data.color;
-  return wrapper;
-}
 
-/* === Save / Delete === */
-$("#saveBtn").onclick=async()=>{
-  const id=currentId||prompt("Enter Subject ID:");
-  if(!id)return;
-  const name=$("#subjectName").value.trim();
-  const weeks=[];
-  for(let i=1;i<=12;i++){
-    const weekDiv=$("#weeksContainer").children[i-1];
-    const customBtns=[...weekDiv.querySelectorAll(".customBtnRow")].map(b=>({
-      label:b.querySelector(".btnLabel").value.trim(),
-      link:b.querySelector(".btnLink").value.trim(),
-      color:b.dataset.color||"#ffc423",
-      textColor:b.querySelector(".textColor").value||"#111"
-    }));
-    weeks.push({
-      week:i,
-      title:$("#title-"+i).value.trim(),
-      slides:$("#slides-"+i).value.trim(),
-      video:$("#video-"+i).value.trim(),
-      buttons:customBtns
+  /* === Load Subjects === */
+  async function loadSubjects() {
+    try {
+      const snap = await db.collection("subjects").get();
+      subjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      console.log("📘 Subjects loaded:", subjects);
+      renderList();
+      showStatus(`✅ Loaded ${subjects.length} subjects`, "#38d98a");
+      if (subjects.length === 0)
+        showStatus("⚠️ No subjects found in Firestore", "#ed3737");
+    } catch (e) {
+      console.error("❌ Firestore error:", e);
+      showStatus("❌ Firestore load error: " + e.message, "#ed3737");
+    }
+  }
+
+  /* === Render subject list === */
+  function renderList() {
+    const list = $("#subjectList");
+    list.innerHTML = "";
+    const q = $("#searchBox").value.toLowerCase().trim();
+    console.log("🔎 Filter:", q);
+
+    const visible = subjects.filter(s => {
+      if (!q) return true;
+      const name = s.name ? s.name.toLowerCase() : "";
+      const id = s.id ? s.id.toLowerCase() : "";
+      return name.includes(q) || id.includes(q);
+    });
+
+    if (visible.length === 0) {
+      list.innerHTML = `<div style="opacity:.7;padding:8px;">No subjects found${q ? " for \""+q+"\"" : ""}.</div>`;
+      return;
+    }
+
+    visible.forEach(s => {
+      const div = el("div", {
+        className: "subject-item",
+        textContent: `${s.name || "Untitled"} (${s.id})`
+      });
+      div.onclick = () => openSubject(s.id);
+      list.append(div);
     });
   }
-  try{
-    await db.collection("subjects").doc(id).set({id,name,weeks});
-    showStatus("✅ Saved successfully!","#38d98a");
-    await loadSubjects();
-  }catch(e){showStatus("❌ Save failed: "+e.message,"#ed3737");}
-};
+  $("#searchBox").oninput = renderList;
 
-$("#deleteBtn").onclick=async()=>{
-  if(!currentId||!confirm("Delete this subject?"))return;
-  try{
-    await db.collection("subjects").doc(currentId).delete();
-    showStatus("🗑️ Deleted","#ed3737");
-    await loadSubjects();
-    $("#editor").style.display="none";
-  }catch(e){showStatus("Error deleting: "+e.message,"#ed3737");}
-};
+  /* === Add new subject === */
+  $("#addSubjectBtn").onclick = () => {
+    currentId = null;
+    $("#editor").style.display = "block";
+    $("#editorTitle").textContent = "🆕 New Subject";
+    $("#subjectId").value = "";
+    $("#subjectName").value = "";
+    renderWeeks([]);
+  };
+
+  /* === Open subject === */
+  async function openSubject(id) {
+    try {
+      const doc = await db.collection("subjects").doc(id).get();
+      if (!doc.exists) {
+        alert("Subject not found");
+        return;
+      }
+      const data = doc.data();
+      currentId = id;
+      $("#editor").style.display = "block";
+      $("#editorTitle").textContent = `Editing: ${data.name}`;
+      $("#subjectId").value = id;
+      $("#subjectName").value = data.name || "";
+      renderWeeks(data.weeks || []);
+      console.log("📝 Opened subject:", id, data);
+    } catch (err) {
+      console.error("❌ Error opening subject:", err);
+      showStatus("Error opening: " + err.message, "#ed3737");
+    }
+  }
+
+  /* === Render weeks === */
+  function renderWeeks(weeks) {
+    const box = $("#weeksContainer");
+    box.innerHTML = "";
+    for (let i = 1; i <= 12; i++) {
+      const w = weeks.find(x => x.week === i) || {};
+      const div = el("div", { className: "week" });
+      div.innerHTML = `
+        <h3>Week ${i}</h3>
+        <label>Slides</label><input id="slides-${i}" value="${w.slides || ""}">
+        <label>Video</label><input id="video-${i}" value="${w.video || ""}">
+        <div id="buttons-${i}"></div>
+        <button class="addBtn" data-week="${i}">+ Add Button</button>
+      `;
+      box.append(div);
+
+      const btnBox = div.querySelector(`#buttons-${i}`);
+      (w.buttons || []).forEach((b, j) =>
+        btnBox.append(createButtonEditor(i, j, b))
+      );
+    }
+
+    document.querySelectorAll(".addBtn").forEach(btn => {
+      btn.onclick = () => {
+        const i = btn.dataset.week;
+        const container = $("#buttons-" + i);
+        const newB = {
+          label: "New Button",
+          color: "#ffc423",
+          textColor: "#111",
+          link: ""
+        };
+        container.append(createButtonEditor(i, container.children.length, newB));
+      };
+    });
+  }
+
+  /* === Button Editor === */
+  function createButtonEditor(week, index, b) {
+    const wrap = el("div", { className: "customBtnRow" });
+    wrap.innerHTML = `
+      <input class="btnLabel" type="text" value="${b.label || ""}" placeholder="Name">
+      <input class="btnLink" type="text" value="${b.link || ""}" placeholder="Link">
+      <div class="palette">
+        ${["#ffc423","#38d98a","#ed3737","#2979ff","#9c27b0","#ff9800","#00bcd4","#607d8b"].map(
+          c =>
+            `<div class="colorCircle" data-color="${c}" style="background:${c};color:#fff">${b.color === c ? "✓" : ""}</div>`
+        ).join("")}
+      </div>
+      <input class="textColor" type="color" value="${b.textColor || "#111"}">
+      <button class="removeBtn">❌</button>
+    `;
+    wrap.dataset.color = b.color || "#ffc423";
+    wrap.querySelectorAll(".colorCircle").forEach(circ => {
+      circ.onclick = () => {
+        wrap.dataset.color = circ.dataset.color;
+        wrap.querySelectorAll(".colorCircle").forEach(x => (x.textContent = ""));
+        circ.textContent = "✓";
+      };
+    });
+    wrap.querySelector(".removeBtn").onclick = () => wrap.remove();
+    return wrap;
+  }
+
+  /* === Save / Delete === */
+  $("#saveBtn").onclick = async () => {
+    const id = currentId || prompt("Enter Subject ID:");
+    if (!id) return;
+    const name = $("#subjectName").value.trim();
+    const weeks = [];
+    for (let i = 1; i <= 12; i++) {
+      const weekDiv = $("#weeksContainer").children[i - 1];
+      const customBtns = [...weekDiv.querySelectorAll(".customBtnRow")].map(b => ({
+        label: b.querySelector(".btnLabel").value.trim(),
+        link: b.querySelector(".btnLink").value.trim(),
+        color: b.dataset.color || "#ffc423",
+        textColor: b.querySelector(".textColor").value || "#111"
+      }));
+      weeks.push({
+        week: i,
+        slides: $("#slides-" + i).value.trim(),
+        video: $("#video-" + i).value.trim(),
+        buttons: customBtns
+      });
+    }
+
+    try {
+      await db.collection("subjects").doc(id).set({ id, name, weeks });
+      showStatus("✅ Saved successfully!", "#38d98a");
+      console.log("✅ Saved subject:", id, { id, name, weeks });
+      await loadSubjects();
+    } catch (e) {
+      console.error("❌ Save failed:", e);
+      showStatus("❌ " + e.message, "#ed3737");
+    }
+  };
+
+  $("#deleteBtn").onclick = async () => {
+    if (!currentId || !confirm("Delete this subject?")) return;
+    try {
+      await db.collection("subjects").doc(currentId).delete();
+      showStatus("🗑️ Deleted", "#ed3737");
+      $("#editor").style.display = "none";
+      await loadSubjects();
+    } catch (e) {
+      console.error("❌ Delete error:", e);
+      showStatus("Error: " + e.message, "#ed3737");
+    }
+  };
+}
 </script>
+
+
+
+
 </body>
 </html>
