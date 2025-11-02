@@ -161,14 +161,14 @@
   #cardsCanvas { transition: opacity .35s ease, filter .35s ease; }
   .card-stack {
     display: flex; flex-direction: column; gap: 20px;
-    max-width: 1200px; min-width: 700px; margin: 0 auto; padding: 20px;
+    max-width: 1300px; min-width: 1000px; margin: 0 auto; padding: 20px;
   }
   .card {
     background: var(--card); border-radius: 0; box-shadow: var(--shadow);
-    padding: 22px; border: 1px solid #0005;
+    padding: 25px; border: 0px solid #0005;
     display: flex; flex-direction: column; gap: 16px;
   }
-  .subhead { text-align: center; font-weight: 700; opacity: .9; margin-bottom: 4px; }
+  .subhead { text-align: center; font-weight: 700; opacity: .9; margin-bottom: 4px; font-size: 1.4rem;}
   .card-sections { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
   .card-section {
     flex: 1; background: transparent; border: 1px solid rgba(255,255,255,.13);
@@ -176,7 +176,7 @@
     justify-content: space-between; transition: transform .2s, background .2s;
   }
   .card-section:hover { background: #ffffff05; }
-  .card-section h4 { margin: 0 0 30px; font-weight: 700; color: var(--subject-title); font-size: 1rem; }
+  .card-section h4 { margin: 0 0 30px; font-weight: 700; color: var(--subject-title); font-size: 1.3rem; }
 
   .global-files {
     background: transparent;
@@ -525,7 +525,7 @@ function showWeek(n) {
       if (typeText) {
         const typeEl = el("div", {
           style:
-            "text-align:center;font-size:0.9rem;opacity:0.8;margin-top:-6px;",
+            "text-align:center;font-size:1.2rem;opacity:0.8;margin-top:-6px;",
           textContent: typeText
         });
         card.append(typeEl);
@@ -541,7 +541,7 @@ function showWeek(n) {
         if (prev.topic) {
           const topicEl = el("div", {
             style:
-              "margin-bottom:10px;font-weight:600;color:#fff;opacity:0.85;",
+              "margin-bottom:30px;font-weight:500;color:#fff;opacity:1;font-size:1.2rem; line-height: 1.5;",
             textContent: prev.topic
           });
           sec.append(topicEl);
