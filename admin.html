@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -22,7 +21,7 @@
 
 <style>
 :root{
-  --bg:#0B1216; --surface:#17333d; --text:#EDEFF2;
+  --bg:#0B1216; --surface:#17333d; --surface2:#121A1F; --text:#EDEFF2;
   --accent:#0fbe35; --success:#38d98a; --danger:#ED3737;
   --buttontext:#ffffff;
 }
@@ -64,7 +63,7 @@ section{overflow-y:auto;height:100%;padding:20px;}
 .search{width:100%;padding:10px;border:none;background:#23343B;color:#fff;margin-bottom:10px;}
 .subject-item{padding:10px;background:#1A2328;border:1px solid #0006;margin-bottom:8px;cursor:pointer;font-weight:600; transition: ease-out 0.1s;}
 .subject-item:hover{background:#2A3A40;}
-.subject-item.active{background:var(--accent);color:#ffffff;}
+.subject-item.active{background:var(--surface);color:#ffffff;}
 .btn-row{display:flex;gap:10px;margin-top:10px;padding:10px;}
 .btn-row button{flex:1;padding:10px;background:var(--accent);color:#ffffff;border:none;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-row button img{width:20px;height:20px}
@@ -74,7 +73,7 @@ section{overflow-y:auto;height:100%;padding:20px;}
 #editor.fadeout{opacity:0;filter:blur(4px);}
 #editor h2{font-size:22px;margin-bottom:10px;color:var(--accent);}
 label{display:block;font-weight:700;margin:8px 0 4px;}
-input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--buttontext);font-size:1rem;margin-bottom:8px;}
+input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--buttontext);font-size:1rem;margin-bottom:10px;}
 .week{border:1px solid #0006;background:#121A1F;padding:12px;margin-bottom:14px;}
 .week h3{margin-bottom:8px;color:var(--accent);}
 .addBtn{background:var(--accent);color:var(--buttontext);border:none;padding:8px 12px;cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:6px;}
@@ -85,13 +84,16 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 .global h3{color:var(--success);margin-bottom:6px;}
 
 /* Color selector */
-.colorPalette{display:flex;gap:8px;align-items:center;margin-left:6px;}
-.colorBox{width:24px;height:24px;border-radius:4px;cursor:pointer;transition:.15s ease;box-shadow:0 0 0 2px transparent;}
+.colorPalette{display:flex;gap:15px;align-items:center;margin-left:6px;}
+
+
+.colorBox{width:35px;height:35px;border: 0;cursor:pointer;transition:.3s ease;box-shadow:0}
+
 .colorBox[data-color="yellow"]{background:#ffc423;}
 .colorBox[data-color="green"]{background:#38d98a;}
 .colorBox[data-color="red"]{background:#ed3737;}
 .colorBox[data-color="blue"]{background:#2979ff;}
-.colorBox.active{box-shadow:0 0 0 3px #fff;transform:scale(1.1);}
+.colorBox.active{border-radius: 50%; filter:brightness(1.2); border: rgba(255, 255, 255, 0.445) solid 2px; box-sizing: border-box;}
 
 /* Popup (Create Subject) */
 #addPopup{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:2000;}
