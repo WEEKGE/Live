@@ -71,7 +71,7 @@ header .right{display:flex;align-items:center;gap:12px;}
 header button{transition: ease-out 0.1s;background:var(--accent);color:var(--buttontext);border:none;padding:8px 16px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border-radius:0;}
 header button img{width:18px;height:18px;filter:brightness(0) invert(1);}
 header button:hover{background-color: #138d2d;}
-#saveStatus{font-weight:700;font-size:14px}
+#saveStatus{font-weight:600;font-size:18px; margin-right:30px;}
 #saveStatus.saving{color:#ffc423}
 #saveStatus.saved{color:var(--success)}
 #saveStatus.error{color:var(--danger)}
@@ -180,7 +180,7 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 <header>
   <h1>Weekge Admin</h1>
   <div class="right">
-    <div id="saveStatus" class="saved">🟢 Saved</div>
+    <div id="saveStatus" class="saved">✅ დამახსოვრებულია</div>
     <button id="signinBtn">
       <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Google-ით შესვლა
     </button>
@@ -273,8 +273,8 @@ function startAdmin(){
   const saveStatus=$("#saveStatus");
   const setSaveState=(st)=>{
     saveStatus.className="";
-    if(st==="saving"){saveStatus.textContent="🟠 მოითმინე...";saveStatus.classList.add("saving");}
-    else if(st==="saved"){saveStatus.textContent="🟢 დამახსოვრებულია";saveStatus.classList.add("saved");}
+    if(st==="saving"){saveStatus.textContent=" მოითმინე...";saveStatus.classList.add("saving");}
+    else if(st==="saved"){saveStatus.textContent="✅ დამახსოვრებულია";saveStatus.classList.add("saved");}
     else{saveStatus.textContent="❌ პრობლემაა";saveStatus.classList.add("error");}
   };
 
