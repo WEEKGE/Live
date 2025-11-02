@@ -1,361 +1,290 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Weeksy</title>
 
-  <!-- fonts -->
+  <title>Weekge — University Syllabus Platform</title>
+  <meta name="description" content="Weekge (Week.ge) — უნივერსიტეტის საგნების და სილაბუსების პლატფორმა. ნახე შენი საგნები კვირების მიხედვით და იოლი ნავიგაციით." />
+  <meta name="keywords" content="weekge, week.ge, weekgy, week, silabus, syllabus, university platform, study platform, UG, უნივერსიტეტი, სტუდენტი" />
+  <meta name="author" content="weekge" />
+  <meta name="theme-color" content="#0B1216" />
+  <meta property="og:title" content="Weekge — University Platform" />
+  <meta property="og:description" content="მართე სილაბუსი და საგნები მარტივად — კვირების მიხედვით, Today ღილაკით და სუფთა UI-ით." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://weekge.github.io/preview.png" />
+  <link rel="icon" href="https://weekge.github.io/favicon.ico" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-
+<style>
+/* ======================= FONTS ======================= */
 @font-face {
-    font-family: 'TBC Contractica';
-    src: url('https://github.com/WEEKGE/UGSTUFF/raw/refs/heads/main/css%20font/TBCContracticaCAPS-Book.woff');
-    font-weight: normal;
-    font-display: swap;
+  font-family:'TBC Contractica';
+  src:url('https://github.com/WEEKGE/UGSTUFF/raw/refs/heads/main/css%20font/TBCContracticaCAPS-Book.woff');
+  font-weight:400;font-display:swap;
+}
+@font-face {
+  font-family:'TBC Contractica';
+  src:url('https://github.com/WEEKGE/UGSTUFF/raw/refs/heads/main/css%20font/TBCContracticaCAPS-Bold.woff');
+  font-weight:700;font-display:swap;
 }
 
-@font-face {
-    font-family: 'TBC Contractica';
-    src: url('https://github.com/WEEKGE/UGSTUFF/raw/refs/heads/main/css%20font/TBCContracticaCAPS-Bold.woff');
-    font-weight: bold;
-    font-display: swap;
-}
-
-::-webkit-scrollbar { width: 0.4rem; background-color: #00000000; }
-::-webkit-scrollbar-track { border-radius: 10px; background-color: #18181800; }
-::-webkit-scrollbar-thumb { background: #16b438; border-radius: 20px; }
-
+/* ======================= THEME ======================= */
 :root {
-  --bg:#0B1216;
-  --top:#1C2A2F;
-  --card:#2A3A40;
-  --line:#83919922;
-  --text:#EDEFF2;
-  --muted:#B7C0C6;
-  --accent:#F2C200;
-  --done:#38D98A;
-  --pending:#6B7780;
-  --danger:#ED3737;
-  --shadow:0 8px 28px rgba(0,0,0,.35);
+  --bg:#0B1216;--top:#1C2A2F;--card:#2A3A40;
+  --line:#83919922;--text:#EDEFF2;--muted:#B7C0C6;
+  --accent:#F2C200;--done:#38D98A;--pending:#6B7780;
+  --danger:#ED3737;--subject-title:#2ad324;--shadow:0 8px 28px rgba(0,0,0,.35);
 }
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:'TBC Contractica',sans-serif;}
+::-webkit-scrollbar{width:.45rem}::-webkit-scrollbar-thumb{background:#16b438;border-radius:20px}
 
-* { box-sizing: border-box; }
-
-html, body {
-  height: 100%;
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'TBC Contractica', sans-serif;
+/* ======================= NAV ======================= */
+.nav{
+  position:sticky;top:0;z-index:50;height:64px;background:var(--top);
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #0006;
 }
+.brand{display:flex;align-items:center;gap:10px;font-weight:700}
+.week-toggle{background:transparent;border:none;color:var(--text);font-size:1rem;cursor:pointer;border-radius:10px}
+.today-btn{background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+.signin-btn{background:#fff;color:#0B1216;border:none;padding:10px 14px;border-radius:999px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;border:3px solid #00b890;cursor:pointer;object-fit:cover;display:none}
 
-a { color: inherit; text-decoration: none; }
+/* Profile menu center aligned */
+.menu{
+  position:absolute;right:16px;top:64px;width:220px;background:rgba(43,47,49,.9);
+  backdrop-filter:blur(12px);border-radius:18px;box-shadow:var(--shadow);
+  transform:translateY(-8px) scale(.95);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.menu.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.menu a,.menu button{display:block;width:100%;padding:14px 0;background:transparent;border:none;color:#D7DBDE;font-size:1rem;cursor:pointer;transition:background .2s;}
+.menu a:hover,.menu button:hover{background:rgba(255,255,255,0.1);}
+.menu .sep{height:1px;width:100%;background:#FFFFFF22;}
 
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  height: 64px;
-  background: var(--top);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  border-bottom: 1px solid #00000044;
-}
-.brand { font-weight: 700; letter-spacing: .3px; }
-.signin-btn {
-  background: #fff; color: #0B1216; border: none;
-  padding: 10px 14px; border-radius: 999px; cursor: pointer;
-}
-.avatar {
-  width: 45px; height: 45px; border-radius: 50%; border: 3px solid #00b890;
-  cursor: pointer; box-shadow: var(--shadow); object-fit: cover; display: none;
-}
-.menu { position:absolute; right:20px; top:60px; width:200px; background:#2B2F31; border-radius:18px;
-  box-shadow:var(--shadow); display:none; overflow:hidden; }
-.menu.open {display:block;}
-.menu a,.menu button{display:block;padding:16px 12px;width:100%;background:transparent;border:none;color:#D7DBDE;cursor:pointer;text-align:center;font-size:1.2rem;}
-.menu .sep{height:1px;background:#FFFFFF22;}
+/* ======================= LAYOUT ======================= */
+.wrap{height:calc(100% - 64px);display:grid;grid-template-columns:320px 1fr;gap:18px}
+.left{border-right:1px solid var(--line);padding:20px;overflow:auto;background:#0e161a;transition:transform .3s ease}
+.right-panel{overflow:auto}
 
-.wrap{height:calc(100% - 64px);display:grid;grid-template-columns:320px 1fr;gap:18px;}
-.left{border-right:1px solid var(--line);padding:24px 18px;overflow:auto;}
-.week-item{display:grid;grid-template-columns:66px 1fr;align-items:center;gap:12px;padding:14px 8px;border-radius:10px;cursor:pointer;}
-.week-item.active{background:#1a2328;}
-.dot{width:40px;height:40px;border-radius:50%;border:6px solid #fff;background:var(--pending);}
-.dot.current{background:var(--accent);}
-.dot.done{background:var(--done);}
-.wk-title{font-weight:bold;}
-.wk-dates{font-size:13px;color:var(--muted);}
-.right-panel{overflow:auto;}
-.card-stack{display:flex;flex-direction:column;gap:16px;max-width:860px;margin:0 auto;padding:24px;}
-.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px;border:1px solid #00000055;}
-.card .subhead{font-weight:bold;text-align:center;opacity:.85;}
-.card .title{font-size:24px;font-weight:bold;text-align:center;margin:12px 0 18px;}
-.btns{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;}
-.pill{min-width:140px;padding:12px 16px;border-radius:14px;border:none;font-weight:800;cursor:pointer;}
-.pill.disabled{opacity:.35;pointer-events:none;}
-.modal{position:fixed;inset:0;background:#0B1216;z-index:100;display:none;}
-.modal.open{display:block;}
-.modal-inner{max-width:1100px;margin:0 auto;padding:22px;}
-.modal-head{display:flex;justify-content:space-between;align-items:center;}
-.close{background:#2b2f31;color:#fff;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;}
-.catalog{display:grid;grid-template-columns:1fr 320px;gap:18px;}
-.list,.sidebox{background:#121A1F;border-radius:14px;padding:12px;border:1px solid #00000066;}
-.item{display:flex;justify-content:space-between;align-items:center;padding:10px 8px;border-bottom:1px solid #ffffff10;}
-.item:last-child{border-bottom:none;}
-.item button{background:#2e3a40;color:#fff;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;}
-.item .added{background:#38d98a;color:#111;cursor:default;}
-.save{margin-top:10px;background:#38D98A;color:#0B1216;border:none;padding:12px 14px;border-radius:12px;width:100%;cursor:pointer;}
-.empty{opacity:.7;text-align:center;margin-top:14vh;font-size:18px;}
-@media(max-width:900px){.wrap{grid-template-columns:1fr;}.left{height:44vh;}.right-panel{height:56vh;}.catalog{grid-template-columns:1fr;}}
-  </style>
+/* weeks list */
+.week-item{display:grid;grid-template-columns:50px 1fr;align-items:center;gap:10px;padding:12px 8px;border-radius:10px;cursor:pointer}
+.week-item.active{background:#1a2328}
+.dot{width:34px;height:34px;border-radius:50%;border:5px solid #fff;background:var(--pending)}
+.dot.current{background:var(--accent)}
+.dot.done{background:var(--done)}
+.wk-title{font-weight:700}.wk-dates{font-size:13px;color:var(--muted)}
+
+/* ======================= CARDS ======================= */
+#cardsCanvas{transition:opacity .35s ease, filter .35s ease}
+.card-stack{display:flex;flex-direction:column;gap:20px;max-width:1200px;min-width: 700px;margin:0 auto;padding:20px}
+.card{background:var(--card);border-radius:10px;box-shadow:var(--shadow);padding:22px;border:1px solid #0005;display:flex;flex-direction:column;gap:16px}
+.subhead{text-align:center;font-weight:700;opacity:.9;margin-bottom:4px}
+.card-sections{display:flex;justify-content:space-between;align-items:stretch;gap:16px}
+.card-section{flex:1;background:#00000000;border:1px solid rgba(255, 255, 255, 0.13);border-radius:10px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s,background .2s}
+.card-section:hover{background:#ffffff05;}
+.card-section h4{margin:0 0 30px;font-weight:700;color:var(--subject-title);font-size:1rem}
+.btns{display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
+.pill{border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:.95rem}
+.empty{opacity:.75;text-align:center;margin-top:14vh}
+
+/* ======================= MODAL ======================= */
+.modal{position:fixed;inset:0;z-index:200;background:rgba(11,18,22,.75);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;}
+.modal.open{opacity:1;pointer-events:auto}
+.modal-inner{background:#121A1F;width:96%;max-width:1100px;height:92vh;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.4);transform:scale(.9);opacity:0;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;display:flex;flex-direction:column;overflow:hidden}
+.modal.open .modal-inner{transform:scale(1);opacity:1}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#1C2A2F;border-bottom:1px solid #0005}
+.close{background:#2b2f31;color:#fff;border:none;border-radius:12px;padding:8px 12px;font-weight:700;cursor:pointer}
+.modal-body{flex:1;display:flex;flex-direction:column}
+.catalog{flex:1;display:grid;grid-template-columns:1fr 300px;gap:14px;padding:16px 20px;overflow:hidden}
+.list,.sidebox{background:#0e161a;border-radius:14px;border:1px solid #0006;padding:10px;overflow:auto}
+.item{display:flex;justify-content:space-between;align-items:center;padding:8px 6px;border-bottom:1px solid #fff1}
+.item:last-child{border-bottom:none}
+.item button{background:#2e3a40;color:#fff;border:none;padding:6px 10px;border-radius:10px;cursor:pointer}
+.item .added{background:#38d98a;color:#111}
+.save{width:100%;margin-top:10px;background:#38D98A;color:#111;border:none;padding:10px;border-radius:12px;font-weight:700;cursor:pointer}
+
+/* ======================= RESPONSIVE ======================= */
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  .left{position:absolute;left:0;top:64px;bottom:0;width:100%;transform:translateY(-100%);z-index:30}
+  .left.open{transform:translateY(0)}
+  .modal-inner{width:100%;height:100%;border-radius:0}
+  .catalog{grid-template-columns:1fr}
+  .card-sections{flex-direction:column}
+  .card-stack{width: 100%;max-width: 100hv;min-width: 50px;}
+}
+@media(min-width:901px){
+  #weekToggle,#todayBtn{display:none!important;pointer-events:none}
+}
+</style>
 </head>
 
-
 <body>
-
-  <div class="nav">
-    <div class="brand">Weeksy</div>
-    <div class="right">
-      <button id="signinBtn" class="signin-btn" style="display:none;">Sign in with Google</button>
-      <img id="avatar" class="avatar" src="" alt="profile" />
-      <div id="menu" class="menu">
-        <a id="openProfile">Profile Settings</a>
-        <div class="sep"></div>
-        <button id="logoutBtn">Log Out</button>
-      </div>
+<div class="nav">
+  <div class="brand">
+    <button id="weekToggle" class="week-toggle">📅 Week —</button>
+    <button id="todayBtn" class="today-btn">Today</button>
+  </div>
+  <div class="right">
+    <button id="signinBtn" class="signin-btn">Sign in with Google</button>
+    <img id="avatar" class="avatar" src="" alt="profile" />
+    <div id="menu" class="menu">
+      <a id="openProfile">Profile Settings</a>
+      <div class="sep"></div>
+      <button id="logoutBtn">Log Out</button>
     </div>
   </div>
+</div>
 
-  <div class="wrap">
-    <div id="weeksList" class="left"></div>
-    <div class="right-panel">
-      <div id="cardsCanvas" class="card-stack">
-        <div class="empty">აირჩიე მარცხნივ კვირა ან ჩართე საგნები Profile Settings-ში.</div>
-      </div>
+<div class="wrap">
+  <div id="weeksList" class="left"></div>
+  <div class="right-panel">
+    <div id="cardsCanvas" class="card-stack">
+      <div class="empty">აირჩიე მარცხნივ კვირა ან ჩართე საგნები Profile Settings-ში.</div>
     </div>
   </div>
+</div>
 
-  <div id="modal" class="modal">
-    <div class="modal-inner">
-      <div class="modal-head">
-        <div>Profile Settings</div>
-        <button id="closeModal" class="close">Close</button>
-      </div>
+<div id="modal" class="modal">
+  <div class="modal-inner">
+    <div class="modal-head"><div>Profile Settings</div><button id="closeModal" class="close">✕</button></div>
+    <div class="modal-body">
       <div class="catalog">
-        <div>
-          <input id="searchBox" type="search" placeholder="ძებნა კატალოგში..." style="width:100%;padding:10px;">
-          <div id="catalogList" class="list" style="margin-top:10px;"></div>
-        </div>
+        <div id="catalogList" class="list"><div class="empty">იტვირთება...</div></div>
         <div class="sidebox">
-          <div style="margin-bottom:6px;">ჩემი საგნები</div>
+          <div style="margin-bottom:6px;font-weight:700;">ჩემი საგნები</div>
           <div id="mySubjects"></div>
           <button id="saveSubjects" class="save">Save</button>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <script>
-  // 🟨 Load config.json securely
-  fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
+<script>
+/* ======= INIT ======= */
+fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
+.then(r=>r.json())
+.then(cfg=>{firebase.initializeApp(cfg);startWeeksy();})
+.catch(()=>alert("⚠️ config.json ვერ ჩაიტვირთა."));
 
-    .then(res => res.json())
-    .then(config => {
-      firebase.initializeApp(config);
-      startWeeksy(); // run main script
-    })
-    .catch(err => {
-      console.error("Error loading config.json:", err);
-      document.body.innerHTML = "<p style='color:#ed3737;padding:20px;'>⚠️ config.json ვერ ჩაიტვირთა. გადაამოწმე ფაილი.</p>";
+function startWeeksy(){
+  const auth=firebase.auth(),db=firebase.firestore();
+  let user=null,catalog=[],selected=[],cache={},weekDates=[];
+  const $=s=>document.querySelector(s);
+  const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
+  const todayISO=()=>new Date().toISOString().slice(0,10);
+  const isBetween=(d,s,e)=>d>=s&&d<=e;
+  const hasPassed=(d,e)=>d>e;
+  const fmtRange=(s,e)=>{const f=d=>new Date(d+"T12:00:00").toLocaleString(undefined,{month:"short",day:"numeric"});return f(s)+" → "+f(e);};
+
+  const SEMESTER_WEEKS=[
+    {n:1,start1:"2025-09-22",end1:"2025-09-28",start2:"2026-03-02",end2:"2026-03-08"},
+    {n:2,start1:"2025-09-29",end1:"2025-10-05",start2:"2026-03-09",end2:"2026-03-15"},
+    {n:3,start1:"2025-10-06",end1:"2025-10-12",start2:"2026-03-16",end2:"2026-03-22"},
+    {n:4,start1:"2025-10-13",end1:"2025-10-19",start2:"2026-03-23",end2:"2026-03-29"},
+    {n:5,start1:"2025-10-20",end1:"2025-10-26",start2:"2026-03-30",end2:"2026-04-05"},
+    {n:6,start1:"2025-10-27",end1:"2025-11-02",start2:"2026-04-06",end2:"2026-04-12"},
+    {n:7,start1:"2025-11-03",end1:"2025-11-09",start2:"2026-04-20",end2:"2026-04-26"},
+    {n:8,start1:"2025-11-10",end1:"2025-11-16",start2:"2026-04-27",end2:"2026-05-03"},
+    {n:9,start1:"2025-11-17",end1:"2025-11-23",start2:"2026-05-04",end2:"2026-05-10"},
+    {n:10,start1:"2025-11-24",end1:"2025-11-30",start2:"2026-05-11",end2:"2026-05-17"},
+    {n:11,start1:"2025-12-01",end1:"2025-12-07",start2:"2026-05-18",end2:"2026-05-24"},
+    {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"}
+  ];
+
+  /* ====== Auth & UI ====== */
+  const provider=new firebase.auth.GoogleAuthProvider();
+  $("#signinBtn").onclick=()=>auth.signInWithPopup(provider);
+  $("#logoutBtn").onclick=()=>auth.signOut();
+  $("#avatar").onclick=()=>$("#menu").classList.toggle("open");
+  document.addEventListener("click",e=>{if(!e.target.closest(".avatar")&&!e.target.closest(".menu"))$("#menu").classList.remove("open");});
+  $("#weekToggle").onclick=()=>toggleWeeks();
+  $("#todayBtn").onclick=goToday;
+  $("#openProfile").onclick=async()=>{$("#menu").classList.remove("open");$("#modal").classList.add("open");if(!catalog.length)await loadCatalog();renderProfile();};
+  $("#closeModal").onclick=()=>$("#modal").classList.remove("open");
+
+  auth.onAuthStateChanged(async u=>{user=u||null;guardUI(!!user);if(user){$("#avatar").src=user.photoURL||"https://i.pravatar.cc/100";await bootAfterLogin();}});
+
+  function guardUI(signed){$("#signinBtn").style.display=signed?"none":"inline-flex";$("#avatar").style.display=signed?"block":"none";if(!signed)$("#cardsCanvas").innerHTML="<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";}
+
+  async function loadCatalog(){catalog=[];const snap=await db.collection("subjects").get();snap.forEach(d=>catalog.push({id:d.id,...d.data()}));}
+  async function loadUserSelection(){const key=`weeksy:selected:${user.uid}`;try{const snap=await db.collection("users").doc(user.uid).get();selected=(snap.exists&&snap.data().subjects)||[];localStorage.setItem(key,JSON.stringify(selected));}catch{selected=JSON.parse(localStorage.getItem(key)||"[]");}}
+  async function ensureSubjectsLoaded(){const toLoad=selected.filter(id=>!cache[id]);for(const id of toLoad){const subj=catalog.find(c=>c.id===id);if(subj)cache[id]=subj;}}
+  function flattenWeeks(){weekDates=[];SEMESTER_WEEKS.forEach(w=>{if(w.start1)weekDates.push({n:w.n,start:w.start1,end:w.end1});if(w.start2)weekDates.push({n:w.n,start:w.start2,end:w.end2});});}
+
+  /* ===== Render Weeks ===== */
+  function paintWeeks(){
+    const iso=todayISO();const list=$("#weeksList");list.innerHTML="";
+    let activeWeekN=null;
+    for(const w of SEMESTER_WEEKS){if(isBetween(iso,w.start1,w.end1)||isBetween(iso,w.start2,w.end2)){activeWeekN=w.n;break;}}
+    SEMESTER_WEEKS.forEach(w=>{
+      const isCurrent=activeWeekN===w.n;const done=hasPassed(iso,w.end1)&&hasPassed(iso,w.end2);
+      const status=isCurrent?"current":done?"done":"pending";
+      const row=el("div",{className:`week-item${isCurrent?" active":""}`});
+      row.setAttribute("data-week",w.n);
+      row.append(el("div",{className:"dot "+status}),el("div",{},[el("div",{className:"wk-title",textContent:`Week ${w.n}`}),el("div",{className:"wk-dates",textContent:fmtRange(w.start1,w.end1)+" / "+fmtRange(w.start2,w.end2)})]));
+      row.onclick=()=>{document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));row.classList.add("active");showWeek(w.n);toggleWeeks(false);updateWeekLabel(w.n);};
+      list.append(row);
     });
-
-  // 🟩 Main App Code
-  function startWeeksy() {
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    let user=null,catalog=[],selectedSubjects=[],subjectCache={},weekDates=[];
-    const $=s=>document.querySelector(s);
-    const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
-    const todayISO=()=>new Date().toISOString().slice(0,10);
-    const isBetween=(d,s,e)=>d>=s&&d<=e;
-    const hasPassed=(d,e)=>d>e;
-    const fmtRange=(s,e)=>{const f=d=>new Date(d+"T12:00:00").toLocaleString(undefined,{month:"short",day:"numeric"});return f(s)+" → "+f(e);};
-
-    const SEMESTER_WEEKS=[
-      {n:1,start1:"2025-09-22",end1:"2025-09-28",start2:"2026-03-02",end2:"2026-03-08"},
-      {n:2,start1:"2025-09-29",end1:"2025-10-05",start2:"2026-03-09",end2:"2026-03-15"},
-      {n:3,start1:"2025-10-06",end1:"2025-10-12",start2:"2026-03-16",end2:"2026-03-22"},
-      {n:4,start1:"2025-10-13",end1:"2025-10-19",start2:"2026-03-23",end2:"2026-03-29"},
-      {n:5,start1:"2025-10-20",end1:"2025-10-26",start2:"2026-03-30",end2:"2026-04-05"},
-      {n:6,start1:"2025-10-27",end1:"2025-11-02",start2:"2026-04-06",end2:"2026-04-12"},
-      {n:7,start1:"2025-11-03",end1:"2025-11-09",start2:"2026-04-20",end2:"2026-04-26"},
-      {n:8,start1:"2025-11-10",end1:"2025-11-16",start2:"2026-04-27",end2:"2026-05-03"},
-      {n:9,start1:"2025-11-17",end1:"2025-11-23",start2:"2026-05-04",end2:"2026-05-10"},
-      {n:10,start1:"2025-11-24",end1:"2025-11-30",start2:"2026-05-11",end2:"2026-05-17"},
-      {n:11,start1:"2025-12-01",end1:"2025-12-07",start2:"2026-05-18",end2:"2026-05-24"},
-      {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"}
-    ];
-
-    const provider=new firebase.auth.GoogleAuthProvider();
-    $("#signinBtn").onclick=()=>auth.signInWithPopup(provider);
-    $("#logoutBtn").onclick=()=>auth.signOut();
-    $("#avatar").onclick=()=>$("#menu").classList.toggle("open");
-    document.addEventListener("click",e=>{if(!e.target.closest(".avatar")&&!e.target.closest(".menu"))$("#menu").classList.remove("open");});
-
-    auth.onAuthStateChanged(async u=>{
-      user=u||null;guardUI(!!user);
-      if(user){$("#avatar").src=user.photoURL||"https://i.pravatar.cc/100";await bootAfterLogin();}
-    });
-
-    function guardUI(signed){
-      $("#signinBtn").style.display=signed?"none":"inline-flex";
-      $("#avatar").style.display=signed?"block":"none";
-      if(!signed)$("#cardsCanvas").innerHTML=`<div class="empty">შედი Google-ით რომ ნახო საგნები.</div>`;
-    }
-
-    async function loadCatalog(){
-      catalog=[];const snap=await db.collection("subjects").get();
-      snap.forEach(doc=>catalog.push({id:doc.id,...doc.data()}));
-    }
-
-    async function loadUserSelection(){
-      const key=`weeksy:selected:${user.uid}`;
-      try{
-        const snap=await db.collection("users").doc(user.uid).get();
-        selectedSubjects=(snap.exists&&snap.data().subjects)||[];
-        localStorage.setItem(key,JSON.stringify(selectedSubjects));
-      }catch{selectedSubjects=JSON.parse(localStorage.getItem(key)||"[]");}
-    }
-
-    async function saveUserSelection(immediate=false){
-      if(!user)return;
-      await db.collection("users").doc(user.uid).set({subjects:selectedSubjects},{merge:true});
-      localStorage.setItem(`weeksy:selected:${user.uid}`,JSON.stringify(selectedSubjects));
-      if(immediate){
-        await ensureSubjectsLoaded();
-        paintWeeks();
-        const iso=todayISO();
-        const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
-        if(cur)showWeek(cur.n);
-      }
-    }
-
-    async function ensureSubjectsLoaded(){
-      const toLoad=selectedSubjects.filter(id=>!subjectCache[id]);
-      for(const id of toLoad){const subj=catalog.find(c=>c.id===id);if(subj)subjectCache[id]=subj;}
-    }
-
-    function flattenWeeks(){
-      weekDates=[];
-      SEMESTER_WEEKS.forEach(w=>{
-        if(w.start1)weekDates.push({n:w.n,start:w.start1,end:w.end1});
-        if(w.start2)weekDates.push({n:w.n,start:w.start2,end:w.end2});
-      });
-    }
-
-    function paintWeeks(){
-      const iso=todayISO();const list=$("#weeksList");list.innerHTML="";let activeWeekN=null;
-      for(const w of SEMESTER_WEEKS){if(isBetween(iso,w.start1,w.end1)||isBetween(iso,w.start2,w.end2)){activeWeekN=w.n;break;}}
-      SEMESTER_WEEKS.forEach(w=>{
-        const isCurrent=activeWeekN===w.n;const done=hasPassed(iso,w.end1)&&hasPassed(iso,w.end2);
-        const status=isCurrent?"current":done?"done":"pending";
-        const row=el("div",{className:`week-item${isCurrent?" active":""}`});
-        row.setAttribute("data-week",w.n);
-        row.append(el("div",{className:"dot "+status}),el("div",{},[
-          el("div",{className:"wk-title",textContent:`Week ${w.n}`}),
-          el("div",{className:"wk-dates",textContent:fmtRange(w.start1,w.end1)+" / "+fmtRange(w.start2,w.end2)})
-        ]));
-        row.onclick=()=>{document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));row.classList.add("active");showWeek(w.n);};
-        list.append(row);
-      });
-    }
-
-    function showWeek(n){
-      const stack=el("div",{className:"card-stack"});let any=false;
-      selectedSubjects.forEach(id=>{
-        const subj=subjectCache[id];if(!subj)return;
-        const wk=subj.weeks.find(w=>w.week===n);if(!wk)return;any=true;
-        const card=el("div",{className:"card"});
-        card.append(el("div",{className:"subhead",textContent:subj.name}),
-                    el("div",{className:"title",textContent:wk.title||"—"}));
-        const btnsDiv=el("div",{className:"btns"});
-        const addBtn=(label,url,color,textColor)=>{
-          const b=el("button",{className:"pill",textContent:label,style:`background:${color};color:${textColor}`});
-          if(url)b.onclick=()=>window.open(url,"_blank");
-          btnsDiv.append(b);
-        };
-        if(wk.slides)addBtn("Slides",wk.slides,"#ffc423","#111");
-        if(wk.video)addBtn("Video",wk.video,"#ed3737","#fff");
-        (wk.buttons||[]).forEach(b=>addBtn(b.label,b.link||"",b.color||"#38d98a",b.textColor||"#111"));
-        card.append(btnsDiv);stack.append(card);
-      });
-      $("#cardsCanvas").innerHTML="";
-      $("#cardsCanvas").append(any?stack:el("div",{className:"empty",textContent:"ამ კვირისთვის მასალა ჯერ არაა."}));
-    }
-
-    $("#openProfile").onclick=async()=>{
-      $("#menu").classList.remove("open");
-      $("#modal").classList.add("open");
-      if(!catalog.length)await loadCatalog();
-      renderProfile();
-    };
-    $("#closeModal").onclick=()=>$("#modal").classList.remove("open");
-    $("#searchBox").oninput=renderProfile;
-
-    function renderProfile(){
-      const q=($("#searchBox").value||"").toLowerCase();const list=$("#catalogList");list.innerHTML="";
-      catalog.filter(x=>x.name.toLowerCase().includes(q)||x.id.toLowerCase().includes(q)).forEach(x=>{
-        const added=selectedSubjects.includes(x.id);
-        const row=el("div",{className:"item"});
-        row.append(el("div",{},[el("div",{textContent:x.name,style:"font-weight:700"}),
-                                el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})]),
-          added?el("button",{className:"added",textContent:"✓ Added"}):
-                 el("button",{textContent:"Add",onclick:async()=>{
-                   if(!selectedSubjects.includes(x.id))selectedSubjects.push(x.id);
-                   await saveUserSelection(true);renderProfile();}}));
-        list.append(row);
-      });
-      const mine=$("#mySubjects");mine.innerHTML="";
-      selectedSubjects.forEach(id=>{
-        const subj=catalog.find(c=>c.id===id);
-        const row=el("div",{className:"item"});
-        row.append(el("div",{},[el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
-                                el("div",{textContent:id,style:"font-size:12px;opacity:.7"})]),
-          el("button",{textContent:"Remove",onclick:async()=>{
-            selectedSubjects=selectedSubjects.filter(s=>s!==id);
-            delete subjectCache[id];
-            await saveUserSelection(true);renderProfile();
-          }}));
-        mine.append(row);
-      });
-    }
-
-    async function bootAfterLogin(){
-      await Promise.all([loadCatalog(),loadUserSelection()]);
-      await ensureSubjectsLoaded();flattenWeeks();paintWeeks();
-      const iso=todayISO();
-      const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
-      if(cur)showWeek(cur.n);
-    }
-    guardUI(false);
+    updateWeekLabel(activeWeekN);
   }
-  </script>
+  function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`;}
 
+  /* ===== Cards render ===== */
+  function showWeek(n){
+    const canvas=$("#cardsCanvas");canvas.style.opacity="0";canvas.style.filter="blur(8px)";
+    setTimeout(()=>{
+      const stack=el("div",{className:"card-stack"});let any=false;
+      selected.forEach(id=>{
+        const subj=cache[id];if(!subj)return;
+        const cur=subj.weeks?.find(w=>w.week===n);
+        const prev=(n>1)?subj.weeks?.find(w=>w.week===n-1):null;
+        if(!cur&&!prev)return;any=true;
+        const card=el("div",{className:"card"});
+        card.append(el("div",{className:"subhead",textContent:subj.name}));
+        const wrap=el("div",{className:"card-sections"});
+        if(prev){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`ამ კვირისთვის`}));addBtns(sec,prev);wrap.append(sec);}
+        if(cur){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`შემდეგი კვირისთვის`}));addBtns(sec,cur);wrap.append(sec);}
+        card.append(wrap);stack.append(card);
+      });
+      canvas.innerHTML="";canvas.append(any?stack:el("div",{className:"empty",textContent:"ამ კვირისთვის მასალა ჯერ არაა."}));canvas.style.filter="blur(0)";canvas.style.opacity="1";
+    },300);
+  }
+  function addBtns(wrap,weekObj){
+    const btns=el("div",{className:"btns"});
+    const add=(label,url,color,textColor)=>{const b=el("button",{className:"pill",textContent:label,style:`background:${color};color:${textColor}`});if(url)b.onclick=()=>window.open(url,"_blank");btns.append(b);};
+    if(weekObj.slides)add("Slides",weekObj.slides,"#ffc423","#111");
+    if(weekObj.video)add("Video",weekObj.video,"#ed3737","#fff");
+    (weekObj.buttons||[]).forEach(b=>add(b.label,b.link||"",b.color||"#38d98a",b.textColor||"#111"));
+    wrap.append(btns);
+  }
 
+  /* ===== Profile ===== */
+  function renderProfile(){
+    const list=$("#catalogList");list.innerHTML="";const mine=$("#mySubjects");mine.innerHTML="";
+    catalog.forEach(x=>{const added=selected.includes(x.id);const row=el("div",{className:"item"});row.append(el("div",{},[el("div",{textContent:x.name,style:"font-weight:700"}),el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})]),added?el("button",{className:"added",textContent:"✓ Added"}):el("button",{textContent:"Add",onclick:async()=>{if(!selected.includes(x.id))selected.push(x.id);await saveSelection(true);renderProfile();}}));list.append(row);});
+    selected.forEach(id=>{const subj=catalog.find(c=>c.id===id);const row=el("div",{className:"item"});row.append(el("div",{},[el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),el("div",{textContent:id,style:"font-size:12px;opacity:.7"})]),el("button",{textContent:"Remove",onclick:async()=>{selected=selected.filter(s=>s!==id);delete cache[id];await saveSelection(true);renderProfile();}}));mine.append(row);});
+    $("#saveSubjects").onclick=async()=>{await saveSelection(true);};
+  }
 
+  async function saveSelection(immediate=false){if(!user)return;await db.collection("users").doc(user.uid).set({subjects:selected},{merge:true});localStorage.setItem(`weeksy:selected:${user.uid}`,JSON.stringify(selected));if(immediate){await ensureSubjectsLoaded();paintWeeks();goToday();}}
+
+  function goToday(){const iso=todayISO();const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];if(cur){showWeek(cur.n);updateWeekLabel(cur.n);document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));const currentEl=document.querySelector(`.week-item[data-week="${cur.n}"]`);if(currentEl)currentEl.classList.add("active");}toggleWeeks(false);}
+  function toggleWeeks(force){const left=$("#weeksList");left.classList.toggle("open",force!==undefined?force:!left.classList.contains("open"));}
+  async function bootAfterLogin(){await Promise.all([loadCatalog(),loadUserSelection()]);await ensureSubjectsLoaded();flattenWeeks();paintWeeks();goToday();}
+}
+</script>
+</body>
 </html>
-
