@@ -16,13 +16,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@100..900&display=swap');
+
+
 :root{
   --bg:#0B1216; --surface:#17333d; --surface2:#121A1F; --text:#EDEFF2;
-  --accent:#16b438; --success:#38d98a; --danger:#ED3737;
+  --accent:#16b438; --success:#38d98a; --danger:#f12525;
   --buttontext:#ffffff;
 }
 
@@ -31,7 +32,7 @@
 ::-webkit-scrollbar-thumb{background:#16b438}
 
 /* Base */
-*{box-sizing:border-box;margin:0;padding:0;font-family:"Saira",sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;font-family: "Noto Sans Georgian", sans-serif;}
 body{background:var(--bg);color:var(--text);height:100vh;display:grid;grid-template-rows:64px 1fr;overflow:hidden;}
 
   /* === Loading Overlay === */
@@ -134,10 +135,10 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 .cancelBtn{background:#333;color:#fff}
 
 .removeBtn {
-  background: #ed3737;
+  background: #e61717;
   color: #fff;
   border: none;
-  padding: 8px 10px;
+  padding: 8px 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -146,12 +147,11 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
   transition: 0.2s ease;
   margin-top: 20px;
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .removeBtn:hover {
-  background: #c82333;
-  transform: translateY(-1px);
-  box-shadow: 0 0 8px #ed373755;
+  background: #920c0c;
 }
 
 .removeBtn img {
@@ -377,7 +377,7 @@ function startAdmin(){
       <div class="colorPalette">
         ${COLOR_NAMES.map(c=>`<div class="colorBox ${c===selected?"active":""}" data-color="${c}"></div>`).join("")}
       </div>
-      <button class="removeBtn">Remove</button>
+      <button class="removeBtn">წაშლა</button>
     `;
     wrap.dataset.colorName=selected;
 
@@ -436,14 +436,14 @@ function startAdmin(){
 
       div.querySelector(".slideBtn").onclick=()=>{
         const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="slide");
-        if(!exists){ btnBox.append(createButtonEditor({label:"Slide",link:"#",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
+        if(!exists){ btnBox.append(createButtonEditor({label:"სლაიდი",link:"https://",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
       };
       div.querySelector(".videoBtn").onclick=()=>{
         const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="video");
-        if(!exists){ btnBox.append(createButtonEditor({label:"Video",link:"#",colorName:"red"})); updateAddButtonsVisibility(i); autoSave(); }
+        if(!exists){ btnBox.append(createButtonEditor({label:"ვიდეო",link:"https://",colorName:"red"})); updateAddButtonsVisibility(i); autoSave(); }
       };
       div.querySelector(".addCustom").onclick=()=>{
-        btnBox.append(createButtonEditor({label:"New",link:"",colorName:"blue"}));
+        btnBox.append(createButtonEditor({label:"რესურსის დასახელება",link:"https://",colorName:"blue"}));
         autoSave();
       };
 
