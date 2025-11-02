@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -83,13 +84,14 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 .global{border:0;background:#182025;padding:10px;margin:14px 0 20px;}
 .global h3{color:var(--success);margin-bottom:6px;}
 
-/* Color palette + rows */
-.customBtnRow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0;}
-.customBtnRow input[type=text]{flex:1;min-width:140px;background:#23343B;color:#fff;border:none;padding:8px;}
-.palette{display:flex;gap:4px;}
-.colorCircle{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0006;font-size:12px;}
-.removeBtn{background:var(--danger);color:#fff;border:none;padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;}
-.removeBtn img{width:14px;height:14px;filter:invert(1);}
+/* Color selector */
+.colorPalette{display:flex;gap:8px;align-items:center;margin-left:6px;}
+.colorBox{width:24px;height:24px;border-radius:4px;cursor:pointer;transition:.15s ease;box-shadow:0 0 0 2px transparent;}
+.colorBox[data-color="yellow"]{background:#ffc423;}
+.colorBox[data-color="green"]{background:#38d98a;}
+.colorBox[data-color="red"]{background:#ed3737;}
+.colorBox[data-color="blue"]{background:#2979ff;}
+.colorBox.active{box-shadow:0 0 0 3px #fff;transform:scale(1.1);}
 
 /* Popup (Create Subject) */
 #addPopup{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:2000;}
@@ -103,6 +105,35 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 .popup-actions button{padding:10px;border:none;font-weight:800;cursor:pointer}
 .createBtn{background:var(--accent);color:#ffffff}
 .cancelBtn{background:#333;color:#fff}
+
+.removeBtn {
+  background: #ed3737;
+  color: #fff;
+  border: none;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  transition: 0.2s ease;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.removeBtn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 0 8px #ed373755;
+}
+
+.removeBtn img {
+  width: 18px;
+  height: 18px;
+  filter: invert(1);
+  pointer-events: none;
+}
+
 
 @media(max-width:900px){
   main{grid-template-columns:1fr}
@@ -124,16 +155,15 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
   <div class="right">
     <div id="saveStatus" class="saved">🟢 Saved</div>
     <button id="signinBtn">
-      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" style="width:20px ;height: 20px;" alt="">Sign in with Google
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Sign in with Google
     </button>
     <button id="logoutBtn" style="display:none;">
-      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" style="width:20px ;height: 20px;"   alt="">Logout
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">Logout
     </button>
   </div>
 </header>
 
 <main>
-  <!-- Sidebar (own scroll) -->
   <aside>
     <div id="sidebarScroll">
       <input type="search" id="searchBox" class="search" placeholder="Search subjects...">
@@ -141,12 +171,11 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
     </div>
     <div class="btn-row">
       <button id="addSubjectBtn">
-        <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" style="width:25px ;height: 25px;" alt="">Add Subject
+        <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="">Add Subject
       </button>
     </div>
   </aside>
 
-  <!-- Editor (own scroll) -->
   <section>
     <h2 id="editorTitle">Select a subject to edit</h2>
     <div id="editor" style="display:none;">
@@ -310,7 +339,6 @@ function startAdmin(){
     });
   }
 
-  /* === Only color NAMES === */
   const COLOR_NAMES = ["yellow","green","red","blue"];
 
   function createButtonEditor(b){
@@ -319,21 +347,26 @@ function startAdmin(){
     wrap.innerHTML=`
       <input class="btnLabel" type="text" value="${b.label||""}" placeholder="Name">
       <input class="btnLink" type="text" value="${b.link||""}" placeholder="Link">
-      <select class="colorSelect">
-        ${COLOR_NAMES.map(c=>`<option value="${c}"${c===selected?" selected":""}>${c}</option>`).join("")}
-      </select>
+      <div class="colorPalette">
+        ${COLOR_NAMES.map(c=>`<div class="colorBox ${c===selected?"active":""}" data-color="${c}"></div>`).join("")}
+      </div>
       <button class="removeBtn">Remove</button>
     `;
     wrap.dataset.colorName=selected;
-    wrap.querySelector(".colorSelect").oninput=e=>{
-      wrap.dataset.colorName=e.target.value;
-      autoSave();
-    };
+
+    wrap.querySelectorAll(".colorBox").forEach(box=>{
+      box.onclick=()=>{
+        wrap.querySelectorAll(".colorBox").forEach(bx=>bx.classList.remove("active"));
+        box.classList.add("active");
+        wrap.dataset.colorName=box.dataset.color;
+        autoSave();
+      };
+    });
+
     wrap.querySelector(".removeBtn").onclick=()=>{wrap.remove();autoSave();};
     return wrap;
   }
 
-  /* GLOBAL BUTTONS */
   function renderGlobal(btns){
     const box=$("#globalBtns"); box.innerHTML="";
     btns.forEach(b=> box.append(createButtonEditor(b)));
@@ -344,7 +377,6 @@ function startAdmin(){
     box.oninput=autoSave;
   }
 
-  /* WEEKS + BUTTONS */
   function renderWeeks(weeks){
     const box=$("#weeksContainer"); box.innerHTML="";
     for(let i=1;i<=12;i++){
@@ -403,7 +435,6 @@ function startAdmin(){
     videoBtn.style.display = hasVideo ? "none" : "inline-flex";
   }
 
-  /* AUTOSAVE */
   async function autoSave(){
     if(!currentId) return;
     clearTimeout(saveTimer);
@@ -450,8 +481,6 @@ function startAdmin(){
     showToast("🗑️ Deleted","#ed3737");
   };
 }
-
 </script>
-
 </body>
 </html>
