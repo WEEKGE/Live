@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -6,7 +7,6 @@
 
   <title>Weekge — University Syllabus Platform</title>
 
-  <!-- ===== META TAGS FOR SEO ===== -->
   <meta name="description" content="Weekge (Week.ge) — უნივერსიტეტის საგნების და სილაბუსების პლატფორმა. ნახე შენი საგნები კვირების მიხედვით და იოლი ნავიგაციით.">
   <meta name="theme-color" content="#0B1216">
   <link rel="icon" href="https://weekge.github.io/favicon.ico">
@@ -22,11 +22,12 @@
     --text: #EDEFF2;
     --muted: #B7C0C6;
     --accent: #F2C200;
-    --done: #38D98A;
+    --done: #1ae63c;
     --pending: #6B7780;
     --danger: #ED3737;
     --subject-title: #2ad324;
     --shadow: 0 8px 28px rgba(0, 0, 0, .35);
+    --defcolor: #16b438;
   }
 
   * { box-sizing: border-box; }
@@ -40,7 +41,37 @@
   }
 
   ::-webkit-scrollbar { width: .3rem }
-  ::-webkit-scrollbar-thumb { background: #16b438; border-radius: 0px }
+  ::-webkit-scrollbar-thumb { background: var(--defcolor); border-radius: 0px }
+
+  /* === Loading Overlay === */
+  #loadingOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #0B1216;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .3s ease, visibility .3s ease;
+  }
+  #loadingOverlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+  #loadingOverlay .spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255,255,255,.15);
+    border-top: 5px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.4s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loadingOverlay p {
+    margin-top: 16px;
+    opacity: .9;
+  }
 
   /* NAV */
   .nav {
@@ -187,7 +218,6 @@
   .item .added{background:#38d98a;color:#111;}
   .save{width:100%;margin-top:10px;background:#38D98A;color:#111;border:none;padding:15px 10px;font-weight:700;cursor:pointer;font-size:1rem;}
 
-
   /* Responsive */
   @media(max-width:900px){
     .wrap{grid-template-columns:1fr;}
@@ -203,6 +233,12 @@
 </head>
 
 <body>
+<!-- ✅ Loading Overlay -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>Loading Weekge...</p>
+</div>
+
 <div class="nav">
   <div class="brand">
     <button id="weekToggle" class="week-toggle">📅 Week —</button>
@@ -256,14 +292,24 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+
+
+<!-- JS -->
 <script>
+const overlay = document.getElementById("loadingOverlay");
+
 fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
-.then(r=>r.json())
-.then(cfg=>{firebase.initializeApp(cfg);startWeekge();})
-.catch(()=>alert("⚠️ config.json ვერ ჩაიტვირთა."));
+.then(r => r.json())
+.then(cfg => {
+  firebase.initializeApp(cfg);
+  startWeekge();
+})
+.catch(() => {
+  overlay.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ config.json ვერ ჩაიტვირთა.</h2>";
+});
 
 function startWeekge(){
-  const auth=firebase.auth(),db=firebase.firestore();
+  const auth = firebase.auth(), db = firebase.firestore();
   let user=null,catalog=[],selected=[],cache={},weekDates=[];
   const $=s=>document.querySelector(s);
   const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
@@ -288,9 +334,15 @@ function startWeekge(){
     {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"}
   ];
 
-    $("#weekToggle").onclick=()=>toggleWeeks();
+  // === Color Map (colorName from admin → hex + white text)
+  const colorMap = {
+    yellow: ["#ffc423", "#fff"],
+    green:  ["#38d98a", "#fff"],
+    red:    ["#ed3737", "#fff"],
+    blue:   ["#2979ff", "#fff"]
+  };
 
-function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`;}
+  $("#weekToggle").onclick=()=>toggleWeeks();
 
   // === AUTH ===
   const provider=new firebase.auth.GoogleAuthProvider();
@@ -310,9 +362,7 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
     renderProfile();
   };
   $("#closeModal").onclick=()=>$("#modal").classList.remove("open");
-  document.addEventListener("keydown",e=>{
-    if(e.key==="Escape") $("#modal").classList.remove("open");
-  });
+  document.addEventListener("keydown",e=>{if(e.key==="Escape") $("#modal").classList.remove("open");});
 
   // === AUTH STATE ===
   auth.onAuthStateChanged(async u=>{
@@ -320,7 +370,10 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
     guardUI(!!user);
     if(user){
       $("#avatar").src=user.photoURL||"https://i.pravatar.cc/100";
+      overlay.classList.add("hidden");
       await bootAfterLogin();
+    } else {
+      overlay.classList.add("hidden");
     }
   });
 
@@ -367,7 +420,7 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
     goToday();
   }
 
-  // === WEEKS & SUBJECTS ===
+  // === WEEKS ===
   function paintWeeks(){
     const iso=todayISO();
     const list=$("#weeksList");
@@ -392,32 +445,28 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
           el("div",{className:"wk-dates",textContent:fmtRange(w.start1,w.end1)+" / "+fmtRange(w.start2,w.end2)})
         ])
       );
-      row.onclick=()=>{
-        document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));
-        row.classList.add("active");
-        showWeek(w.n);
-        toggleWeeks(false);
-        updateWeekLabel(w.n);
-      };
+      row.onclick=()=>{document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));row.classList.add("active");showWeek(w.n);toggleWeeks(false);updateWeekLabel(w.n);};
       list.append(row);
     });
     updateWeekLabel(activeWeekN);
   }
 
-  function updateWeekLabel(n){
-    $("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`;
-  }
+  function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} ▼`; }
 
+  // === Buttons rendering ===
   function addBtns(wrap,weekObj){
     const btns=el("div",{className:"btns"});
-    const add=(label,url,color,textColor)=>{
-      const b=el("button",{className:"pill",textContent:label,style:`background:${color};color:${textColor}`});
-      if(url) b.onclick=()=>window.open(url,"_blank");
+    const add=(label,url,colorName)=>{
+      const [bg,txt]=colorMap[colorName]||["#38d98a","#fff"];
+      const b=el("button",{className:"pill",textContent:label,style:`background:${bg};color:${txt}`});
+      if(url)b.onclick=()=>window.open(url,"_blank");
       btns.append(b);
     };
-    if(weekObj.slides)add("Slides",weekObj.slides,"#ffc423","#111");
-    if(weekObj.video)add("Video",weekObj.video,"#ed3737","#fff");
-    (weekObj.buttons||[]).forEach(b=>add(b.label,b.link||"",b.color||"#38d98a",b.textColor||"#111"));
+
+    (weekObj.buttons||[]).forEach(b=>{
+      add(b.label,b.link,b.colorName||b.color||"green");
+    });
+
     wrap.append(btns);
   }
 
@@ -427,7 +476,8 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
       box.append(el("h4",{textContent:"მთავარი ფაილები:"}));
       const btns=el("div",{className:"btns"});
       subj.globalButtons.forEach(b=>{
-        const btn=el("button",{className:"pill",textContent:b.label,style:`background:${b.color||"#ffc423"};color:${b.textColor||"#111"}`});
+        const [bg,txt]=colorMap[b.colorName||b.color]||["#38d98a","#fff"];
+        const btn=el("button",{className:"pill",textContent:b.label,style:`background:${bg};color:${txt}`});
         if(b.link) btn.onclick=()=>window.open(b.link,"_blank");
         btns.append(btn);
       });
@@ -452,18 +502,8 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
         card.append(el("div",{className:"subhead",textContent:subj.name}));
         addGlobalBtns(card,subj);
         const wrap=el("div",{className:"card-sections"});
-        if(prev){
-          const sec=el("div",{className:"card-section"});
-          sec.append(el("h4",{textContent:`ამ კვირისთვის:`}));
-          addBtns(sec,prev);
-          wrap.append(sec);
-        }
-        if(cur){
-          const sec=el("div",{className:"card-section"});
-          sec.append(el("h4",{textContent:`შემდეგი კვირისთვის:`}));
-          addBtns(sec,cur);
-          wrap.append(sec);
-        }
+        if(prev){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`ამ კვირისთვის:`}));addBtns(sec,prev);wrap.append(sec);}
+        if(cur){const sec=el("div",{className:"card-section"});sec.append(el("h4",{textContent:`შემდეგი კვირისთვის:`}));addBtns(sec,cur);wrap.append(sec);}
         card.append(wrap);
         stack.append(card);
       });
@@ -500,17 +540,8 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
       const added=selected.includes(x.id);
       const row=el("div",{className:"item"});
       row.append(
-        el("div",{},[
-          el("div",{textContent:x.name,style:"font-weight:700"}),
-          el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
-        ]),
-        added
-          ? el("button",{className:"added",textContent:"✓ Added"})
-          : el("button",{textContent:"Add",onclick:async()=>{
-              if(!selected.includes(x.id))selected.push(x.id);
-              await saveSelection(true);
-              renderProfile();
-            }})
+        el("div",{},[el("div",{textContent:x.name,style:"font-weight:700"}),el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})]),
+        added?el("button",{className:"added",textContent:"✓ Added"}):el("button",{textContent:"Add",onclick:async()=>{if(!selected.includes(x.id))selected.push(x.id);await saveSelection(true);renderProfile();}})
       );
       list.append(row);
     });
@@ -518,16 +549,8 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
       const subj=catalog.find(c=>c.id===id);
       const row=el("div",{className:"item"});
       row.append(
-        el("div",{},[
-          el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
-          el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
-        ]),
-        el("button",{textContent:"Remove",onclick:async()=>{
-          selected=selected.filter(s=>s!==id);
-          delete cache[id];
-          await saveSelection(true);
-          renderProfile();
-        }})
+        el("div",{},[el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),el("div",{textContent:id,style:"font-size:12px;opacity:.7"})]),
+        el("button",{textContent:"Remove",onclick:async()=>{selected=selected.filter(s=>s!==id);delete cache[id];await saveSelection(true);renderProfile();}})
       );
       mine.append(row);
     });
@@ -544,7 +567,11 @@ function updateWeekLabel(n){$("#weekToggle").textContent=`📅 Week ${n||"-"} �
     }
   }
 }
-
 </script>
+
+
+
+
+
 </body>
 </html>
