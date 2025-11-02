@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -92,13 +91,14 @@ section{overflow-y:auto;height:100%;padding:20px;}
 .btn-row button{flex:1;padding:10px;background:var(--accent);color:#ffffff;border:none;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-row button img{width:20px;height:20px}
 
+
 /* Editor */
 #editor{transition:opacity .1s ease, filter .1s ease;}
 #editor.fadeout{opacity:0;filter:blur(4px);}
 #editor h2{font-size:22px;margin-bottom:10px;color:var(--accent);}
 label{display:block;font-weight:700;margin:8px 0 4px;}
 input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--buttontext);font-size:1rem;margin-bottom:10px;}
-.week{border:1px solid #0006;background:#121A1F;padding:12px;margin-bottom:14px;}
+.week{border:1px solid #0006;background:#121A1F;padding:12px;margin-bottom:24px;}
 .week h3{margin-bottom:8px;color:var(--accent);}
 .addBtn{background:var(--accent);color:var(--buttontext);border:none;padding:8px 12px;cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:6px;}
 .success{background:var(--success);color:var(--buttontext)}
@@ -112,6 +112,7 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 
 
 .colorBox{width:35px;height:35px;border: 0;cursor:pointer;transition:.3s ease;box-shadow:0}
+
 
 .colorBox[data-color="yellow"]{background:#ffc423;}
 .colorBox[data-color="green"]{background:#38d98a;}
@@ -173,7 +174,7 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 <!-- Loading -->
 <div id="loadingOverlay">
   <div class="spinner"></div>
-  <p>Loading Weekge Admin...</p>
+  <p>იტვირთება...</p>
 </div>
 
 <header>
@@ -181,10 +182,10 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
   <div class="right">
     <div id="saveStatus" class="saved">🟢 Saved</div>
     <button id="signinBtn">
-      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Sign in with Google
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Google-ით შესვლა
     </button>
     <button id="logoutBtn" style="display:none;">
-      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">Logout
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">გასვლა
     </button>
   </div>
 </header>
@@ -192,31 +193,31 @@ input,select{width:100%;padding:10px;border:none;background:#1A2328;color:var(--
 <main>
   <aside>
     <div id="sidebarScroll">
-      <input type="search" id="searchBox" class="search" placeholder="Search subjects...">
+      <input type="search" id="searchBox" class="search" placeholder="მოძებნა">
       <div id="subjectList"></div>
     </div>
     <div class="btn-row">
       <button id="addSubjectBtn">
-        <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="">Add Subject
+        <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="">საგნის დამატება
       </button>
     </div>
   </aside>
 
   <section>
-    <h2 id="editorTitle">Select a subject to edit</h2>
+    <h2 id="editorTitle">აირჩიე საგანი გადასაკეთებლად</h2>
     <div id="editor" style="display:none;">
-      <label>Subject ID</label>
+      <label>საგნის ID</label>
       <input id="subjectId" disabled>
-      <label>Subject Name</label>
+      <label>საგნის სახელი</label>
       <input id="subjectName">
-      <label>Theme Title</label>
+      <label>ლექციის სათაური</label>
       <input id="subjectTheme">
 
       <div class="global">
-        <h3>🌍 Global Buttons</h3>
+        <h3>ზოგადი რესურსები</h3>
         <div id="globalBtns"></div>
         <button class="addBtn" id="addGlobalBtn">
-          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">Add Global Button
+          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">ზოგადი რესურსის დამატება
         </button>
       </div>
 
@@ -272,9 +273,9 @@ function startAdmin(){
   const saveStatus=$("#saveStatus");
   const setSaveState=(st)=>{
     saveStatus.className="";
-    if(st==="saving"){saveStatus.textContent="🟠 Saving...";saveStatus.classList.add("saving");}
-    else if(st==="saved"){saveStatus.textContent="🟢 Saved";saveStatus.classList.add("saved");}
-    else{saveStatus.textContent="❌ Error";saveStatus.classList.add("error");}
+    if(st==="saving"){saveStatus.textContent="🟠 მოითმინე...";saveStatus.classList.add("saving");}
+    else if(st==="saved"){saveStatus.textContent="🟢 დამახსოვრებულია";saveStatus.classList.add("saved");}
+    else{saveStatus.textContent="❌ პრობლემაა";saveStatus.classList.add("error");}
   };
 
   function showToast(m,c="#fff"){const s=$("#status");if(s){s.textContent=m;s.style.color=c}}
@@ -365,7 +366,7 @@ function startAdmin(){
     });
   }
 
-  const COLOR_NAMES = ["yellow","green","red","blue"];
+  const COLOR_NAMES = ["blue","green","yellow","red"];
 
   function createButtonEditor(b){
     const wrap=el("div",{className:"customBtnRow"});
@@ -409,10 +410,10 @@ function startAdmin(){
       const w=weeks.find(x=>x.week===i)||{};
       const div=el("div",{className:"week"});
       div.innerHTML=`
-        <h3>Week ${i}</h3>
-        <label>Topic Title</label>
+        <h3>კვირა ${i}</h3>
+        <label>თემის სათაური</label>
         <input id="topic-${i}" type="text" value="${w.topic||""}">
-        <label>Type</label>
+        <label>ლექციის ტიპი</label>
         <select id="type-${i}">
           <option value="ლექცია"${w.type==="ლექცია"?" selected":""}>ლექცია</option>
           <option value="ლექცია (ქვიზი)"${w.type==="ლექცია (ქვიზი)"?" selected":""}>ლექცია (ქვიზი)</option>
@@ -420,9 +421,9 @@ function startAdmin(){
         </select>
         <div id="buttons-${i}"></div>
         <div class="weekBtns" id="weekBtns-${i}" style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="addBtn slideBtn" data-week="${i}">Add Slide</button>
-          <button class="addBtn videoBtn" data-week="${i}">Add Video</button>
-          <button class="addBtn addCustom" data-week="${i}">Add Custom</button>
+          <button class="addBtn slideBtn" data-week="${i}" style="background-color:#e8980e; "><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სლაიდის დამატება</button>
+          <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515; ><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">ვიდეოს დამატება</button>
+          <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742; ><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სხვა რესურსის დამატება</button>
         </div>
       `;
       box.append(div);
@@ -435,14 +436,14 @@ function startAdmin(){
 
       div.querySelector(".slideBtn").onclick=()=>{
         const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="slide");
-        if(!exists){ btnBox.append(createButtonEditor({label:"Slide",link:"#",colorName:"blue"})); updateAddButtonsVisibility(i); autoSave(); }
+        if(!exists){ btnBox.append(createButtonEditor({label:"Slide",link:"#",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
       };
       div.querySelector(".videoBtn").onclick=()=>{
         const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="video");
         if(!exists){ btnBox.append(createButtonEditor({label:"Video",link:"#",colorName:"red"})); updateAddButtonsVisibility(i); autoSave(); }
       };
       div.querySelector(".addCustom").onclick=()=>{
-        btnBox.append(createButtonEditor({label:"New",link:"",colorName:"green"}));
+        btnBox.append(createButtonEditor({label:"New",link:"",colorName:"blue"}));
         autoSave();
       };
 
