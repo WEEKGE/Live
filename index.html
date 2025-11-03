@@ -375,9 +375,18 @@ function startWeekge(){
     guardUI(!!user);
     if (user) {
       $("#avatar").src = user.photoURL || "https://i.pravatar.cc/100";
-      overlay.classList.add("hidden");
       await bootAfterLogin();
-    } else overlay.classList.add("hidden");
+
+      // ⏳ Add 3-second delay before hiding the loader
+      setTimeout(() => {
+        overlay.classList.add("hidden");
+      }, 1000);
+    } else {
+      // ⏳ Also delay hiding when user is not signed in
+      setTimeout(() => {
+        overlay.classList.add("hidden");
+      }, 1000);
+    }
   });
 
   function guardUI(signed) {
