@@ -696,8 +696,15 @@ function startWeekge(){
     return subjs.sort((a, b) => {
       const da = (a.dayIndex ?? 7) - t;
       const db = (b.dayIndex ?? 7) - t;
+
+      // დღევანდელი საგნები წამოსწიოს წინ
       const wrapA = da < 0 ? da + 7 : da;
       const wrapB = db < 0 ? db + 7 : db;
+
+      // თუ საგანი დღევანდელია, დააყენე ყველაზე წინ
+      if (a.dayIndex === t && b.dayIndex !== t) return -1;
+      if (b.dayIndex === t && a.dayIndex !== t) return 1;
+
       return wrapA - wrapB;
     });
   }
