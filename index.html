@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -488,10 +487,10 @@ function startWeekge(){
   ];
 
   const colorMap = {
-    yellow: ["#ffc423", "#000"],
-    green:  ["#38d98a", "#fff"],
-    red:    ["#ed3737", "#fff"],
-    blue:   ["#2979ff", "#fff"]
+    yellow: ["#f7ab14", "#000"],
+    green:  ["#22bf3d", "#fff"],
+    red:    ["#e01d1d", "#fff"],
+    blue:   ["#1a76ed", "#fff"]
   };
 
   const daysOfWeek = ["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
@@ -688,9 +687,11 @@ function startWeekge(){
     }
   }
 
-  function todayDayIndex() {
-    return new Date().getDay();
-  }
+function todayDayIndex() {
+  const d = new Date().getDay();
+  // კვირა უნდა გახდეს 6, ორშაბათი 0-ზე იწყოს
+  return d === 0 ? 6 : d - 1;
+}
 
   function sortByDayProximity(subjs) {
     const t = todayDayIndex();
