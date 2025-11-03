@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -21,13 +20,14 @@
     --line: #83919922;
     --text: #EDEFF2;
     --muted: #B7C0C6;
-    --accent: #F2C200;
+    --accent: #ffbb00;
     --done: #1ae63c;
-    --pending: #6B7780;
+    --pending: #5c5c5c;
     --danger: #ED3737;
     --subject-title: #2ad324;
     --shadow: 0 8px 28px rgba(0, 0, 0, .35);
     --defcolor: #16b438;
+    --dot: #ffffff;
   }
 
   * { box-sizing: border-box; }
@@ -104,7 +104,7 @@
   }
 
   .avatar {
-    width: 42px; height: 42px; border-radius: 50%; border: 0;
+    width: 42px; height: 42px; border-radius: 0; border: 0;
     cursor: pointer; object-fit: cover; display: none; box-shadow: var(--shadow);
   }
 
@@ -149,8 +149,8 @@
   }
   .week-item.active { background: #1a2328; }
   .dot {
-    width: 34px; height: 34px; border-radius: 50%;
-    border: 5px solid #fff; background: var(--pending);
+    width: 34px; height: 34px; border-radius: 0;
+    border: 5px solid var(--dot); background: var(--pending);
   }
   .dot.current { background: var(--accent); }
   .dot.done { background: var(--done); }
