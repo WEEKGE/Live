@@ -291,21 +291,35 @@ function startAdmin(){
   function showToast(m,c="#fff"){const s=$("#status");if(s){s.textContent=m;s.style.color=c}}
 
   /* AUTH */
-  const provider=new firebase.auth.GoogleAuthProvider();
-  $("#signinBtn").onclick=()=>auth.signInWithPopup(provider);
-  $("#logoutBtn").onclick=()=>auth.signOut();
+auth.onAuthStateChanged(async u => {
+  user = u || null;
+  if (user) {
+    $("#signinBtn").style.display = "none";
+    $("#logoutBtn").style.display = "inline-flex";
 
-  auth.onAuthStateChanged(async u=>{
-    user=u||null;
-    if(user){
-      $("#signinBtn").style.display="none";$("#logoutBtn").style.display="inline-flex";
-      if(ADMIN_EMAILS.includes(user.email)){await loadSubjects();overlay.classList.add("hidden");}
-      else overlay.innerHTML="<h1 style='color:red;'>Access Denied</h1>";
-    }else{
-      overlay.classList.add("hidden");
-      $("#signinBtn").style.display="inline-flex";$("#logoutBtn").style.display="none";
+    if (ADMIN_EMAILS.includes(user.email)) {
+      await loadSubjects();
+
+      // ⏳ Add 3s delay before hiding overlay
+      setTimeout(() => {
+        overlay.classList.add("hidden");
+      }, 1000);
+
+    } else {
+      overlay.innerHTML = "<h1 style='color:red;'>Access Denied</h1>";
     }
-  });
+
+  } else {
+    // ⏳ Add 3s delay for non-logged-in state too
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+    }, 1000);
+
+    $("#signinBtn").style.display = "inline-flex";
+    $("#logoutBtn").style.display = "none";
+  }
+});
+
 
   /* LOAD SUBJECTS */
   async function loadSubjects(){
