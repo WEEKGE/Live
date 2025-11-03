@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Weekge Admin — University Platform</title>
-<link rel="icon" href="https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/logo/weekge%20logo.png">
+<link rel="icon" href="https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/logo/weekge%20logo%20admin.png">
 
 <!-- SEO META -->
 <meta name="description" content="Weekge Admin Panel — Manage university syllabus subjects, weeks, slides and videos.">
@@ -293,93 +293,138 @@ const overlay = document.getElementById("loadingOverlay");
 
 fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   .then(r => r.json())
-  .then(cfg => { firebase.initializeApp(cfg); startAdmin(); })
-  .catch(() => document.body.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ ბაზა ვერ ჩაიტვირთა.</h2>");
+  .then(cfg => { 
+    firebase.initializeApp(cfg); 
+    startAdmin(); 
+  })
+  .catch(() => {
+    document.body.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ ბაზა ვერ ჩაიტვირთა.</h2>";
+  });
 
 function startAdmin(){
   const auth = firebase.auth(), db = firebase.firestore();
-  let user=null, subjects=[], currentId=null, saveTimer=null;
-  const ADMIN_EMAILS=["davit.gvakharia@gmail.com"];
+  let user = null, subjects = [], currentId = null, saveTimer = null;
+  const ADMIN_EMAILS = ["davit.gvakharia@gmail.com"];
   const $ = s => document.querySelector(s);
-  const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
-
-  const saveStatus=$("#saveStatus");
-  const setSaveState=(st)=>{
-    saveStatus.className="";
-    if(st==="saving"){saveStatus.textContent=" მოითმინე...";saveStatus.classList.add("saving");}
-    else if(st==="saved"){saveStatus.textContent="✅ დამახსოვრებულია";saveStatus.classList.add("saved");}
-    else{saveStatus.textContent="❌ პრობლემაა";saveStatus.classList.add("error");}
+  const el = (t, p = {}, kids = []) => {
+    const e = document.createElement(t);
+    Object.assign(e, p);
+    kids.forEach(k => e.append(k));
+    return e;
   };
 
-  function showToast(m,c="#fff"){const s=$("#status");if(s){s.textContent=m;s.style.color=c}}
+  const saveStatus = $("#saveStatus");
+  const setSaveState = (st) => {
+    saveStatus.className = "";
+    if (st === "saving") {
+      saveStatus.textContent = " მოითმინე...";
+      saveStatus.classList.add("saving");
+    } else if (st === "saved") {
+      saveStatus.textContent = "✅ დამახსოვრებულია";
+      saveStatus.classList.add("saved");
+    } else {
+      saveStatus.textContent = "❌ პრობლემაა";
+      saveStatus.classList.add("error");
+    }
+  };
 
-  /* AUTH */
-auth.onAuthStateChanged(async u => {
-  user = u || null;
-  if (user) {
-    $("#signinBtn").style.display = "none";
-    $("#logoutBtn").style.display = "inline-flex";
+  function showToast(m, c = "#fff") {
+    const s = $("#status");
+    if (s) { s.textContent = m; s.style.color = c; }
+  }
 
-    if (ADMIN_EMAILS.includes(user.email)) {
-      await loadSubjects();
+  /* === ✅ Sign In / Sign Out === */
+  $("#signinBtn").onclick = async () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    overlay.querySelector("p").textContent = "ავტორიზაცია მიმდინარეობს...";
+    overlay.classList.remove("hidden");
+    try {
+      await auth.signInWithPopup(provider);
+    } catch (err) {
+      console.error("Sign-in error:", err);
+      alert("❌ შესვლისას შეცდომაა");
+      overlay.classList.add("hidden");
+    }
+  };
 
-      setTimeout(() => {
-        overlay.classList.add("hidden");
-      }, 500);
+  $("#logoutBtn").onclick = async () => {
+    overlay.querySelector("p").textContent = "გასვლა...";
+    overlay.classList.remove("hidden");
+    try {
+      await auth.signOut();
+    } catch (err) {
+      console.error("Logout error:", err);
+      alert("❌ გასვლისას შეცდომაა");
+      overlay.classList.add("hidden");
+    }
+  };
+
+  /* === AUTH STATE === */
+  auth.onAuthStateChanged(async u => {
+    user = u || null;
+    if (user) {
+      $("#signinBtn").style.display = "none";
+      $("#logoutBtn").style.display = "inline-flex";
+
+      if (ADMIN_EMAILS.includes(user.email)) {
+        await loadSubjects();
+        overlay.querySelector("p").textContent = "იტვირთება...";
+        setTimeout(() => overlay.classList.add("hidden"), 600);
+      } else {
+        overlay.innerHTML = "<h1 style='color:red;'>🚫 Access Denied</h1>";
+      }
 
     } else {
-      overlay.innerHTML = "<h1 style='color:red;'>Access Denied</h1>";
+      setTimeout(() => overlay.classList.add("hidden"), 600);
+      $("#signinBtn").style.display = "inline-flex";
+      $("#logoutBtn").style.display = "none";
     }
+  });
 
-  } else {
-    setTimeout(() => {
-      overlay.classList.add("hidden");
-    }, 500);
-
-    $("#signinBtn").style.display = "inline-flex";
-    $("#logoutBtn").style.display = "none";
-  }
-});
-
-
-  /* LOAD SUBJECTS */
+  /* === LOAD SUBJECTS === */
   async function loadSubjects(){
-    const snap=await db.collection("subjects").get();
-    subjects=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const snap = await db.collection("subjects").get();
+    subjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderList();
   }
 
   function renderList(){
-    const list=$("#subjectList"); list.innerHTML="";
-    const q=$("#searchBox").value.toLowerCase();
+    const list = $("#subjectList"); 
+    list.innerHTML = "";
+    const q = $("#searchBox").value.toLowerCase();
     subjects
-      .filter(s=>s.name?.toLowerCase().includes(q)||s.id?.toLowerCase().includes(q))
-      .forEach(s=>{
-        const div=el("div",{className:"subject-item",textContent:`${s.name} (${s.id})`});
-        div.onclick=()=>openSubject(s.id);
-        if(s.id===currentId) div.classList.add("active");
+      .filter(s => s.name?.toLowerCase().includes(q) || s.id?.toLowerCase().includes(q))
+      .forEach(s => {
+        const div = el("div", { className: "subject-item", textContent: `${s.name} (${s.id})` });
+        div.onclick = () => openSubject(s.id);
+        if (s.id === currentId) div.classList.add("active");
         list.append(div);
       });
   }
-  $("#searchBox").oninput=renderList;
+  $("#searchBox").oninput = renderList;
 
-  /* CREATE SUBJECT POPUP */
-  const popup=$("#addPopup");
-  $("#addSubjectBtn").onclick=()=>{ $("#popupName").value=""; $("#popupId").value=""; popup.classList.add("active"); $("#popupName").focus(); };
-  $("#popupCancel").onclick=()=>popup.classList.remove("active");
-  $("#popupCreate").onclick=createSubject;
-  $("#popupId").addEventListener("keydown",e=>{ if(e.key==="Enter") createSubject(); });
+  /* === CREATE SUBJECT POPUP === */
+  const popup = $("#addPopup");
+  $("#addSubjectBtn").onclick = () => { 
+    $("#popupName").value = ""; 
+    $("#popupId").value = ""; 
+    popup.classList.add("active"); 
+    $("#popupName").focus(); 
+  };
+  $("#popupCancel").onclick = () => popup.classList.remove("active");
+  $("#popupCreate").onclick = createSubject;
+  $("#popupId").addEventListener("keydown", e => { if(e.key === "Enter") createSubject(); });
 
   async function createSubject(){
-    const name=$("#popupName").value.trim();
-    const id=$("#popupId").value.trim();
-    if(!name || !id){alert("შეიყვანე ორივე ველი: სახელი და ID");return;}
-    const valid=/^[a-z0-9\-_\.]+$/i.test(id);
-    if(!valid){alert("ID უნდა შეიცავდეს მხოლოდ ასოებს, ციფრებს, '-', '_' ან '.'");return;}
-    const doc=await db.collection("subjects").doc(id).get();
-    if(doc.exists){alert("აიდი დაკავებულია. აირჩიე სხვა ID.");return;}
+    const name = $("#popupName").value.trim();
+    const id = $("#popupId").value.trim();
+    if(!name || !id){ alert("შეიყვანე ორივე ველი: სახელი და ID"); return; }
+    const valid = /^[a-z0-9\-_\.]+$/i.test(id);
+    if(!valid){ alert("ID უნდა შეიცავდეს მხოლოდ ასოებს, ციფრებს, '-', '_' ან '.'"); return; }
+    const doc = await db.collection("subjects").doc(id).get();
+    if(doc.exists){ alert("აიდი დაკავებულია. აირჩიე სხვა ID."); return; }
 
-    const payload={ id, name, theme:"", globalButtons:[], weeks:[] };
+    const payload = { id, name, theme:"", globalButtons:[], weeks:[] };
     await db.collection("subjects").doc(id).set(payload);
     popup.classList.remove("active");
     await loadSubjects();
@@ -388,77 +433,79 @@ auth.onAuthStateChanged(async u => {
   }
 
   function fadeEditor(cb){
-    const ed=$("#editor");
+    const ed = $("#editor");
     ed.classList.add("fadeout");
-    setTimeout(()=>{ cb(); ed.classList.remove("fadeout"); }, 100);
+    setTimeout(() => { cb(); ed.classList.remove("fadeout"); }, 100);
   }
 
   async function openSubject(id){
-    const doc=await db.collection("subjects").doc(id).get();
+    const doc = await db.collection("subjects").doc(id).get();
     if(!doc.exists) return alert("Not found");
-    const data=doc.data();
-    currentId=id;
-    document.querySelectorAll(".subject-item").forEach(x=>x.classList.toggle("active", x.textContent.endsWith(`(${id})`)));
+    const data = doc.data();
+    currentId = id;
+    document.querySelectorAll(".subject-item").forEach(x => 
+      x.classList.toggle("active", x.textContent.endsWith(`(${id})`))
+    );
 
-    $("#editor").style.display="block";
-    fadeEditor(()=>{
-      $("#editorTitle").textContent=`Editing: ${data.name}`;
-      $("#subjectId").value=id;
-      $("#subjectName").value=data.name||"";
-      $("#subjectTheme").value=data.theme||"";
-      renderGlobal(data.globalButtons||[]);
-      renderWeeks(data.weeks||[]);
+    $("#editor").style.display = "block";
+    fadeEditor(() => {
+      $("#editorTitle").textContent = `Editing: ${data.name}`;
+      $("#subjectId").value = id;
+      $("#subjectName").value = data.name || "";
+      $("#subjectTheme").value = data.theme || "";
+      renderGlobal(data.globalButtons || []);
+      renderWeeks(data.weeks || []);
     });
   }
 
   const COLOR_NAMES = ["blue","green","yellow","red"];
 
   function createButtonEditor(b){
-    const wrap=el("div",{className:"customBtnRow"});
-    const selected=b.colorName||"yellow";
-    wrap.innerHTML=`
+    const wrap = el("div",{className:"customBtnRow"});
+    const selected = b.colorName || "yellow";
+    wrap.innerHTML = `
       <input class="btnLabel" type="text" value="${b.label||""}" placeholder="სახელი">
       <input class="btnLink" type="text" value="${b.link||""}" placeholder="ლინკი">
       <div class="colorPalette">
         ${COLOR_NAMES.map(c=>`<div class="colorBox ${c===selected?"active":""}" data-color="${c}"></div>`).join("")}
       </div>
-      <button class="removeBtn"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" style="color:white;width:25px;height:25px;" alt=""></button>
+      <button class="removeBtn"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" style="width:25px;height:25px;" alt=""></button>
     `;
-    wrap.dataset.colorName=selected;
+    wrap.dataset.colorName = selected;
 
     wrap.querySelectorAll(".colorBox").forEach(box=>{
       box.onclick=()=>{
         wrap.querySelectorAll(".colorBox").forEach(bx=>bx.classList.remove("active"));
         box.classList.add("active");
-        wrap.dataset.colorName=box.dataset.color;
+        wrap.dataset.colorName = box.dataset.color;
         autoSave();
       };
     });
 
-    wrap.querySelector(".removeBtn").onclick=()=>{wrap.remove();autoSave();};
+    wrap.querySelector(".removeBtn").onclick = () => { wrap.remove(); autoSave(); };
     return wrap;
   }
 
   function renderGlobal(btns){
-    const box=$("#globalBtns"); box.innerHTML="";
-    btns.forEach(b=> box.append(createButtonEditor(b)));
-    $("#addGlobalBtn").onclick=()=>{
+    const box = $("#globalBtns"); box.innerHTML = "";
+    btns.forEach(b => box.append(createButtonEditor(b)));
+    $("#addGlobalBtn").onclick = () => {
       box.append(createButtonEditor({label:"New", link:"", colorName:"yellow"}));
       autoSave();
     };
-    box.oninput=autoSave;
+    box.oninput = autoSave;
   }
 
   function renderWeeks(weeks){
-    const box=$("#weeksContainer"); box.innerHTML="";
+    const box = $("#weeksContainer"); box.innerHTML = "";
     for(let i=1;i<=12;i++){
-      const w=weeks.find(x=>x.week===i)||{};
-      const div=el("div",{className:"week"});
-      div.innerHTML=`
+      const w = weeks.find(x=>x.week===i)||{};
+      const div = el("div",{className:"week"});
+      div.innerHTML = `
         <h3>კვირა ${i}</h3>
         <label>თემის სათაური</label>
         <div id="topic-${i}" class="topicField" contenteditable="true">${w.topic || ""}</div>
-        <label margin-top:30px;>ლექციის ტიპი</label>
+        <label style="margin-top:30px;">ლექციის ტიპი</label>
         <select id="type-${i}" style="background: #23343B; color:var(--buttontext)">
           <option value="ლექცია"${w.type==="ლექცია"?" selected":""}>ლექცია</option>
           <option value="ლექცია (ქვიზი)"${w.type==="ლექცია (ქვიზი)"?" selected":""}>ლექცია (ქვიზი)</option>
@@ -467,7 +514,7 @@ auth.onAuthStateChanged(async u => {
         <label style="margin-top:30px;">ბმულები</label>
         <div id="buttons-${i}"></div>
         <div class="weekBtns" id="weekBtns-${i}" style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="addBtn slideBtn" data-week="${i}" style="background-color:#e8980e; "><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სლაიდის დამატება</button>
+          <button class="addBtn slideBtn" data-week="${i}" style="background-color:#e8980e;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სლაიდის დამატება</button>
           <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">ვიდეოს დამატება</button>
           <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სხვა რესურსის დამატება</button>
         </div>
@@ -475,32 +522,27 @@ auth.onAuthStateChanged(async u => {
       box.append(div);
 
       const btnBox = div.querySelector(`#buttons-${i}`);
-      (w.buttons||[]).forEach(b=> btnBox.append(createButtonEditor(b)));
+      (w.buttons||[]).forEach(b => btnBox.append(createButtonEditor(b)));
 
       const topicField = div.querySelector(`#topic-${i}`);
-      topicField.oninput=()=>{
-        pushUndoState(topicField);
-        autoSave();
-      };
-      div.querySelector(`#type-${i}`).oninput=autoSave;
+      topicField.oninput = () => { pushUndoState(topicField); autoSave(); };
+      div.querySelector(`#type-${i}`).oninput = autoSave;
 
-      div.querySelector(".slideBtn").onclick=()=>{
-        const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="slide");
+      div.querySelector(".slideBtn").onclick = () => {
+        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.toLowerCase() === "slide");
         if(!exists){ btnBox.append(createButtonEditor({label:"სლაიდი",link:"",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
       };
-      div.querySelector(".videoBtn").onclick=()=>{
-        const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="video");
+      div.querySelector(".videoBtn").onclick = () => {
+        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.toLowerCase() === "video");
         if(!exists){ btnBox.append(createButtonEditor({label:"ვიდეო",link:"",colorName:"red"})); updateAddButtonsVisibility(i); autoSave(); }
       };
-      div.querySelector(".addCustom").onclick=()=>{
+      div.querySelector(".addCustom").onclick = () => {
         btnBox.append(createButtonEditor({label:"",link:"",colorName:"blue"}));
         autoSave();
       };
 
-      btnBox.oninput=autoSave;
+      btnBox.oninput = autoSave;
       updateAddButtonsVisibility(i);
-
-      // Initialize Undo stack for this field
       initUndo(topicField);
     }
   }
@@ -549,10 +591,10 @@ auth.onAuthStateChanged(async u => {
     },1000);
   }
 
-  $("#subjectName").oninput=autoSave;
-  $("#subjectTheme").oninput=autoSave;
-  $("#saveBtn").onclick=autoSave;
-  $("#deleteBtn").onclick=async()=>{
+  $("#subjectName").oninput = autoSave;
+  $("#subjectTheme").oninput = autoSave;
+  $("#saveBtn").onclick = autoSave;
+  $("#deleteBtn").onclick = async () => {
     if(!currentId || !confirm("Delete this subject?")) return;
     await db.collection("subjects").doc(currentId).delete();
     $("#editor").style.display="none";
@@ -561,8 +603,7 @@ auth.onAuthStateChanged(async u => {
     showToast("🗑️ Deleted","#ed3737");
   };
 
-
-  /* --- Formatting Shortcuts (Bold, Italic, Underline) --- */
+  /* --- Formatting Shortcuts --- */
   document.addEventListener("keydown", e => {
     if (e.ctrlKey && ["b", "i", "u"].includes(e.key.toLowerCase())) {
       e.preventDefault();
@@ -572,24 +613,18 @@ auth.onAuthStateChanged(async u => {
     }
   });
 
-
   /* --- Undo System --- */
-  const undoStacks = new WeakMap(); // keeps undo history per topic field
-
-  function initUndo(el){
-    undoStacks.set(el, [el.innerHTML]);
-  }
-
+  const undoStacks = new WeakMap();
+  function initUndo(el){ undoStacks.set(el, [el.innerHTML]); }
   function pushUndoState(el){
     const stack = undoStacks.get(el) || [];
     const last = stack[stack.length-1];
     if (last !== el.innerHTML) {
       stack.push(el.innerHTML);
-      if (stack.length > 5) stack.shift(); // keep max 5
+      if (stack.length > 5) stack.shift();
       undoStacks.set(el, stack);
     }
   }
-
   document.addEventListener("keydown", e => {
     if (e.ctrlKey && e.key.toLowerCase() === "z") {
       e.preventDefault();
@@ -597,7 +632,7 @@ auth.onAuthStateChanged(async u => {
       if (active && active.classList.contains("topicField")) {
         const stack = undoStacks.get(active) || [];
         if (stack.length > 1) {
-          stack.pop(); // remove current state
+          stack.pop();
           active.innerHTML = stack[stack.length - 1];
           undoStacks.set(active, stack);
           autoSave();
@@ -605,9 +640,9 @@ auth.onAuthStateChanged(async u => {
       }
     }
   });
-
 }
 </script>
+
 
 </body>
 </html>
