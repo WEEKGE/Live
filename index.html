@@ -41,8 +41,9 @@
     font-family: "Noto Sans Georgian", sans-serif;
   }
 
-  ::-webkit-scrollbar { width: .3rem }
-  ::-webkit-scrollbar-thumb { background: var(--defcolor); border-radius: 0px }
+  ::-webkit-scrollbar { width: .3rem ;}
+  ::-webkit-scrollbar-thumb { background: var(--defcolor); border-radius: 0px;}
+  ::-webkit-scrollbar-track {margin-top: 5px; margin-bottom: 5;}
 
   /* === Loading Overlay === */
   #loadingOverlay {
@@ -85,7 +86,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
-    border-bottom: 1px solid rgba(1, 255, 13, 0.4);
+    border-bottom: 2px solid var(--defcolor);
   }
 
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 500; }
@@ -183,7 +184,7 @@
     padding: 25px; border: 0px solid #0005;
     display: flex; flex-direction: column; gap: 16px;
   }
-  .subhead { text-align: center; font-weight: 700; opacity: .9; margin-bottom: 4px; font-size: 1.4rem;}
+  .subhead { text-align: center; font-weight: 700; opacity: .9; margin-bottom: 4px; font-size: 1.4rem;color:#2dff2d;}
   .card-sections { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
   .card-section {
     flex: 1; background: #00000018; border: 1px solid rgba(255,255,255,.13);
@@ -191,7 +192,17 @@
     justify-content: space-between; transition: transform .2s, background .2s;
   }
   .card-section:hover { background: #ffffff05; }
-  .card-section h4 { margin: 0 0 30px; font-weight: 300; color: var(--subject-title); font-size: 1.2rem; border-bottom: #ffffff56 solid 1px; padding-bottom: 10px;}
+  .card-section h4 {text-align: center; margin: 0 0 20px; font-weight: 300; color: #b3b3b3; font-size: 1.2rem; border-bottom: #ffffff56 solid 1px; padding-bottom: 10px;}
+
+
+
+.card-section.this-week {
+  border: 2px solid var(--defcolor) !important; /* მწვანე ჩარჩო */
+}
+
+.card-section.this-week h4{color: rgb(96, 255, 65);}
+
+.card-section.this-week:hover{background: #ffffff05;}
 
   .global-files {
     background: #00000018;
@@ -206,6 +217,8 @@
     font-size: 1.2rem;
     border-bottom: #ffffff56 solid 1px; 
     padding-bottom: 10px;
+    color: white;
+    text-align: center;
   }
 
   .btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
@@ -310,6 +323,7 @@
   overflow-wrap: break-word;   /* ✅ newer version, better support */
   max-width: 350px;             /* ✅ არ დაარღვიოს მშობელი კონტეინერი */
   display: block;
+  color: #e9e9e9
   }
   .topic-text b {
     font-weight: 700;
@@ -339,6 +353,12 @@
   .card{padding: 1rem;}
   .card-section{padding: 0.5rem;}
   .card-section h4{font-size: 1rem;}
+
+  .card-section.this-week {
+    border: 2px solid var(--defcolor) !important; /* მწვანე ჩარჩო */
+    box-shadow: 0 0 12px rgba(3, 255, 57, 0.932);   /* მსუბუქი შუქი ირგვლივ */
+  }
+
   .global-files {padding: 0.5rem;}
 
   /* ✅ Profile Settings layout */
@@ -742,7 +762,7 @@ function todayDayIndex() {
         const typeText = cur?.type || prev?.type || null;
         if (typeText) {
           const typeEl = el("div", {
-            style:"text-align:center;font-size:1.1rem;opacity:0.8;margin-top:-6px;",
+            style:"text-align:center;font-size:1.4rem;opacity:1;margin:10px 0 20px 0;font-weight:600;color:white;letter-spacing:3px;",
             textContent: typeText
           });
           card.append(typeEl);
@@ -752,7 +772,7 @@ function todayDayIndex() {
         const wrap = el("div", { className: "card-sections" });
 
         if (prev) {
-          const sec = el("div", { className: "card-section" });
+          const sec = el("div", { className: "card-section this-week" }); // ✅ დავამატე ახალი კლასი
           sec.append(el("h4", { textContent: "ამ კვირისთვის:" }));
           if (prev.topic)
             sec.append(el("div", { className: "topic-text", style: "margin-bottom:15px;", innerHTML: prev.topic }));
