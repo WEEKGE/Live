@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -498,7 +499,7 @@ function startAdmin(){
 
   function renderWeeks(weeks){
     const box = $("#weeksContainer"); box.innerHTML = "";
-    for(let i=1;i<=12;i++){
+    for(let i=1;i<=13;i++){
       const w = weeks.find(x=>x.week===i)||{};
       const div = el("div",{className:"week"});
       div.innerHTML = `
