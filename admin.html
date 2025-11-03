@@ -171,6 +171,28 @@ input,select{width:100%;padding:10px;border:none;background:#282f35;color:var(--
   background-color: #14862d;
 }
 
+.topicField {
+  width: 100%;
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #282f35;
+  color: var(--buttontext);
+  padding: 10px;
+  font-size: 1rem;
+  border: none;
+  outline: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.5;
+  border-radius: 4px;
+}
+.topicField:focus {
+  background: #303840;
+}
+
+
+
 
 @media(max-width:900px){
   main{grid-template-columns:1fr}
@@ -300,20 +322,18 @@ auth.onAuthStateChanged(async u => {
     if (ADMIN_EMAILS.includes(user.email)) {
       await loadSubjects();
 
-      // ⏳ Add 3s delay before hiding overlay
       setTimeout(() => {
         overlay.classList.add("hidden");
-      }, 1000);
+      }, 500);
 
     } else {
       overlay.innerHTML = "<h1 style='color:red;'>Access Denied</h1>";
     }
 
   } else {
-    // ⏳ Add 3s delay for non-logged-in state too
     setTimeout(() => {
       overlay.classList.add("hidden");
-    }, 1000);
+    }, 500);
 
     $("#signinBtn").style.display = "inline-flex";
     $("#logoutBtn").style.display = "none";
@@ -436,7 +456,7 @@ auth.onAuthStateChanged(async u => {
       div.innerHTML=`
         <h3>კვირა ${i}</h3>
         <label>თემის სათაური</label>
-        <input id="topic-${i}" type="text" value="${w.topic||""}">
+        <div id="topic-${i}" class="topicField" contenteditable="true">${w.topic || ""}</div>
         <label margin-top:30px;>ლექციის ტიპი</label>
         <select id="type-${i}" style="background: #23343B; color:var(--buttontext)">
           <option value="ლექცია"${w.type==="ლექცია"?" selected":""}>ლექცია</option>
@@ -447,8 +467,8 @@ auth.onAuthStateChanged(async u => {
         <div id="buttons-${i}"></div>
         <div class="weekBtns" id="weekBtns-${i}" style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="addBtn slideBtn" data-week="${i}" style="background-color:#e8980e; "><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სლაიდის დამატება</button>
-          <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515; ""><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">ვიდეოს დამატება</button>
-          <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742; ""><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სხვა რესურსის დამატება</button>
+          <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">ვიდეოს დამატება</button>
+          <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სხვა რესურსის დამატება</button>
         </div>
       `;
       box.append(div);
@@ -456,7 +476,11 @@ auth.onAuthStateChanged(async u => {
       const btnBox = div.querySelector(`#buttons-${i}`);
       (w.buttons||[]).forEach(b=> btnBox.append(createButtonEditor(b)));
 
-      div.querySelector(`#topic-${i}`).oninput=autoSave;
+      const topicField = div.querySelector(`#topic-${i}`);
+      topicField.oninput=()=>{
+        pushUndoState(topicField);
+        autoSave();
+      };
       div.querySelector(`#type-${i}`).oninput=autoSave;
 
       div.querySelector(".slideBtn").onclick=()=>{
@@ -474,6 +498,9 @@ auth.onAuthStateChanged(async u => {
 
       btnBox.oninput=autoSave;
       updateAddButtonsVisibility(i);
+
+      // Initialize Undo stack for this field
+      initUndo(topicField);
     }
   }
 
@@ -502,7 +529,7 @@ auth.onAuthStateChanged(async u => {
         for(let i=1;i<=12;i++){
           const weekDiv=document.querySelector("#weeksContainer").children[i-1];
           if(!weekDiv) continue;
-          const topic=(document.querySelector("#topic-"+i)?.value||"").trim();
+          const topic=(document.querySelector("#topic-"+i)?.innerHTML||"").trim();
           const type=(document.querySelector("#type-"+i)?.value)||"ლექცია";
           const buttons=[...weekDiv.querySelectorAll(".customBtnRow")].map(b=>({
             label:b.querySelector(".btnLabel").value,
@@ -532,7 +559,54 @@ auth.onAuthStateChanged(async u => {
     await loadSubjects();
     showToast("🗑️ Deleted","#ed3737");
   };
+
+
+  /* --- Formatting Shortcuts (Bold, Italic, Underline) --- */
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey && ["b", "i", "u"].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+      const cmd = e.key.toLowerCase() === "b" ? "bold" :
+                  e.key.toLowerCase() === "i" ? "italic" : "underline";
+      document.execCommand(cmd, false, null);
+    }
+  });
+
+
+  /* --- Undo System --- */
+  const undoStacks = new WeakMap(); // keeps undo history per topic field
+
+  function initUndo(el){
+    undoStacks.set(el, [el.innerHTML]);
+  }
+
+  function pushUndoState(el){
+    const stack = undoStacks.get(el) || [];
+    const last = stack[stack.length-1];
+    if (last !== el.innerHTML) {
+      stack.push(el.innerHTML);
+      if (stack.length > 5) stack.shift(); // keep max 5
+      undoStacks.set(el, stack);
+    }
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.key.toLowerCase() === "z") {
+      e.preventDefault();
+      const active = document.activeElement;
+      if (active && active.classList.contains("topicField")) {
+        const stack = undoStacks.get(active) || [];
+        if (stack.length > 1) {
+          stack.pop(); // remove current state
+          active.innerHTML = stack[stack.length - 1];
+          undoStacks.set(active, stack);
+          autoSave();
+        }
+      }
+    }
+  });
+
 }
 </script>
+
 </body>
 </html>
