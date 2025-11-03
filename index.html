@@ -112,18 +112,31 @@
   .menu {
     position: absolute; right: 16px; top: 64px;
     width: 220px; background: rgba(43,47,49,.9); backdrop-filter: blur(12px);
-    box-shadow: var(--shadow); transform: translateY(-8px) scale(.95);
+    box-shadow: var(--shadow); transform: translateY(-10px) scale(1);filter: blur(5px);
     opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
     display: flex; flex-direction: column; align-items: center; text-align: center;
   }
-  .menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; filter: blur(0)}
 
-  .menu a, .menu button {
-    display: block; width: 100%; padding: 14px 0; background: transparent;
-    border: none; color: #D7DBDE; font-size: 1rem; cursor: pointer; transition: background .2s;
-  }
+    .menu a, .menu button {
+      width: 100%;
+      background: transparent;
+      color: #fff;
+      border: 0;
+      padding: 20px 15px;
+      display: flex;              /* ✅ ცენტრში მოსაყვანად */
+      align-items: center;        /* ვერტიკალურად */
+      justify-content: center;    /* ჰორიზონტალურად */
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-weight: bold;
+    }
+
   .menu a:hover, .menu button:hover { background: rgba(255,255,255,0.1); }
-  .menu .sep { height: 1px; width: 100%; background: #FFFFFF22; }
+  .menu .sep { height: 1px; width: 100%; background: #FFFFFF22;}
+
+
 
   /* LAYOUT */
   .wrap {
@@ -383,8 +396,7 @@
     <button id="signinBtn" class="signin-btn">Sign in with Google</button>
     <img id="avatar" class="avatar" src="" alt="profile" />
     <div id="menu" class="menu">
-      <a id="openProfile">პარამეტრები</a>
-      <div class="sep"></div>
+      <button id="openProfile">პარამეტრები</button>
       <button id="logoutBtn">გასვლა</button>
     </div>
   </div>
@@ -450,7 +462,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
 function startWeekge(){
   const auth = firebase.auth(), db = firebase.firestore();
-  let user=null,catalog=[],selected=[],cache={},weekDates=[];
+  let user=null,catalog=[],selected=[],cache={},weekDates=[],userDays={};
   const $=s=>document.querySelector(s);
   const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
   const todayISO=()=>new Date().toISOString().slice(0,10);
@@ -473,7 +485,6 @@ function startWeekge(){
     {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"}
   ];
 
-  // === Color Map ===
   const colorMap = {
     yellow: ["#ffc423", "#000"],
     green:  ["#38d98a", "#fff"],
@@ -485,10 +496,32 @@ function startWeekge(){
 
   $("#weekToggle").onclick=()=>toggleWeeks();
 
-  // === AUTH ===
+  /* === ✅ Sign In / Sign Out === */
   const provider = new firebase.auth.GoogleAuthProvider();
-  $("#signinBtn").onclick = () => auth.signInWithPopup(provider);
-  $("#logoutBtn").onclick = () => auth.signOut();
+  $("#signinBtn").onclick = async () => {
+    overlay.querySelector("p").textContent = "ავტორიზაცია მიმდინარეობს...";
+    overlay.classList.remove("hidden");
+    try {
+      await auth.signInWithPopup(provider);
+    } catch (err) {
+      console.error("Sign-in error:", err);
+      alert("❌ შესვლისას შეცდომაა");
+      overlay.classList.add("hidden");
+    }
+  };
+
+  $("#logoutBtn").onclick = async () => {
+    overlay.querySelector("p").textContent = "გასვლა...";
+    overlay.classList.remove("hidden");
+    try {
+      await auth.signOut();
+    } catch (err) {
+      console.error("Logout error:", err);
+      alert("❌ გასვლისას შეცდომაა");
+      overlay.classList.add("hidden");
+    }
+  };
+
   $("#avatar").onclick = () => $("#menu").classList.toggle("open");
   document.addEventListener("click", e => {
     if (!e.target.closest(".avatar") && !e.target.closest(".menu"))
@@ -506,27 +539,25 @@ function startWeekge(){
     if (e.key === "Escape") $("#modal").classList.remove("open");
   });
 
+  /* === AUTH STATE === */
   auth.onAuthStateChanged(async u => {
     user = u || null;
     guardUI(!!user);
+
     if (user) {
       $("#avatar").src = user.photoURL || "https://i.pravatar.cc/100";
+      overlay.querySelector("p").textContent = "იტვირთება...";
       await bootAfterLogin();
 
-      // ⏳ Add 3-second delay before hiding the loader
-      setTimeout(() => {
-        overlay.classList.add("hidden");
-      }, 1000);
+      setTimeout(() => overlay.classList.add("hidden"), 800);
     } else {
-      // ⏳ Also delay hiding when user is not signed in
-      setTimeout(() => {
-        overlay.classList.add("hidden");
-      }, 1000);
+      setTimeout(() => overlay.classList.add("hidden"), 800);
     }
   });
 
   function guardUI(signed) {
     $("#signinBtn").style.display = signed ? "none" : "inline-flex";
+    $("#logoutBtn").style.display = signed ? "inline-flex" : "none";
     $("#avatar").style.display = signed ? "block" : "none";
     if (!signed)
       $("#cardsCanvas").innerHTML =
@@ -602,9 +633,7 @@ function startWeekge(){
         ])
       );
       row.onclick = () => {
-        document
-          .querySelectorAll(".week-item")
-          .forEach(x => x.classList.remove("active"));
+        document.querySelectorAll(".week-item").forEach(x => x.classList.remove("active"));
         row.classList.add("active");
         showWeek(w.n);
         toggleWeeks(false);
@@ -657,12 +686,10 @@ function startWeekge(){
     }
   }
 
-  // ✅ Get today's day index
   function todayDayIndex() {
-    return new Date().getDay(); // 0=Sunday
+    return new Date().getDay();
   }
 
-  // ✅ Sorting function based on proximity to today
   function sortByDayProximity(subjs) {
     const t = todayDayIndex();
     return subjs.sort((a, b) => {
@@ -712,12 +739,7 @@ function startWeekge(){
           const sec = el("div", { className: "card-section" });
           sec.append(el("h4", { textContent: "ამ კვირისთვის:" }));
           if (prev.topic)
-          sec.append(el("div", {
-            className: "topic-text",
-            style: "margin-bottom:15px;",
-            innerHTML: prev.topic
-          }));
-
+            sec.append(el("div", { className: "topic-text", style: "margin-bottom:15px;", innerHTML: prev.topic }));
           addBtns(sec, prev);
           wrap.append(sec);
         }
@@ -726,11 +748,7 @@ function startWeekge(){
           const sec = el("div", { className: "card-section" });
           sec.append(el("h4", { textContent: "შემდეგი კვირისთვის:" }));
           if (cur.topic)
-            sec.append(el("div", {
-              className: "topic-text",
-              style: "margin-bottom:15px;",
-              innerHTML: cur.topic
-            }));
+            sec.append(el("div", { className: "topic-text", style: "margin-bottom:15px;", innerHTML: cur.topic }));
           addBtns(sec, cur);
           wrap.append(sec);
         }
@@ -739,9 +757,7 @@ function startWeekge(){
         stack.append(card);
       });
       canvas.innerHTML = "";
-      canvas.append(
-        any ? stack : el("div", { className: "empty", textContent: "საგნები არ არის. დაამატე პარამეტრებში" })
-      );
+      canvas.append(any ? stack : el("div", { className: "empty", textContent: "საგნები არ არის. დაამატე პარამეტრებში" }));
       canvas.style.filter = "blur(0)";
       canvas.style.opacity = "1";
     }, 300);
@@ -753,9 +769,7 @@ function startWeekge(){
     if (cur) {
       showWeek(cur.n);
       updateWeekLabel(cur.n);
-      document
-        .querySelectorAll(".week-item")
-        .forEach(x => x.classList.remove("active"));
+      document.querySelectorAll(".week-item").forEach(x => x.classList.remove("active"));
       const currentEl = document.querySelector(`.week-item[data-week="${cur.n}"]`);
       if (currentEl) currentEl.classList.add("active");
     }
@@ -767,96 +781,83 @@ function startWeekge(){
     left.classList.toggle("open", force !== undefined ? force : !left.classList.contains("open"));
   }
 
+  /* === PROFILE === */
   function renderProfile() {
-  const list = $("#catalogList");
-  list.innerHTML = "";
-  const mine = $("#mySubjects");
-  mine.innerHTML = "";
+    const list = $("#catalogList");
+    list.innerHTML = "";
+    const mine = $("#mySubjects");
+    mine.innerHTML = "";
 
-  // === 📚 Catalog List ===
-  catalog.forEach(x => {
-    const added = selected.includes(x.id);
-    const row = el("div", { className: "item" });
+    catalog.forEach(x => {
+      const added = selected.includes(x.id);
+      const row = el("div", { className: "item" });
 
-    const left = el("div", {}, [
-      el("div", { textContent: x.name, style: "font-weight:700" }),
-      el("div", { textContent: x.id, style: "font-size:12px;opacity:.7" })
-    ]);
+      const left = el("div", {}, [
+        el("div", { textContent: x.name, style: "font-weight:700" }),
+        el("div", { textContent: x.id, style: "font-size:12px;opacity:.7" })
+      ]);
 
-    const action = added
-        ? el("button", { 
-            className: "added",
-            style: "background:#38d98a;color:#fff;",
-            innerHTML: `<img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg"
-                          style="width:25px;height:25px;filter:brightness(0) invert(1);">`
-          })
+      const action = added
+        ? el("button", { className: "added", style: "background:#38d98a;color:#fff;",
+            innerHTML: `<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>` })
+        : el("button", { innerHTML: `<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg' style='width:25px;height:25px;'>`,
+            onclick: async () => {
+              if (!selected.includes(x.id)) selected.push(x.id);
+              await saveSelection(true);
+              renderProfile();
+            } });
 
-      : el("button", {
-          innerHTML: `<img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg"
-                        style="width:25px;height:25px;">`,
-          onclick: async () => {
-            if (!selected.includes(x.id)) selected.push(x.id);
-            await saveSelection(true);
-            renderProfile();
-          }
-        });
-
-    row.append(left, action);
-    list.append(row);
-  });
-
-  // === ✅ My Subjects ===
-  selected.forEach(id => {
-    const subj = catalog.find(c => c.id === id);
-    const row = el("div", { className: "item" });
-
-    const left = el("div", {}, [
-      el("div", { textContent: subj ? subj.name : id, style: "font-weight:700" }),
-      el("div", { textContent: id, style: "font-size:12px;opacity:.7" })
-    ]);
-
-    const delBtn = el("button", {
-      innerHTML: `<div style="text-align:center;font-size:1.2rem;">-</div>`,
-      onclick: async () => {
-        selected = selected.filter(s => s !== id);
-        delete cache[id];
-        await saveSelection(true);
-        renderProfile();
-      }
+      row.append(left, action);
+      list.append(row);
     });
 
-    // 🔽 კვირის დღის არჩევა (ქვემოთ განლაგებული)
-    const select = el("select", { className: "day-select" });
-    daysOfWeek.forEach(d => {
-      const opt = el("option", { textContent: d, value: d });
-      if (userDays?.[id] === d) opt.selected = true;
-      select.append(opt);
+    selected.forEach(id => {
+      const subj = catalog.find(c => c.id === id);
+      const row = el("div", { className: "item" });
+      const left = el("div", {}, [
+        el("div", { textContent: subj ? subj.name : id, style: "font-weight:700" }),
+        el("div", { textContent: id, style: "font-size:12px;opacity:.7" })
+      ]);
+
+      const delBtn = el("button", {
+        innerHTML: `<div style='text-align:center;font-size:1.2rem;'>-</div>`,
+        onclick: async () => {
+          selected = selected.filter(s => s !== id);
+          delete cache[id];
+          await saveSelection(true);
+          renderProfile();
+        }
+      });
+
+      const select = el("select", { className: "day-select" });
+      daysOfWeek.forEach(d => {
+        const opt = el("option", { textContent: d, value: d });
+        if (userDays?.[id] === d) opt.selected = true;
+        select.append(opt);
+      });
+      select.onchange = () => { userDays[id] = select.value; };
+
+      row.append(left, delBtn, select);
+      mine.append(row);
     });
-    select.onchange = () => { userDays[id] = select.value; };
 
-    row.append(left, delBtn, select);
-    mine.append(row);
-  });
+    $("#saveSubjects").onclick = async () => {
+      await saveSelection(true);
+    };
+  }
 
-  // 💾 Save button
-  $("#saveSubjects").onclick = async () => {
-    await saveSelection(true);
-  };
-}
-
-async function saveSelection(immediate = false) {
-  if (!user) return;
-  await db.collection("users").doc(user.uid).set({ subjects: selected, days: userDays }, { merge: true });
-  if (immediate) {
-    await ensureSubjectsLoaded();
-    paintWeeks();
-    goToday();
+  async function saveSelection(immediate = false) {
+    if (!user) return;
+    await db.collection("users").doc(user.uid).set({ subjects: selected, days: userDays }, { merge: true });
+    if (immediate) {
+      await ensureSubjectsLoaded();
+      paintWeeks();
+      goToday();
+    }
   }
 }
-
-}
-
 </script>
+
 
 
 
