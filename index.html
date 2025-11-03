@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -213,7 +214,7 @@
   .search-box{background:#23343b;border:0;padding:10px 12px;color:var(--text);width:100%;margin-bottom:10px;font-size:1rem;outline:none;}
   #mySubjects{max-height:55vh;overflow-y:auto;}
   .item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid #fff1;}
-  .item button{background:#2e3a40;color:#fff;border:0;padding:10px 12px;cursor:pointer;min-width:100px;}
+  .item button{background:#2e3a40;color:#fff;border:0;padding:10px 12px;cursor:pointer;min-width:150px;}
   .item .added{background:#38d98a;color:#111;}
   .save{width:100%;margin-top:10px;background:#38D98A;color:#111;border:none;padding:15px 10px;font-weight:700;cursor:pointer;font-size:1rem;}
 
@@ -223,7 +224,11 @@
     .left{position:absolute;left:0;top:64px;bottom:0;width:100%;transform:translateY(-100%);z-index:30;}
     .left.open{transform:translateY(0);}
     .card-sections{flex-direction:column;}
-    .card-stack{width:100%;max-width:100vw;min-width:50px;}
+    .card-stack{width:100%;max-width:100vw;min-width:50px;padding: 0.5rem;}
+    .card{padding: 1rem;}
+    .card-section{padding: 0.5rem;}
+    .card-section h4{font-size: 1rem;}
+    .global-files {padding: 0.5rem;}
   }
   @media(min-width:901px){
     #weekToggle,#todayBtn{display:none!important;pointer-events:none;}
@@ -334,350 +339,357 @@ function startWeekge(){
 
   // === Color Map ===
   const colorMap = {
-    yellow: ["#ffc423", "#black"],
+    yellow: ["#ffc423", "#000"],
     green:  ["#38d98a", "#fff"],
     red:    ["#ed3737", "#fff"],
     blue:   ["#2979ff", "#fff"]
   };
 
+  const daysOfWeek = ["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
+
   $("#weekToggle").onclick=()=>toggleWeeks();
 
-// === AUTH ===
-const provider = new firebase.auth.GoogleAuthProvider();
-$("#signinBtn").onclick = () => auth.signInWithPopup(provider);
-$("#logoutBtn").onclick = () => auth.signOut();
-$("#avatar").onclick = () => $("#menu").classList.toggle("open");
-document.addEventListener("click", e => {
-  if (!e.target.closest(".avatar") && !e.target.closest(".menu"))
-    $("#menu").classList.remove("open");
-});
-
-$("#openProfile").onclick = async () => {
-  $("#menu").classList.remove("open");
-  $("#modal").classList.add("open");
-  if (!catalog.length) await loadCatalog();
-  renderProfile();
-};
-$("#closeModal").onclick = () => $("#modal").classList.remove("open");
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") $("#modal").classList.remove("open");
-});
-
-auth.onAuthStateChanged(async u => {
-  user = u || null;
-  guardUI(!!user);
-  if (user) {
-    $("#avatar").src = user.photoURL || "https://i.pravatar.cc/100";
-    overlay.classList.add("hidden");
-    await bootAfterLogin();
-  } else overlay.classList.add("hidden");
-});
-
-function guardUI(signed) {
-  $("#signinBtn").style.display = signed ? "none" : "inline-flex";
-  $("#avatar").style.display = signed ? "block" : "none";
-  if (!signed)
-    $("#cardsCanvas").innerHTML =
-      "<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";
-}
-
-async function loadCatalog() {
-  catalog = [];
-  const snap = await db.collection("subjects").get();
-  snap.forEach(d => catalog.push({ id: d.id, ...d.data() }));
-}
-
-async function loadUserSelection() {
-  const snap = await db.collection("users").doc(user.uid).get();
-  selected = (snap.exists && snap.data().subjects) || [];
-}
-
-async function ensureSubjectsLoaded() {
-  const toLoad = selected.filter(id => !cache[id]);
-  for (const id of toLoad) {
-    const subj = catalog.find(c => c.id === id);
-    if (subj) cache[id] = subj;
-  }
-}
-
-function flattenWeeks() {
-  weekDates = [];
-  SEMESTER_WEEKS.forEach(w => {
-    if (w.start1) weekDates.push({ n: w.n, start: w.start1, end: w.end1 });
-    if (w.start2) weekDates.push({ n: w.n, start: w.start2, end: w.end2 });
+  // === AUTH ===
+  const provider = new firebase.auth.GoogleAuthProvider();
+  $("#signinBtn").onclick = () => auth.signInWithPopup(provider);
+  $("#logoutBtn").onclick = () => auth.signOut();
+  $("#avatar").onclick = () => $("#menu").classList.toggle("open");
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".avatar") && !e.target.closest(".menu"))
+      $("#menu").classList.remove("open");
   });
-}
 
-async function bootAfterLogin() {
-  await Promise.all([loadCatalog(), loadUserSelection()]);
-  await ensureSubjectsLoaded();
-  flattenWeeks();
-  paintWeeks();
-  goToday();
-}
+  $("#openProfile").onclick = async () => {
+    $("#menu").classList.remove("open");
+    $("#modal").classList.add("open");
+    if (!catalog.length) await loadCatalog();
+    renderProfile();
+  };
+  $("#closeModal").onclick = () => $("#modal").classList.remove("open");
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") $("#modal").classList.remove("open");
+  });
 
-function paintWeeks() {
-  const iso = todayISO();
-  const list = $("#weeksList");
-  list.innerHTML = "";
-  let activeWeekN = null;
-  for (const w of SEMESTER_WEEKS) {
-    if (isBetween(iso, w.start1, w.end1) || isBetween(iso, w.start2, w.end2)) {
-      activeWeekN = w.n;
-      break;
+  auth.onAuthStateChanged(async u => {
+    user = u || null;
+    guardUI(!!user);
+    if (user) {
+      $("#avatar").src = user.photoURL || "https://i.pravatar.cc/100";
+      overlay.classList.add("hidden");
+      await bootAfterLogin();
+    } else overlay.classList.add("hidden");
+  });
+
+  function guardUI(signed) {
+    $("#signinBtn").style.display = signed ? "none" : "inline-flex";
+    $("#avatar").style.display = signed ? "block" : "none";
+    if (!signed)
+      $("#cardsCanvas").innerHTML =
+        "<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";
+  }
+
+  async function loadCatalog() {
+    catalog = [];
+    const snap = await db.collection("subjects").get();
+    snap.forEach(d => catalog.push({ id: d.id, ...d.data() }));
+  }
+
+  async function loadUserSelection() {
+    const snap = await db.collection("users").doc(user.uid).get();
+    const data = snap.exists ? snap.data() : {};
+    selected = data.subjects || [];
+    userDays = data.days || {};
+  }
+
+  async function ensureSubjectsLoaded() {
+    const toLoad = selected.filter(id => !cache[id]);
+    for (const id of toLoad) {
+      const subj = catalog.find(c => c.id === id);
+      if (subj) cache[id] = subj;
     }
   }
 
-  SEMESTER_WEEKS.forEach(w => {
-    const isCurrent = activeWeekN === w.n;
-    const done = hasPassed(iso, w.end1) && hasPassed(iso, w.end2);
-    const status = isCurrent ? "current" : done ? "done" : "pending";
-    const row = el("div", {
-      className: `week-item${isCurrent ? " active" : ""}`
+  function flattenWeeks() {
+    weekDates = [];
+    SEMESTER_WEEKS.forEach(w => {
+      if (w.start1) weekDates.push({ n: w.n, start: w.start1, end: w.end1 });
+      if (w.start2) weekDates.push({ n: w.n, start: w.start2, end: w.end2 });
     });
-    row.setAttribute("data-week", w.n);
-    row.append(
-      el("div", { className: "dot " + status }),
-      el("div", {}, [
-        el("div", { className: "wk-title", textContent: `კვირა ${w.n}` }),
-        el("div", {
-          className: "wk-dates",
-          textContent:
-            fmtRange(w.start1, w.end1) + " / " + fmtRange(w.start2, w.end2)
-        })
-      ])
+  }
+
+  async function bootAfterLogin() {
+    await Promise.all([loadCatalog(), loadUserSelection()]);
+    await ensureSubjectsLoaded();
+    flattenWeeks();
+    paintWeeks();
+    goToday();
+  }
+
+  function paintWeeks() {
+    const iso = todayISO();
+    const list = $("#weeksList");
+    list.innerHTML = "";
+    let activeWeekN = null;
+    for (const w of SEMESTER_WEEKS) {
+      if (isBetween(iso, w.start1, w.end1) || isBetween(iso, w.start2, w.end2)) {
+        activeWeekN = w.n;
+        break;
+      }
+    }
+
+    SEMESTER_WEEKS.forEach(w => {
+      const isCurrent = activeWeekN === w.n;
+      const done = hasPassed(iso, w.end1) && hasPassed(iso, w.end2);
+      const status = isCurrent ? "current" : done ? "done" : "pending";
+      const row = el("div", {
+        className: `week-item${isCurrent ? " active" : ""}`
+      });
+      row.setAttribute("data-week", w.n);
+      row.append(
+        el("div", { className: "dot " + status }),
+        el("div", {}, [
+          el("div", { className: "wk-title", textContent: `კვირა ${w.n}` }),
+          el("div", {
+            className: "wk-dates",
+            textContent:
+              fmtRange(w.start1, w.end1) + " / " + fmtRange(w.start2, w.end2)
+          })
+        ])
+      );
+      row.onclick = () => {
+        document
+          .querySelectorAll(".week-item")
+          .forEach(x => x.classList.remove("active"));
+        row.classList.add("active");
+        showWeek(w.n);
+        toggleWeeks(false);
+        updateWeekLabel(w.n);
+      };
+      list.append(row);
+    });
+    updateWeekLabel(activeWeekN);
+  }
+
+  function updateWeekLabel(n) {
+    $("#weekToggle").textContent = `კვირა ${n || "-"} ▼`;
+  }
+
+  function addBtns(wrap, weekObj) {
+    const btns = el("div", { className: "btns" });
+    const add = (label, url, colorName) => {
+      const [bg, txt] = colorMap[colorName] || ["#38d98a", "#fff"];
+      const b = el("button", {
+        className: "pill",
+        textContent: label,
+        style: `background:${bg};color:${txt}`
+      });
+      if (url) b.onclick = () => window.open(url, "_blank");
+      btns.append(b);
+    };
+    (weekObj.buttons || []).forEach(b =>
+      add(b.label, b.link, b.colorName || b.color || "green")
     );
-    row.onclick = () => {
+    wrap.append(btns);
+  }
+
+  function addGlobalBtns(card, subj) {
+    if (subj.globalButtons && subj.globalButtons.length > 0) {
+      const box = el("div", { className: "global-files" });
+      box.append(el("h4", { textContent: "მთავარი ფაილები:" }));
+      const btns = el("div", { className: "btns" });
+      subj.globalButtons.forEach(b => {
+        const [bg, txt] = colorMap[b.colorName || b.color] || ["#38d98a", "#fff"];
+        const btn = el("button", {
+          className: "pill",
+          textContent: b.label,
+          style: `background:${bg};color:${txt}`
+        });
+        if (b.link) btn.onclick = () => window.open(b.link, "_blank");
+        btns.append(btn);
+      });
+      box.append(btns);
+      card.append(box);
+    }
+  }
+
+  // ✅ Get today's day index
+  function todayDayIndex() {
+    return new Date().getDay(); // 0=Sunday
+  }
+
+  // ✅ Sorting function based on proximity to today
+  function sortByDayProximity(subjs) {
+    const t = todayDayIndex();
+    return subjs.sort((a, b) => {
+      const da = (a.dayIndex ?? 7) - t;
+      const db = (b.dayIndex ?? 7) - t;
+      const wrapA = da < 0 ? da + 7 : da;
+      const wrapB = db < 0 ? db + 7 : db;
+      return wrapA - wrapB;
+    });
+  }
+
+  function showWeek(n) {
+    const canvas = $("#cardsCanvas");
+    canvas.style.opacity = "0";
+    canvas.style.filter = "blur(8px)";
+    setTimeout(() => {
+      const stack = el("div", { className: "card-stack" });
+      let any = false;
+      const subs = sortByDayProximity(selected.map(id => {
+        const subj = cache[id];
+        if (!subj) return null;
+        const day = userDays?.[id] ?? null;
+        return {...subj, dayIndex: daysOfWeek.indexOf(day)};
+      }).filter(Boolean));
+
+      subs.forEach(subj => {
+        const cur = subj.weeks?.find(w => w.week === n);
+        const prev = n > 1 ? subj.weeks?.find(w => w.week === n - 1) : null;
+        if (!cur && !prev) return;
+        any = true;
+        const card = el("div", { className: "card" });
+        card.append(el("div", { className: "subhead", textContent: subj.name + (userDays?.[subj.id] ? ` (${userDays[subj.id]})` : "") }));
+
+        const typeText = cur?.type || prev?.type || null;
+        if (typeText) {
+          const typeEl = el("div", {
+            style:"text-align:center;font-size:1.1rem;opacity:0.8;margin-top:-6px;",
+            textContent: typeText
+          });
+          card.append(typeEl);
+        }
+
+        addGlobalBtns(card, subj);
+        const wrap = el("div", { className: "card-sections" });
+
+        if (prev) {
+          const sec = el("div", { className: "card-section" });
+          sec.append(el("h4", { textContent: "ამ კვირისთვის:" }));
+          if (prev.topic) sec.append(el("div",{style:"margin-bottom:15px;font-weight:600;",textContent:prev.topic}));
+          addBtns(sec, prev);
+          wrap.append(sec);
+        }
+
+        if (cur) {
+          const sec = el("div", { className: "card-section" });
+          sec.append(el("h4", { textContent: "შემდეგი კვირისთვის:" }));
+          if (cur.topic) sec.append(el("div",{style:"margin-bottom:15px;font-weight:600;",textContent:cur.topic}));
+          addBtns(sec, cur);
+          wrap.append(sec);
+        }
+
+        card.append(wrap);
+        stack.append(card);
+      });
+      canvas.innerHTML = "";
+      canvas.append(
+        any ? stack : el("div", { className: "empty", textContent: "ამ კვირისთვის მასალა ჯერ არაა." })
+      );
+      canvas.style.filter = "blur(0)";
+      canvas.style.opacity = "1";
+    }, 300);
+  }
+
+  function goToday() {
+    const iso = todayISO();
+    const cur = weekDates.find(w => isBetween(iso, w.start, w.end)) || weekDates[0];
+    if (cur) {
+      showWeek(cur.n);
+      updateWeekLabel(cur.n);
       document
         .querySelectorAll(".week-item")
         .forEach(x => x.classList.remove("active"));
-      row.classList.add("active");
-      showWeek(w.n);
-      toggleWeeks(false);
-      updateWeekLabel(w.n);
-    };
-    list.append(row);
-  });
-  updateWeekLabel(activeWeekN);
-}
+      const currentEl = document.querySelector(`.week-item[data-week="${cur.n}"]`);
+      if (currentEl) currentEl.classList.add("active");
+    }
+    toggleWeeks(false);
+  }
 
-function updateWeekLabel(n) {
-  $("#weekToggle").textContent = `კვირა ${n || "-"} ▼`;
-}
+  function toggleWeeks(force) {
+    const left = $("#weeksList");
+    left.classList.toggle("open", force !== undefined ? force : !left.classList.contains("open"));
+  }
 
-function addBtns(wrap, weekObj) {
-  const btns = el("div", { className: "btns" });
-  const add = (label, url, colorName) => {
-    const [bg, txt] = colorMap[colorName] || ["#38d98a", "#fff"];
-    const b = el("button", {
-      className: "pill",
-      textContent: label,
-      style: `background:${bg};color:${txt}`
-    });
-    if (url) b.onclick = () => window.open(url, "_blank");
-    btns.append(b);
-  };
-  (weekObj.buttons || []).forEach(b =>
-    add(b.label, b.link, b.colorName || b.color || "green")
-  );
-  wrap.append(btns);
-}
+  function renderProfile() {
+    const list = $("#catalogList");
+    list.innerHTML = "";
+    const mine = $("#mySubjects");
+    mine.innerHTML = "";
 
-function addGlobalBtns(card, subj) {
-  if (subj.globalButtons && subj.globalButtons.length > 0) {
-    const box = el("div", { className: "global-files" });
-    box.append(el("h4", { textContent: "მთავარი ფაილები:" }));
-    const btns = el("div", { className: "btns" });
-    subj.globalButtons.forEach(b => {
-      const [bg, txt] = colorMap[b.colorName || b.color] || ["#38d98a", "#fff"];
-      const btn = el("button", {
-        className: "pill",
-        textContent: b.label,
-        style: `background:${bg};color:${txt}`
+    catalog.forEach(x => {
+      const added = selected.includes(x.id);
+      const row = el("div", { className: "item", style:"display:flex;justify-content:space-between;align-items:center;gap:10px;" });
+      const daySelect = el("select", { style:"background:#23343b;color:#fff;border:none;padding:8px;border-radius:0;font-size:0.8rem;" });
+      daysOfWeek.forEach(d => {
+        const opt = el("option",{textContent:d,value:d});
+        if(userDays?.[x.id]===d) opt.selected=true;
+        daySelect.append(opt);
       });
-      if (b.link) btn.onclick = () => window.open(b.link, "_blank");
-      btns.append(btn);
-    });
-    box.append(btns);
-    card.append(box);
-  }
-}
+      daySelect.onchange=()=>{userDays[x.id]=daySelect.value;};
 
-function showWeek(n) {
-  const canvas = $("#cardsCanvas");
-  canvas.style.opacity = "0";
-  canvas.style.filter = "blur(8px)";
-  setTimeout(() => {
-    const stack = el("div", { className: "card-stack" });
-    let any = false;
-    selected.forEach(id => {
-      const subj = cache[id];
-      if (!subj) return;
-      const cur = subj.weeks?.find(w => w.week === n);
-      const prev = n > 1 ? subj.weeks?.find(w => w.week === n - 1) : null;
-      if (!cur && !prev) return;
-      any = true;
-      const card = el("div", { className: "card" });
-      card.append(el("div", { className: "subhead", textContent: subj.name }));
-
-      // ✅ Show type under subject title
-      const typeText = cur?.type || prev?.type || null;
-      if (typeText) {
-        const typeEl = el("div", {
-          style:
-            "text-align:center;font-size:1.2rem;opacity:0.8;margin-top:-6px;",
-          textContent: typeText
-        });
-        card.append(typeEl);
-      }
-
-      addGlobalBtns(card, subj);
-      const wrap = el("div", { className: "card-sections" });
-
-      // ✅ Added topic display
-      if (prev) {
-        const sec = el("div", { className: "card-section" });
-        sec.append(el("h4", { textContent: `ამ კვირისთვის:` }));
-        if (prev.topic) {
-          const topicEl = el("div", {
-            style:
-              "margin-bottom:30px;font-weight:500;color:#fff;opacity:1;font-size:1.2rem; line-height: 1.5;",
-            textContent: prev.topic
-          });
-          sec.append(topicEl);
-        }
-        addBtns(sec, prev);
-        wrap.append(sec);
-      }
-
-      if (cur) {
-        const sec = el("div", { className: "card-section" });
-        sec.append(el("h4", { textContent: `შემდეგი კვირისთვის:` }));
-        if (cur.topic) {
-          const topicEl = el("div", {
-            style:
-              "margin-bottom:10px;font-weight:600;color:#fff;opacity:0.85;",
-            textContent: cur.topic
-          });
-          sec.append(topicEl);
-        }
-        addBtns(sec, cur);
-        wrap.append(sec);
-      }
-
-      card.append(wrap);
-      stack.append(card);
-    });
-    canvas.innerHTML = "";
-    canvas.append(
-      any
-        ? stack
-        : el("div", {
-            className: "empty",
-            textContent: "ამ კვირისთვის მასალა ჯერ არაა."
-          })
-    );
-    canvas.style.filter = "blur(0)";
-    canvas.style.opacity = "1";
-  }, 300);
-}
-
-function goToday() {
-  const iso = todayISO();
-  const cur = weekDates.find(w => isBetween(iso, w.start, w.end)) || weekDates[0];
-  if (cur) {
-    showWeek(cur.n);
-    updateWeekLabel(cur.n);
-    document
-      .querySelectorAll(".week-item")
-      .forEach(x => x.classList.remove("active"));
-    const currentEl = document.querySelector(
-      `.week-item[data-week="${cur.n}"]`
-    );
-    if (currentEl) currentEl.classList.add("active");
-  }
-  toggleWeeks(false);
-}
-
-function toggleWeeks(force) {
-  const left = $("#weeksList");
-  left.classList.toggle(
-    "open",
-    force !== undefined ? force : !left.classList.contains("open")
-  );
-}
-
-function renderProfile() {
-  const list = $("#catalogList");
-  list.innerHTML = "";
-  const mine = $("#mySubjects");
-  mine.innerHTML = "";
-  catalog.forEach(x => {
-    const added = selected.includes(x.id);
-    const row = el("div", { className: "item" });
-    row.append(
-      el("div", {}, [
+      const left = el("div", {}, [
         el("div", { textContent: x.name, style: "font-weight:700" }),
-        el("div", {
-          textContent: x.id,
-          style: "font-size:12px;opacity:.7"
-        })
-      ]),
-      added
-        ? el("button", { className: "added", textContent: "✓ დამატებულია" })
+        el("div", { textContent: x.id, style: "font-size:12px;opacity:.7" })
+      ]);
+
+      const action = added
+        ? el("button", { 
+            className: "added",
+            innerHTML: `<img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"> დამატებულია`,
+            style: "display:flex;align-items:center;justify-content:center;gap:6px;width:120px;"
+          })
         : el("button", {
-            textContent: "+ დამატება",
+            innerHTML: `<img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"> დამატება`,
+            style: "display:flex;align-items:center;justify-content:center;gap:6px;width:120px;",
             onclick: async () => {
               if (!selected.includes(x.id)) selected.push(x.id);
               await saveSelection(true);
               renderProfile();
             }
-          })
-    );
-    list.append(row);
-  });
-  selected.forEach(id => {
-    const subj = catalog.find(c => c.id === id);
-    const row = el("div", { className: "item" });
-    row.append(
-      el("div", {}, [
-        el("div", {
-          textContent: subj ? subj.name : id,
-          style: "font-weight:700"
-        }),
-        el("div", {
-          textContent: id,
-          style: "font-size:12px;opacity:.7"
-        })
-      ]),
-      el("button", {
-        textContent: "- მოშლა",
-        onclick: async () => {
-          selected = selected.filter(s => s !== id);
-          delete cache[id];
-          await saveSelection(true);
-          renderProfile();
-        }
-      })
-    );
-    mine.append(row);
-  });
-  $("#saveSubjects").onclick = async () => {
-    await saveSelection(true);
-  };
-}
+          });
 
-async function saveSelection(immediate = false) {
-  if (!user) return;
-  await db.collection("users").doc(user.uid).set({ subjects: selected }, { merge: true });
-  if (immediate) {
-    await ensureSubjectsLoaded();
-    paintWeeks();
-    goToday();
+      const container = el("div",{style:"display:flex;align-items:center;gap:10px;"},[daySelect,action]);
+      row.append(left,container);
+      list.append(row);
+    });
+
+    selected.forEach(id => {
+      const subj = catalog.find(c => c.id === id);
+      const row = el("div", { className: "item" });
+      row.append(
+        el("div", {}, [
+          el("div", { textContent: subj ? subj.name : id, style: "font-weight:700" }),
+          el("div", { textContent: id, style: "font-size:12px;opacity:.7" })
+        ]),
+        el("button", {
+          textContent: "- მოშლა",
+          onclick: async () => {
+            selected = selected.filter(s => s !== id);
+            delete cache[id];
+            await saveSelection(true);
+            renderProfile();
+          }
+        })
+      );
+      mine.append(row);
+    });
+    $("#saveSubjects").onclick = async () => {
+      await saveSelection(true);
+    };
+  }
+
+  async function saveSelection(immediate = false) {
+    if (!user) return;
+    await db.collection("users").doc(user.uid).set({ subjects: selected, days: userDays }, { merge: true });
+    if (immediate) {
+      await ensureSubjectsLoaded();
+      paintWeeks();
+      goToday();
+    }
   }
 }
 
-}
 </script>
 
 
