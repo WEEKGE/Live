@@ -436,14 +436,14 @@ function startAdmin(){
 
       div.querySelector(".slideBtn").onclick=()=>{
         const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="slide");
-        if(!exists){ btnBox.append(createButtonEditor({label:"სლაიდი",link:"https://",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
+        if(!exists){ btnBox.append(createButtonEditor({label:"სლაიდი",link:"",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
       };
       div.querySelector(".videoBtn").onclick=()=>{
         const exists=[...btnBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="video");
-        if(!exists){ btnBox.append(createButtonEditor({label:"ვიდეო",link:"https://",colorName:"red"})); updateAddButtonsVisibility(i); autoSave(); }
+        if(!exists){ btnBox.append(createButtonEditor({label:"ვიდეო",link:"",colorName:"red"})); updateAddButtonsVisibility(i); autoSave(); }
       };
       div.querySelector(".addCustom").onclick=()=>{
-        btnBox.append(createButtonEditor({label:"რესურსის დასახელება",link:"https://",colorName:"blue"}));
+        btnBox.append(createButtonEditor({label:"რესურსის დასახელება",link:"",colorName:"blue"}));
         autoSave();
       };
 
@@ -511,3 +511,4 @@ function startAdmin(){
 </script>
 </body>
 </html>
+
