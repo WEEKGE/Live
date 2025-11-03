@@ -28,6 +28,7 @@
     --shadow: 0 8px 28px rgba(0, 0, 0, .35);
     --defcolor: #16b438;
     --dot: #ffffff;
+    --remove: #c72626;
   }
 
   * { box-sizing: border-box; }
@@ -820,7 +821,8 @@ function startWeekge(){
       ]);
 
       const delBtn = el("button", {
-        innerHTML: `<div style='text-align:center;font-size:1.2rem;'>-</div>`,
+        innerHTML: `<img src='https://raw.githubusercontent.com/WEEKGE/live/ce772a078446be5972f9c7b9f2ff91b0122c1dad/svgs/close.svg' style='width:22px;height:22px;filter:brightness(0) invert(1);'>`,
+        style: "background:var(--remove);color:#fff",  // ✅ just red background
         onclick: async () => {
           selected = selected.filter(s => s !== id);
           delete cache[id];
