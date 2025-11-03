@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
@@ -218,6 +217,25 @@
   .item button{background:#2e3a40;color:#fff;border:0;padding:10px 12px;cursor:pointer;min-width:150px;}
   .item .added{background:#38d98a;color:#111;}
   .save{width:100%;margin-top:10px;background:#38D98A;color:#111;border:none;padding:15px 10px;font-weight:700;cursor:pointer;font-size:1rem;}
+
+
+  .topic-text {
+  white-space: pre-wrap;         /* ახსენებს გამოტოვებებს და Enter-ებს */
+  word-wrap: break-word;         /* აძლევს გრძელი სიტყვების გადატანას */
+  line-height: 1.5;
+  font-size: 1rem;
+  color: var(--text);
+  }
+  .topic-text b {
+    font-weight: 700;
+  }
+  .topic-text i {
+    font-style: italic;
+  }
+  .topic-text u {
+    text-decoration: underline;
+  }
+
 
   /* Responsive */
   @media(max-width:900px){
@@ -576,7 +594,13 @@ function startWeekge(){
         if (prev) {
           const sec = el("div", { className: "card-section" });
           sec.append(el("h4", { textContent: "ამ კვირისთვის:" }));
-          if (prev.topic) sec.append(el("div",{style:"margin-bottom:15px;font-weight:600;",textContent:prev.topic}));
+          if (prev.topic)
+          sec.append(el("div", {
+            className: "topic-text",
+            style: "margin-bottom:15px;",
+            innerHTML: prev.topic
+          }));
+
           addBtns(sec, prev);
           wrap.append(sec);
         }
@@ -584,7 +608,12 @@ function startWeekge(){
         if (cur) {
           const sec = el("div", { className: "card-section" });
           sec.append(el("h4", { textContent: "შემდეგი კვირისთვის:" }));
-          if (cur.topic) sec.append(el("div",{style:"margin-bottom:15px;font-weight:600;",textContent:cur.topic}));
+          if (cur.topic)
+            sec.append(el("div", {
+              className: "topic-text",
+              style: "margin-bottom:15px;",
+              innerHTML: cur.topic
+            }));
           addBtns(sec, cur);
           wrap.append(sec);
         }
