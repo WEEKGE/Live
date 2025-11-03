@@ -387,7 +387,7 @@ function startAdmin(){
         box.classList.add("active");
         wrap.dataset.colorName=box.dataset.color;
         autoSave();
-      };y
+      };
     });
 
     wrap.querySelector(".removeBtn").onclick=()=>{wrap.remove();autoSave();};
@@ -398,7 +398,7 @@ function startAdmin(){
     const box=$("#globalBtns"); box.innerHTML="";
     btns.forEach(b=> box.append(createButtonEditor(b)));
     $("#addGlobalBtn").onclick=()=>{
-      box.append(createButtonEditor({label:"", link:"", colorName:"yellow"}));
+      box.append(createButtonEditor({label:"New", link:"", colorName:"yellow"}));
       autoSave();
     };
     box.oninput=autoSave;
@@ -511,5 +511,3 @@ function startAdmin(){
 </script>
 </body>
 </html>
-
-
