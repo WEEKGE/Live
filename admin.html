@@ -569,7 +569,7 @@ function startAdmin(){
           colorName:b.dataset.colorName
         }));
         const weeks=[];
-        for(let i=1;i<=12;i++){
+        for(let i=1;i<=13;i++){
           const weekDiv=document.querySelector("#weeksContainer").children[i-1];
           if(!weekDiv) continue;
           const topic=(document.querySelector("#topic-"+i)?.innerHTML||"").trim();
