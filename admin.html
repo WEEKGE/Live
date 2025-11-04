@@ -530,7 +530,7 @@ function startAdmin(){
 
       div.querySelector(".slideBtn").onclick = () => {
         const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.toLowerCase() === "slide");
-        if(!exists){ btnBox.append(createButtonEditor({label:"სლაიდი",link:"",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
+        if(!exists){ btnBox.append(createButtonEditor({label:"სლაიდი",link:"DRIVELINK/preview",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
       };
       div.querySelector(".videoBtn").onclick = () => {
         const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.toLowerCase() === "video");
