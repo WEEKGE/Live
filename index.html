@@ -478,18 +478,18 @@
 const overlay = document.getElementById("loadingOverlay");
 
 fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
-.then(r => r.json())
-.then(cfg => {
-  firebase.initializeApp(cfg);
-  startWeekge();
-})
-.catch(() => {
-  overlay.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ config.json ვერ ჩაიტვირთა.</h2>";
-});
+  .then(r => r.json())
+  .then(cfg => {
+    firebase.initializeApp(cfg);
+    startWeekge();
+  })
+  .catch(() => {
+    overlay.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ config.json ვერ ჩაიტვირთა.</h2>";
+  });
 
 function startWeekge(){
   const auth = firebase.auth(), db = firebase.firestore();
-  let user=null,catalog=[],selected=[],cache={},weekDates=[],userDays={};
+  let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={};
   const $=s=>document.querySelector(s);
   const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
   const todayISO=()=>new Date().toISOString().slice(0,10);
@@ -524,7 +524,7 @@ function startWeekge(){
 
   $("#weekToggle").onclick=()=>toggleWeeks();
 
-  /* === ✅ Sign In / Sign Out === */
+  /* === Sign In / Out === */
   const provider = new firebase.auth.GoogleAuthProvider();
   $("#signinBtn").onclick = async () => {
     overlay.querySelector("p").textContent = "ავტორიზაცია მიმდინარეობს...";
@@ -537,7 +537,6 @@ function startWeekge(){
       overlay.classList.add("hidden");
     }
   };
-
   $("#logoutBtn").onclick = async () => {
     overlay.querySelector("p").textContent = "გასვლა...";
     overlay.classList.remove("hidden");
@@ -551,8 +550,8 @@ function startWeekge(){
   };
 
   $("#avatar").onclick = () => $("#menu").classList.toggle("open");
-  document.addEventListener("click", e => {
-    if (!e.target.closest(".avatar") && !e.target.closest(".menu"))
+  document.addEventListener("click", e=>{
+    if(!e.target.closest(".avatar") && !e.target.closest(".menu"))
       $("#menu").classList.remove("open");
   });
 
@@ -563,65 +562,68 @@ function startWeekge(){
     renderProfile();
   };
   $("#closeModal").onclick = () => $("#modal").classList.remove("open");
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") $("#modal").classList.remove("open");
-  });
+  document.addEventListener("keydown", e => { if(e.key==="Escape") $("#modal").classList.remove("open"); });
 
   /* === AUTH STATE === */
-  auth.onAuthStateChanged(async u => {
+  auth.onAuthStateChanged(async u=>{
     user = u || null;
     guardUI(!!user);
-
-    if (user) {
+    if(user){
       $("#avatar").src = user.photoURL || "https://i.pravatar.cc/100";
       overlay.querySelector("p").textContent = "იტვირთება...";
       await bootAfterLogin();
-
-      setTimeout(() => overlay.classList.add("hidden"), 800);
-    } else {
-      setTimeout(() => overlay.classList.add("hidden"), 800);
-    }
+      setTimeout(()=>overlay.classList.add("hidden"), 800);
+    } else setTimeout(()=>overlay.classList.add("hidden"),800);
   });
 
-  function guardUI(signed) {
-    $("#signinBtn").style.display = signed ? "none" : "inline-flex";
-    $("#logoutBtn").style.display = signed ? "inline-flex" : "none";
-    $("#avatar").style.display = signed ? "block" : "none";
-    if (!signed)
-      $("#cardsCanvas").innerHTML =
-        "<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";
+  function guardUI(signed){
+    $("#signinBtn").style.display = signed?"none":"inline-flex";
+    $("#logoutBtn").style.display = signed?"inline-flex":"none";
+    $("#avatar").style.display = signed?"block":"none";
+    if(!signed) $("#cardsCanvas").innerHTML="<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";
   }
 
-  async function loadCatalog() {
-    catalog = [];
+  /* === Catalog Load — READ ONLY === */
+  async function loadCatalog(){
+    catalog=[];
     const snap = await db.collection("subjects").get();
-    snap.forEach(d => catalog.push({ id: d.id, ...d.data() }));
+    snap.forEach(d=>{
+      const safeData = JSON.parse(JSON.stringify(d.data())); // clone, remove references
+      catalog.push(Object.freeze({ id: d.id, ...safeData })); // freeze to lock edits
+    });
+    Object.freeze(catalog);
   }
 
-  async function loadUserSelection() {
+  /* === User Selection === */
+  async function loadUserSelection(){
     const snap = await db.collection("users").doc(user.uid).get();
     const data = snap.exists ? snap.data() : {};
-    selected = data.subjects || [];
-    userDays = data.days || {};
+    selected = Array.isArray(data.subjects) ? [...data.subjects] : [];
+    userDays = typeof data.days === "object" ? {...data.days} : {};
   }
 
-  async function ensureSubjectsLoaded() {
-    const toLoad = selected.filter(id => !cache[id]);
-    for (const id of toLoad) {
-      const subj = catalog.find(c => c.id === id);
-      if (subj) cache[id] = subj;
+  async function ensureSubjectsLoaded(){
+    const toLoad = selected.filter(id=>!cache[id]);
+    for(const id of toLoad){
+      const subj = catalog.find(c=>c.id===id);
+      if(subj){
+        cache[id]=Object.freeze({...subj});
+      }else{
+        console.warn("⚠️ subject not found:",id);
+      }
     }
+    Object.freeze(cache);
   }
 
-  function flattenWeeks() {
-    weekDates = [];
-    SEMESTER_WEEKS.forEach(w => {
-      if (w.start1) weekDates.push({ n: w.n, start: w.start1, end: w.end1 });
-      if (w.start2) weekDates.push({ n: w.n, start: w.start2, end: w.end2 });
+  function flattenWeeks(){
+    weekDates=[];
+    SEMESTER_WEEKS.forEach(w=>{
+      if(w.start1) weekDates.push({n:w.n,start:w.start1,end:w.end1});
+      if(w.start2) weekDates.push({n:w.n,start:w.start2,end:w.end2});
     });
   }
 
-  async function bootAfterLogin() {
+  async function bootAfterLogin(){
     await Promise.all([loadCatalog(), loadUserSelection()]);
     await ensureSubjectsLoaded();
     flattenWeeks();
@@ -629,39 +631,28 @@ function startWeekge(){
     goToday();
   }
 
-  function paintWeeks() {
-    const iso = todayISO();
-    const list = $("#weeksList");
-    list.innerHTML = "";
-    let activeWeekN = null;
-    for (const w of SEMESTER_WEEKS) {
-      if (isBetween(iso, w.start1, w.end1) || isBetween(iso, w.start2, w.end2)) {
-        activeWeekN = w.n;
-        break;
-      }
+  function paintWeeks(){
+    const iso=todayISO();
+    const list=$("#weeksList"); list.innerHTML="";
+    let activeWeekN=null;
+    for(const w of SEMESTER_WEEKS){
+      if(isBetween(iso,w.start1,w.end1)||isBetween(iso,w.start2,w.end2)){activeWeekN=w.n;break;}
     }
-
-    SEMESTER_WEEKS.forEach(w => {
-      const isCurrent = activeWeekN === w.n;
-      const done = hasPassed(iso, w.end1) && hasPassed(iso, w.end2);
-      const status = isCurrent ? "current" : done ? "done" : "pending";
-      const row = el("div", {
-        className: `week-item${isCurrent ? " active" : ""}`
-      });
-      row.setAttribute("data-week", w.n);
+    SEMESTER_WEEKS.forEach(w=>{
+      const isCurrent=activeWeekN===w.n;
+      const done=hasPassed(iso,w.end1)&&hasPassed(iso,w.end2);
+      const status=isCurrent?"current":done?"done":"pending";
+      const row=el("div",{className:`week-item${isCurrent?" active":""}`});
+      row.setAttribute("data-week",w.n);
       row.append(
-        el("div", { className: "dot " + status }),
-        el("div", {}, [
-          el("div", { className: "wk-title", textContent: `კვირა ${w.n}` }),
-          el("div", {
-            className: "wk-dates",
-            textContent:
-              fmtRange(w.start1, w.end1) + " / " + fmtRange(w.start2, w.end2)
-          })
+        el("div",{className:"dot "+status}),
+        el("div",{},[
+          el("div",{className:"wk-title",textContent:`კვირა ${w.n}`}),
+          el("div",{className:"wk-dates",textContent:fmtRange(w.start1,w.end1)+" / "+fmtRange(w.start2,w.end2)})
         ])
       );
-      row.onclick = () => {
-        document.querySelectorAll(".week-item").forEach(x => x.classList.remove("active"));
+      row.onclick=()=>{
+        document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));
         row.classList.add("active");
         showWeek(w.n);
         toggleWeeks(false);
@@ -672,41 +663,29 @@ function startWeekge(){
     updateWeekLabel(activeWeekN);
   }
 
-  function updateWeekLabel(n) {
-    $("#weekToggle").textContent = `კვირა ${n || "-"} ▼`;
-  }
+  function updateWeekLabel(n){ $("#weekToggle").textContent=`კვირა ${n||"-"} ▼`; }
 
-  function addBtns(wrap, weekObj) {
-    const btns = el("div", { className: "btns" });
-    const add = (label, url, colorName) => {
-      const [bg, txt] = colorMap[colorName] || ["#38d98a", "#fff"];
-      const b = el("button", {
-        className: "pill",
-        textContent: label,
-        style: `background:${bg};color:${txt}`
-      });
-      if (url) b.onclick = () => window.open(url, "_blank");
+  function addBtns(wrap,weekObj){
+    const btns=el("div",{className:"btns"});
+    const add=(label,url,colorName)=>{
+      const [bg,txt]=colorMap[colorName]||["#38d98a","#fff"];
+      const b=el("button",{className:"pill",textContent:label,style:`background:${bg};color:${txt}`});
+      if(url) b.onclick=()=>window.open(url,"_blank");
       btns.append(b);
     };
-    (weekObj.buttons || []).forEach(b =>
-      add(b.label, b.link, b.colorName || b.color || "green")
-    );
+    (weekObj.buttons||[]).forEach(b=>add(b.label,b.link,b.colorName||b.color||"green"));
     wrap.append(btns);
   }
 
-  function addGlobalBtns(card, subj) {
-    if (subj.globalButtons && subj.globalButtons.length > 0) {
-      const box = el("div", { className: "global-files" });
-      box.append(el("h4", { textContent: "მთავარი ფაილები:" }));
-      const btns = el("div", { className: "btns" });
-      subj.globalButtons.forEach(b => {
-        const [bg, txt] = colorMap[b.colorName || b.color] || ["#38d98a", "#fff"];
-        const btn = el("button", {
-          className: "pill",
-          textContent: b.label,
-          style: `background:${bg};color:${txt}`
-        });
-        if (b.link) btn.onclick = () => window.open(b.link, "_blank");
+  function addGlobalBtns(card,subj){
+    if(subj.globalButtons && subj.globalButtons.length>0){
+      const box=el("div",{className:"global-files"});
+      box.append(el("h4",{textContent:"მთავარი ფაილები:"}));
+      const btns=el("div",{className:"btns"});
+      subj.globalButtons.forEach(b=>{
+        const [bg,txt]=colorMap[b.colorName||b.color]||["#38d98a","#fff"];
+        const btn=el("button",{className:"pill",textContent:b.label,style:`background:${bg};color:${txt}`});
+        if(b.link) btn.onclick=()=>window.open(b.link,"_blank");
         btns.append(btn);
       });
       box.append(btns);
@@ -714,187 +693,152 @@ function startWeekge(){
     }
   }
 
-function todayDayIndex() {
-  const d = new Date().getDay();
-  // კვირა უნდა გახდეს 6, ორშაბათი 0-ზე იწყოს
-  return d === 0 ? 6 : d - 1;
-}
+  function todayDayIndex(){
+    const d=new Date().getDay();
+    return d===0?6:d-1;
+  }
 
-  function sortByDayProximity(subjs) {
-    const t = todayDayIndex();
-    return subjs.sort((a, b) => {
-      const da = (a.dayIndex ?? 7) - t;
-      const db = (b.dayIndex ?? 7) - t;
-
-      // დღევანდელი საგნები წამოსწიოს წინ
-      const wrapA = da < 0 ? da + 7 : da;
-      const wrapB = db < 0 ? db + 7 : db;
-
-      // თუ საგანი დღევანდელია, დააყენე ყველაზე წინ
-      if (a.dayIndex === t && b.dayIndex !== t) return -1;
-      if (b.dayIndex === t && a.dayIndex !== t) return 1;
-
-      return wrapA - wrapB;
+  function sortByDayProximity(subjs){
+    const t=todayDayIndex();
+    return subjs.sort((a,b)=>{
+      const da=(a.dayIndex??7)-t, db=(b.dayIndex??7)-t;
+      const wrapA=da<0?da+7:da, wrapB=db<0?db+7:db;
+      if(a.dayIndex===t && b.dayIndex!==t) return -1;
+      if(b.dayIndex===t && a.dayIndex!==t) return 1;
+      return wrapA-wrapB;
     });
   }
 
-  function showWeek(n) {
-    const canvas = $("#cardsCanvas");
-    canvas.style.opacity = "0";
-    canvas.style.filter = "blur(8px)";
-    setTimeout(() => {
-      const stack = el("div", { className: "card-stack" });
-      let any = false;
-      const subs = sortByDayProximity(selected.map(id => {
-        const subj = cache[id];
-        if (!subj) return null;
-        const day = userDays?.[id] ?? null;
-        return {...subj, dayIndex: daysOfWeek.indexOf(day)};
+  function showWeek(n){
+    const canvas=$("#cardsCanvas");
+    canvas.style.opacity="0";canvas.style.filter="blur(8px)";
+    setTimeout(()=>{
+      const stack=el("div",{className:"card-stack"}); let any=false;
+      const subs=sortByDayProximity(selected.map(id=>{
+        const subj=cache[id];
+        if(!subj) return null;
+        const day=userDays?.[id]??null;
+        return {...subj,dayIndex:daysOfWeek.indexOf(day)};
       }).filter(Boolean));
 
-      subs.forEach(subj => {
-        const cur = subj.weeks?.find(w => w.week === n);
-        const prev = n > 1 ? subj.weeks?.find(w => w.week === n - 1) : null;
-        if (!cur && !prev) return;
-        any = true;
-        const card = el("div", { className: "card" });
-        card.append(el("div", { className: "subhead", textContent: subj.name + (userDays?.[subj.id] ? ` (${userDays[subj.id]})` : "") }));
+      subs.forEach(subj=>{
+        const cur=subj.weeks?.find(w=>w.week===n);
+        const prev=n>1?subj.weeks?.find(w=>w.week===n-1):null;
+        if(!cur && !prev) return;
+        any=true;
+        const card=el("div",{className:"card"});
+        card.append(el("div",{className:"subhead",textContent:subj.name+(userDays?.[subj.id]?` (${userDays[subj.id]})`:"")}));
 
-        const typeText = cur?.type || prev?.type || null;
-        if (typeText) {
-          const typeEl = el("div", {
-            style:"text-align:center;font-size:1.4rem;opacity:1;margin:10px 0 20px 0;font-weight:600;color:white;letter-spacing:3px;",
-            textContent: typeText
-          });
+        const typeText=cur?.type||prev?.type||null;
+        if(typeText){
+          const typeEl=el("div",{style:"text-align:center;font-size:1.4rem;margin:10px 0 20px;font-weight:600;color:white;letter-spacing:3px;",textContent:typeText});
           card.append(typeEl);
         }
 
-        addGlobalBtns(card, subj);
-        const wrap = el("div", { className: "card-sections" });
-
-        if (prev) {
-          const sec = el("div", { className: "card-section this-week" }); // ✅ დავამატე ახალი კლასი
-          sec.append(el("h4", { textContent: "ამ კვირისთვის:" }));
-          if (prev.topic)
-            sec.append(el("div", { className: "topic-text", style: "margin-bottom:15px;", innerHTML: prev.topic }));
-          addBtns(sec, prev);
-          wrap.append(sec);
+        addGlobalBtns(card,subj);
+        const wrap=el("div",{className:"card-sections"});
+        if(prev){
+          const sec=el("div",{className:"card-section this-week"});
+          sec.append(el("h4",{textContent:"ამ კვირისთვის:"}));
+          if(prev.topic) sec.append(el("div",{className:"topic-text",innerHTML:prev.topic}));
+          addBtns(sec,prev); wrap.append(sec);
         }
-
-        if (cur) {
-          const sec = el("div", { className: "card-section" });
-          sec.append(el("h4", { textContent: "შემდეგი კვირისთვის:" }));
-          if (cur.topic)
-            sec.append(el("div", { className: "topic-text", style: "margin-bottom:15px;", innerHTML: cur.topic }));
-          addBtns(sec, cur);
-          wrap.append(sec);
+        if(cur){
+          const sec=el("div",{className:"card-section"});
+          sec.append(el("h4",{textContent:"შემდეგი კვირისთვის:"}));
+          if(cur.topic) sec.append(el("div",{className:"topic-text",innerHTML:cur.topic}));
+          addBtns(sec,cur); wrap.append(sec);
         }
-
-        card.append(wrap);
-        stack.append(card);
+        card.append(wrap); stack.append(card);
       });
-      canvas.innerHTML = "";
-      canvas.append(any ? stack : el("div", { className: "empty", textContent: "საგნები არ არის. დაამატე პარამეტრებში" }));
-      canvas.style.filter = "blur(0)";
-      canvas.style.opacity = "1";
-    }, 300);
+      canvas.innerHTML="";
+      canvas.append(any?stack:el("div",{className:"empty",textContent:"საგნები არ არის. დაამატე პარამეტრებში"}));
+      canvas.style.filter="blur(0)";canvas.style.opacity="1";
+    },300);
   }
 
-  function goToday() {
-    const iso = todayISO();
-    const cur = weekDates.find(w => isBetween(iso, w.start, w.end)) || weekDates[0];
-    if (cur) {
+  function goToday(){
+    const iso=todayISO();
+    const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
+    if(cur){
       showWeek(cur.n);
       updateWeekLabel(cur.n);
-      document.querySelectorAll(".week-item").forEach(x => x.classList.remove("active"));
-      const currentEl = document.querySelector(`.week-item[data-week="${cur.n}"]`);
-      if (currentEl) currentEl.classList.add("active");
+      document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));
+      const elx=document.querySelector(`.week-item[data-week="${cur.n}"]`);
+      if(elx) elx.classList.add("active");
     }
     toggleWeeks(false);
   }
 
-  function toggleWeeks(force) {
-    const left = $("#weeksList");
-    left.classList.toggle("open", force !== undefined ? force : !left.classList.contains("open"));
+  function toggleWeeks(force){
+    const left=$("#weeksList");
+    left.classList.toggle("open",force!==undefined?force:!left.classList.contains("open"));
   }
 
-  /* === PROFILE === */
-  function renderProfile() {
-    const list = $("#catalogList");
-    list.innerHTML = "";
-    const mine = $("#mySubjects");
-    mine.innerHTML = "";
-
-    catalog.forEach(x => {
-      const added = selected.includes(x.id);
-      const row = el("div", { className: "item" });
-
-      const left = el("div", {}, [
-        el("div", { textContent: x.name, style: "font-weight:700" }),
-        el("div", { textContent: x.id, style: "font-size:12px;opacity:.7" })
+  /* === Profile === */
+  function renderProfile(){
+    const list=$("#catalogList"); list.innerHTML="";
+    const mine=$("#mySubjects"); mine.innerHTML="";
+    catalog.forEach(x=>{
+      const added=selected.includes(x.id);
+      const row=el("div",{className:"item"});
+      const left=el("div",{},[
+        el("div",{textContent:x.name,style:"font-weight:700"}),
+        el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
       ]);
-
-      const action = added
-        ? el("button", { className: "added", style: "background:#38d98a;color:#fff;",
-            innerHTML: `<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>` })
-        : el("button", { innerHTML: `<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg' style='width:25px;height:25px;'>`,
-            onclick: async () => {
-              if (!selected.includes(x.id)) selected.push(x.id);
-              await saveSelection(true);
-              renderProfile();
-            } });
-
-      row.append(left, action);
-      list.append(row);
+      const action=added
+        ? el("button",{className:"added",style:"background:#38d98a;color:#fff;",innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>`})
+        : el("button",{innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg' style='width:25px;height:25px;'>`,onclick:async()=>{
+            if(!selected.includes(x.id)) selected.push(x.id);
+            await saveSelection(true); renderProfile();
+          }});
+      row.append(left,action); list.append(row);
     });
 
-    selected.forEach(id => {
-      const subj = catalog.find(c => c.id === id);
-      const row = el("div", { className: "item" });
-      const left = el("div", {}, [
-        el("div", { textContent: subj ? subj.name : id, style: "font-weight:700" }),
-        el("div", { textContent: id, style: "font-size:12px;opacity:.7" })
+    selected.forEach(id=>{
+      const subj=catalog.find(c=>c.id===id);
+      const row=el("div",{className:"item"});
+      const left=el("div",{},[
+        el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
+        el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
       ]);
-
-      const delBtn = el("button", {
-        innerHTML: `<img src='https://raw.githubusercontent.com/WEEKGE/live/ce772a078446be5972f9c7b9f2ff91b0122c1dad/svgs/close.svg' style='width:22px;height:22px;filter:brightness(0) invert(1);'>`,
-        style: "background:var(--remove);color:#fff",  // ✅ just red background
-        onclick: async () => {
-          selected = selected.filter(s => s !== id);
-          delete cache[id];
-          await saveSelection(true);
-          renderProfile();
-        }
-      });
-
-      const select = el("select", { className: "day-select" });
-      daysOfWeek.forEach(d => {
-        const opt = el("option", { textContent: d, value: d });
-        if (userDays?.[id] === d) opt.selected = true;
+      const delBtn=el("button",{innerHTML:`<img src='https://raw.githubusercontent.com/WEEKGE/live/ce772a078446be5972f9c7b9f2ff91b0122c1dad/svgs/close.svg' style='width:22px;height:22px;filter:brightness(0) invert(1);'>`,style:"background:var(--remove);color:#fff",onclick:async()=>{
+        selected=selected.filter(s=>s!==id);
+        delete cache[id];
+        await saveSelection(true);
+        renderProfile();
+      }});
+      const select=el("select",{className:"day-select"});
+      daysOfWeek.forEach(d=>{
+        const opt=el("option",{textContent:d,value:d});
+        if(userDays?.[id]===d) opt.selected=true;
         select.append(opt);
       });
-      select.onchange = () => { userDays[id] = select.value; };
-
-      row.append(left, delBtn, select);
+      select.onchange=()=>{userDays[id]=select.value;};
+      row.append(left,delBtn,select);
       mine.append(row);
     });
-
-    $("#saveSubjects").onclick = async () => {
-      await saveSelection(true);
-    };
+    $("#saveSubjects").onclick=async()=>await saveSelection(true);
   }
 
-  async function saveSelection(immediate = false) {
-    if (!user) return;
-    await db.collection("users").doc(user.uid).set({ subjects: selected, days: userDays }, { merge: true });
-    if (immediate) {
-      await ensureSubjectsLoaded();
-      paintWeeks();
-      goToday();
-    }
+  /* === User Save Only (read-only for subjects) === */
+  async function saveSelection(immediate=false){
+    if(!user) return;
+    try{
+      await db.collection("users").doc(user.uid).set(
+        { subjects:selected, days:userDays },
+        { merge:true }
+      );
+      if(immediate){
+        await ensureSubjectsLoaded();
+        paintWeeks();
+        goToday();
+      }
+    }catch(e){ console.error("User save failed:",e); }
   }
 }
 </script>
+
 
 
 
