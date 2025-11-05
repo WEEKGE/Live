@@ -18,12 +18,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@100..900&display=swap');
 
-
 :root{
-  --bg:#0B1216; --surface:#17333d; --surface2:#121A1F; --text:#EDEFF2;
+  --bg:#000000; --surface:#202020; --surface2:#161616; --text:#EDEFF2;
   --accent:#16b438; --success:#38d98a; --danger:#f12525;
   --buttontext:#ffffff;
 }
@@ -191,14 +189,30 @@ input,select{width:100%;padding:10px;border:none;background:#282f35;color:var(--
 .topicField:focus {
   background: #303840;
 }
+.delete-progress {
+  position:absolute;
+  left:0;
+  top:0;
+  width:0%;
+  height:10px;
+  background-color:rgba(230, 24, 24, 0.801);
+  pointer-events:none;
+  transition:none;
+}
 
 
+#logoutBtn:hover{background:#14862d;}
 
+.topicField{width:100%;min-height:100px;max-height:300px;overflow-y:auto;background:#282f35;color:var(--buttontext);padding:10px;font-size:1rem;border:none;outline:none;white-space:pre-wrap;word-wrap:break-word;line-height:1.5;border-radius:4px;}
+.topicField:focus{background:#303840;}
 
+/* Mobile */
 @media(max-width:900px){
   main{grid-template-columns:1fr}
   aside{order:2}
-  section{order:1}
+  section{order:1;padding:18px}
+  .customBtnRow{grid-template-columns:1fr 1fr auto;gap:8px}
+  .colorPalette{grid-column:1 / -1}
 }
 </style>
 </head>
@@ -214,6 +228,16 @@ input,select{width:100%;padding:10px;border:none;background:#282f35;color:var(--
   <h1>Weekge Admin</h1>
   <div class="right">
     <div id="saveStatus" class="saved">✅ დამახსოვრებულია</div>
+
+    <!-- NAV: Apply / Delete -->
+    <button id="applyNavBtn" title="Ctrl + S">
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Apply
+    </button>
+    <button id="deleteNavBtn">
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">Delete
+    </button>
+
+    <!-- Auth -->
     <button id="signinBtn">
       <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Google-ით შესვლა
     </button>
@@ -256,12 +280,13 @@ input,select{width:100%;padding:10px;border:none;background:#282f35;color:var(--
 
       <div id="weeksContainer"></div>
 
+      <!-- Optional local buttons kept (but not autosaving) -->
       <div class="btn-row" style="padding:0">
         <button class="success" id="saveBtn">
-          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="" width="18" height="18">SAVE
+          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="" width="18" height="18">Apply
         </button>
         <button class="danger" id="deleteBtn">
-          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="" width="18" height="18">DELETE
+          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="" width="18" height="18">Delete
         </button>
       </div>
       <div class="status" id="status"></div>
@@ -291,6 +316,7 @@ input,select{width:100%;padding:10px;border:none;background:#282f35;color:var(--
 <script>
 const overlay = document.getElementById("loadingOverlay");
 
+/* === Firebase init from external config === */
 fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   .then(r => r.json())
   .then(cfg => { 
@@ -303,85 +329,83 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
 function startAdmin(){
   const auth = firebase.auth(), db = firebase.firestore();
-  let user = null, subjects = [], currentId = null, saveTimer = null;
+  let user = null, subjects = [], currentId = null;
+  let isDirty = false; // <- აუტოსეივის ნაცვლად ცვლილების მონიტორი
+
   const ADMIN_EMAILS = ["davit.gvakharia@gmail.com"];
   const $ = s => document.querySelector(s);
-  const el = (t, p = {}, kids = []) => {
-    const e = document.createElement(t);
-    Object.assign(e, p);
-    kids.forEach(k => e.append(k));
-    return e;
-  };
+  const el = (t, p = {}, kids = []) => { const e = document.createElement(t); Object.assign(e, p); kids.forEach(k => e.append(k)); return e; };
 
   const saveStatus = $("#saveStatus");
-  const setSaveState = (st) => {
+  const statusBox = $("#status");
+
+  const setSaveState = (state, msg) => {
     saveStatus.className = "";
-    if (st === "saving") {
-      saveStatus.textContent = " მოითმინე...";
-      saveStatus.classList.add("saving");
-    } else if (st === "saved") {
+    if(state === "wait"){
+      saveStatus.textContent = "⏳ მოითმინე...";
+      saveStatus.classList.add("wait");
+    }else if(state === "saved"){
       saveStatus.textContent = "✅ დამახსოვრებულია";
       saveStatus.classList.add("saved");
-    } else {
+      isDirty = false;
+    }else if(state === "error"){
       saveStatus.textContent = "❌ პრობლემაა";
       saveStatus.classList.add("error");
+    }else if(state === "dirty"){
+      saveStatus.textContent = "⚠️ შენახული არ არის";
+      saveStatus.classList.add("dirty");
+    }else{
+      if(msg) saveStatus.textContent = msg;
     }
+    if(msg && statusBox){ statusBox.textContent = msg; }
+  };
+
+  const markDirty = () => {
+    isDirty = true;
+    setSaveState("dirty");
   };
 
   function showToast(m, c = "#fff") {
-    const s = $("#status");
-    if (s) { s.textContent = m; s.style.color = c; }
+    if (statusBox) { statusBox.textContent = m; statusBox.style.color = c; }
   }
 
-  /* === ✅ Sign In / Sign Out === */
+  /* === Auth === */
   $("#signinBtn").onclick = async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     overlay.querySelector("p").textContent = "ავტორიზაცია მიმდინარეობს...";
     overlay.classList.remove("hidden");
-    try {
-      await auth.signInWithPopup(provider);
-    } catch (err) {
-      console.error("Sign-in error:", err);
-      alert("❌ შესვლისას შეცდომაა");
-      overlay.classList.add("hidden");
-    }
+    try{ await auth.signInWithPopup(provider); }
+    catch(err){ console.error("Sign-in error:", err); alert("❌ შესვლისას შეცდომაა"); overlay.classList.add("hidden"); }
   };
 
   $("#logoutBtn").onclick = async () => {
     overlay.querySelector("p").textContent = "გასვლა...";
     overlay.classList.remove("hidden");
-    try {
-      await auth.signOut();
-    } catch (err) {
-      console.error("Logout error:", err);
-      alert("❌ გასვლისას შეცდომაა");
-      overlay.classList.add("hidden");
-    }
+    try{ await auth.signOut(); }
+    catch(err){ console.error("Logout error:", err); alert("❌ გასვლისას შეცდომაა"); overlay.classList.add("hidden"); }
   };
 
-  /* === AUTH STATE === */
   auth.onAuthStateChanged(async u => {
     user = u || null;
-    if (user) {
+    if(user){
       $("#signinBtn").style.display = "none";
       $("#logoutBtn").style.display = "inline-flex";
 
-      if (ADMIN_EMAILS.includes(user.email)) {
+      if(ADMIN_EMAILS.includes(user.email)){
         await loadSubjects();
         overlay.querySelector("p").textContent = "იტვირთება...";
         setTimeout(() => overlay.classList.add("hidden"), 600);
-      } else {
+      }else{
         overlay.innerHTML = "<h1 style='color:red;'>🚫 Access Denied</h1>";
       }
-
-    } else {
+    }else{
       setTimeout(() => overlay.classList.add("hidden"), 600);
       $("#signinBtn").style.display = "inline-flex";
       $("#logoutBtn").style.display = "none";
     }
   });
 
-  /* === LOAD SUBJECTS === */
+  /* === Subjects === */
   async function loadSubjects(){
     const snap = await db.collection("subjects").get();
     subjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -393,17 +417,17 @@ function startAdmin(){
     list.innerHTML = "";
     const q = $("#searchBox").value.toLowerCase();
     subjects
-      .filter(s => s.name?.toLowerCase().includes(q) || s.id?.toLowerCase().includes(q))
+      .filter(s => (s.name||"").toLowerCase().includes(q) || (s.id||"").toLowerCase().includes(q))
       .forEach(s => {
-        const div = el("div", { className: "subject-item", textContent: `${s.name} (${s.id})` });
+        const div = el("div",{ className:"subject-item", textContent:`${s.name} (${s.id})` });
         div.onclick = () => openSubject(s.id);
-        if (s.id === currentId) div.classList.add("active");
+        if(s.id === currentId) div.classList.add("active");
         list.append(div);
       });
   }
   $("#searchBox").oninput = renderList;
 
-  /* === CREATE SUBJECT POPUP === */
+  /* === Popup create === */
   const popup = $("#addPopup");
   $("#addSubjectBtn").onclick = () => { 
     $("#popupName").value = ""; 
@@ -429,20 +453,23 @@ function startAdmin(){
     popup.classList.remove("active");
     await loadSubjects();
     openSubject(id);
-    showToast("✅ Subject created", "#38d98a");
+    showToast("✅ Subject created","#38d98a");
   }
 
   function fadeEditor(cb){
     const ed = $("#editor");
     ed.classList.add("fadeout");
-    setTimeout(() => { cb(); ed.classList.remove("fadeout"); }, 100);
+    setTimeout(() => { cb(); ed.classList.remove("fadeout"); }, 120);
   }
 
   async function openSubject(id){
     const doc = await db.collection("subjects").doc(id).get();
-    if(!doc.exists) return alert("Not found");
+    if(!doc.exists){ alert("Not found"); return; }
     const data = doc.data();
     currentId = id;
+    isDirty = false;
+    setSaveState("saved");
+
     document.querySelectorAll(".subject-item").forEach(x => 
       x.classList.toggle("active", x.textContent.endsWith(`(${id})`))
     );
@@ -458,31 +485,37 @@ function startAdmin(){
     });
   }
 
-  const COLOR_NAMES = ["blue","green","yellow","red"];
+  const COLOR_NAMES = ["yellow","red","blue","green"];
 
   function createButtonEditor(b){
     const wrap = el("div",{className:"customBtnRow"});
     const selected = b.colorName || "yellow";
+    wrap.dataset.colorName = selected;
     wrap.innerHTML = `
       <input class="btnLabel" type="text" value="${b.label||""}" placeholder="სახელი">
       <input class="btnLink" type="text" value="${b.link||""}" placeholder="ლინკი">
       <div class="colorPalette">
         ${COLOR_NAMES.map(c=>`<div class="colorBox ${c===selected?"active":""}" data-color="${c}"></div>`).join("")}
       </div>
-      <button class="removeBtn"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" style="width:25px;height:25px;" alt=""></button>
+      <button class="removeBtn" title="Remove">
+        <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">
+      </button>
     `;
-    wrap.dataset.colorName = selected;
+
+    wrap.querySelectorAll(".btnLabel,.btnLink").forEach(inp=>{
+      inp.addEventListener("input", markDirty);
+    });
 
     wrap.querySelectorAll(".colorBox").forEach(box=>{
       box.onclick=()=>{
         wrap.querySelectorAll(".colorBox").forEach(bx=>bx.classList.remove("active"));
         box.classList.add("active");
         wrap.dataset.colorName = box.dataset.color;
-        autoSave();
+        markDirty();
       };
     });
 
-    wrap.querySelector(".removeBtn").onclick = () => { wrap.remove(); autoSave(); };
+    wrap.querySelector(".removeBtn").onclick = () => { wrap.remove(); markDirty(); };
     return wrap;
   }
 
@@ -491,32 +524,40 @@ function startAdmin(){
     btns.forEach(b => box.append(createButtonEditor(b)));
     $("#addGlobalBtn").onclick = () => {
       box.append(createButtonEditor({label:"New", link:"", colorName:"yellow"}));
-      autoSave();
+      markDirty();
     };
-    box.oninput = autoSave;
   }
 
   function renderWeeks(weeks){
     const box = $("#weeksContainer"); box.innerHTML = "";
-    for(let i=1;i<=12;i++){
+    for(let i=1;i<=12;i++){ // 12 კვირა
       const w = weeks.find(x=>x.week===i)||{};
       const div = el("div",{className:"week"});
       div.innerHTML = `
         <h3>კვირა ${i}</h3>
         <label>თემის სათაური</label>
         <div id="topic-${i}" class="topicField" contenteditable="true">${w.topic || ""}</div>
-        <label style="margin-top:30px;">ლექციის ტიპი</label>
-        <select id="type-${i}" style="background: #23343B; color:var(--buttontext)">
+
+        <label style="margin-top:18px;">ლექციის ტიპი</label>
+        <select id="type-${i}" style="background:#23343B;color:var(--buttontext)">
           <option value="ლექცია"${w.type==="ლექცია"?" selected":""}>ლექცია</option>
           <option value="ლექცია (ქვიზი)"${w.type==="ლექცია (ქვიზი)"?" selected":""}>ლექცია (ქვიზი)</option>
           <option value="შუალედური"${w.type==="შუალედური"?" selected":""}>შუალედური</option>
         </select>
-        <label style="margin-top:30px;">ბმულები</label>
+
+        <label style="margin-top:18px;">ბმულები</label>
         <div id="buttons-${i}"></div>
+
         <div class="weekBtns" id="weekBtns-${i}" style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="addBtn slideBtn" data-week="${i}" style="background-color:#e8980e;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სლაიდის დამატება</button>
-          <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">ვიდეოს დამატება</button>
-          <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742;"><img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">სხვა რესურსის დამატება</button>
+          <button class="addBtn slideBtn" data-week="${i}" style="background-color:#e8980e;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სლაიდის დამატება
+          </button>
+          <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">ვიდეოს დამატება
+          </button>
+          <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სხვა რესურსის დამატება
+          </button>
         </div>
       `;
       box.append(div);
@@ -525,25 +566,32 @@ function startAdmin(){
       (w.buttons||[]).forEach(b => btnBox.append(createButtonEditor(b)));
 
       const topicField = div.querySelector(`#topic-${i}`);
-      topicField.oninput = () => { pushUndoState(topicField); autoSave(); };
-      div.querySelector(`#type-${i}`).oninput = autoSave;
+      topicField.addEventListener("input", markDirty);
+
+      div.querySelector(`#type-${i}`).addEventListener("input", markDirty);
 
       div.querySelector(".slideBtn").onclick = () => {
-        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.toLowerCase() === "slide");
-        if(!exists){ btnBox.append(createButtonEditor({label:"სლაიდი",link:"DRIVELINK/preview",colorName:"yellow"})); updateAddButtonsVisibility(i); autoSave(); }
+        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.trim().toLowerCase() === "სლაიდი" || el.value.trim().toLowerCase() === "slide");
+        if(!exists){
+          btnBox.append(createButtonEditor({label:"სლაიდი",link:"DRIVELINK/preview",colorName:"yellow"}));
+          updateAddButtonsVisibility(i);
+          markDirty();
+        }
       };
       div.querySelector(".videoBtn").onclick = () => {
-        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.toLowerCase() === "video");
-        if(!exists){ btnBox.append(createButtonEditor({label:"ვიდეო",link:"",colorName:"red"})); updateAddButtonsVisibility(i); autoSave(); }
+        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.trim().toLowerCase() === "ვიდეო" || el.value.trim().toLowerCase() === "video");
+        if(!exists){
+          btnBox.append(createButtonEditor({label:"ვიდეო",link:"",colorName:"red"}));
+          updateAddButtonsVisibility(i);
+          markDirty();
+        }
       };
       div.querySelector(".addCustom").onclick = () => {
         btnBox.append(createButtonEditor({label:"",link:"",colorName:"blue"}));
-        autoSave();
+        markDirty();
       };
 
-      btnBox.oninput = autoSave;
       updateAddButtonsVisibility(i);
-      initUndo(topicField);
     }
   }
 
@@ -551,98 +599,150 @@ function startAdmin(){
     const weekBox = document.querySelector(`#buttons-${i}`);
     const slideBtn = document.querySelector(`#weekBtns-${i} .slideBtn`);
     const videoBtn = document.querySelector(`#weekBtns-${i} .videoBtn`);
-    const hasSlide = [...weekBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="slide");
-    const hasVideo = [...weekBox.querySelectorAll(".btnLabel")].some(el=>el.value.toLowerCase()==="video");
+    const hasSlide = [...weekBox.querySelectorAll(".btnLabel")].some(el=>el.value.trim().toLowerCase()==="სლაიდი" || el.value.trim().toLowerCase()==="slide");
+    const hasVideo = [...weekBox.querySelectorAll(".btnLabel")].some(el=>el.value.trim().toLowerCase()==="ვიდეო" || el.value.trim().toLowerCase()==="video");
     slideBtn.style.display = hasSlide ? "none" : "inline-flex";
     videoBtn.style.display = hasVideo ? "none" : "inline-flex";
   }
 
-  async function autoSave(){
-    if(!currentId) return;
-    clearTimeout(saveTimer);
-    setSaveState("saving");
-    saveTimer=setTimeout(async()=>{
-      try{
-        const globalBtns=[...document.querySelectorAll("#globalBtns .customBtnRow")].map(b=>({
-          label:b.querySelector(".btnLabel").value,
-          link:b.querySelector(".btnLink").value,
-          colorName:b.dataset.colorName
-        }));
-        const weeks=[];
-        for(let i=1;i<=13;i++){
-          const weekDiv=document.querySelector("#weeksContainer").children[i-1];
-          if(!weekDiv) continue;
-          const topic=(document.querySelector("#topic-"+i)?.innerHTML||"").trim();
-          const type=(document.querySelector("#type-"+i)?.value)||"ლექცია";
-          const buttons=[...weekDiv.querySelectorAll(".customBtnRow")].map(b=>({
-            label:b.querySelector(".btnLabel").value,
-            link:b.querySelector(".btnLink").value,
-            colorName:b.dataset.colorName
-          }));
-          const w={week:i,type,buttons};
-          if(topic) w.topic=topic;
-          weeks.push(w);
-        }
-        const name=$("#subjectName").value.trim();
-        const theme=$("#subjectTheme").value.trim();
-        await db.collection("subjects").doc(currentId).set({ id:currentId, name, theme, globalButtons:globalBtns, weeks }, { merge:true });
-        setSaveState("saved");
-      }catch(e){console.error(e);setSaveState("error");}
-    },1000);
+  /* === Collect and Save (manual) === */
+  function collectForm(){
+    if(!currentId) return null;
+
+    const globalBtns=[...document.querySelectorAll("#globalBtns .customBtnRow")].map(b=>({
+      label:b.querySelector(".btnLabel").value,
+      link:b.querySelector(".btnLink").value,
+      colorName:b.dataset.colorName
+    }));
+
+    const weeks=[];
+    for(let i=1;i<=12;i++){
+      const topic=(document.querySelector("#topic-"+i)?.innerHTML||"").trim();
+      const type=(document.querySelector("#type-"+i)?.value)||"ლექცია";
+      const weekDiv=document.querySelector("#buttons-"+i);
+      const buttons=[...(weekDiv?.querySelectorAll(".customBtnRow")||[])].map(b=>({
+        label:b.querySelector(".btnLabel").value,
+        link:b.querySelector(".btnLink").value,
+        colorName:b.dataset.colorName
+      }));
+      const w={week:i,type,buttons};
+      if(topic) w.topic=topic;
+      weeks.push(w);
+    }
+
+    const name=$("#subjectName").value.trim();
+    const theme=$("#subjectTheme").value.trim();
+
+    return { id: currentId, name, theme, globalButtons: globalBtns, weeks };
   }
 
-  $("#subjectName").oninput = autoSave;
-  $("#subjectTheme").oninput = autoSave;
-  $("#saveBtn").onclick = autoSave;
-  $("#deleteBtn").onclick = async () => {
-    if(!currentId || !confirm("Delete this subject?")) return;
-    await db.collection("subjects").doc(currentId).delete();
-    $("#editor").style.display="none";
-    currentId=null;
-    await loadSubjects();
-    showToast("🗑️ Deleted","#ed3737");
-  };
+  async function saveNow(){
+    if(!currentId){ alert("ჯერ აირჩიე საგანი."); return; }
+    const payload = collectForm();
+    if(!payload) return;
 
-  /* --- Formatting Shortcuts --- */
+    try{
+      setSaveState("wait");
+      await db.collection("subjects").doc(currentId).set(payload, { merge:true });
+      setSaveState("saved");
+      showToast("✅ Changes saved","#38d98a");
+      // განახლდეს სია სახელის ცვლილების შემთხვევაში
+      const idx = subjects.findIndex(s => s.id === currentId);
+      if(idx>-1){ subjects[idx] = {...subjects[idx], ...payload}; renderList(); }
+    }catch(e){
+      console.error(e);
+      setSaveState("error");
+      alert("❌ შენახვისას შეცდომაა");
+    }
+  }
+
+  async function deleteCurrent(){
+    if(!currentId){ alert("ჯერ აირჩიე საგანი."); return; }
+    if(!confirm("Delete this subject?")) return;
+    try{
+      setSaveState("wait");
+      await db.collection("subjects").doc(currentId).delete();
+      $("#editor").style.display="none";
+      const removedId = currentId;
+      currentId=null;
+      await loadSubjects();
+      setSaveState("saved");
+      showToast("🗑️ Deleted","#ed3737");
+      // აქტიური highlight მოხდეს
+      document.querySelectorAll(".subject-item").forEach(x=>x.classList.remove("active"));
+    }catch(e){
+      console.error(e);
+      setSaveState("error");
+      alert("❌ წაშლისას შეცდომაა");
+    }
+  }
+
+/* === Hold-to-Delete Delay Setup === */
+  function addHoldToDelete(btn, action) {
+    let progress = 0, interval;
+    // create progress overlay if not exists
+    let bar = btn.querySelector(".delete-progress");
+    if (!bar) {
+      bar = document.createElement("span");
+      bar.className = "delete-progress";
+      btn.prepend(bar);
+    }
+
+    btn.addEventListener("mousedown", () => {
+      progress = 0;
+      bar.style.width = "0%";
+      interval = setInterval(() => {
+        progress += 100 / 20; // fill over ~3s
+        bar.style.width = progress + "%";
+        if (progress >= 100) {
+          clearInterval(interval);
+          bar.style.width = "100%";
+          action(); // perform delete
+        }
+      }, 50);
+    });
+
+    ["mouseup", "mouseleave"].forEach(ev => {
+      btn.addEventListener(ev, () => {
+        clearInterval(interval);
+        bar.style.width = "0%";
+      });
+    });
+  }
+
+  /* === Wire buttons === */
+  $("#saveBtn").onclick = saveNow;
+  $("#applyNavBtn").onclick = saveNow;
+
+  // replace direct delete click with hold-to-delete
+  addHoldToDelete($("#deleteBtn"), deleteCurrent);
+  addHoldToDelete($("#deleteNavBtn"), deleteCurrent);
+
+  // ველების ცვლილებაზე მონიშვნა dirty
+  ["#subjectName","#subjectTheme"].forEach(sel=>{
+    $(sel).addEventListener("input", markDirty);
+  });
+
+  // Ctrl+S => Apply
+  document.addEventListener("keydown", (e)=>{
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="s"){
+      e.preventDefault();
+      saveNow();
+    }
+  });
+
+  /* --- Formatting shortcuts (bold/italic/underline) --- */
   document.addEventListener("keydown", e => {
-    if (e.ctrlKey && ["b", "i", "u"].includes(e.key.toLowerCase())) {
+    if (e.ctrlKey && ["b","i","u"].includes(e.key.toLowerCase())) {
       e.preventDefault();
       const cmd = e.key.toLowerCase() === "b" ? "bold" :
                   e.key.toLowerCase() === "i" ? "italic" : "underline";
       document.execCommand(cmd, false, null);
-    }
-  });
-
-  /* --- Undo System --- */
-  const undoStacks = new WeakMap();
-  function initUndo(el){ undoStacks.set(el, [el.innerHTML]); }
-  function pushUndoState(el){
-    const stack = undoStacks.get(el) || [];
-    const last = stack[stack.length-1];
-    if (last !== el.innerHTML) {
-      stack.push(el.innerHTML);
-      if (stack.length > 5) stack.shift();
-      undoStacks.set(el, stack);
-    }
-  }
-  document.addEventListener("keydown", e => {
-    if (e.ctrlKey && e.key.toLowerCase() === "z") {
-      e.preventDefault();
-      const active = document.activeElement;
-      if (active && active.classList.contains("topicField")) {
-        const stack = undoStacks.get(active) || [];
-        if (stack.length > 1) {
-          stack.pop();
-          active.innerHTML = stack[stack.length - 1];
-          undoStacks.set(active, stack);
-          autoSave();
-        }
-      }
+      markDirty();
     }
   });
 }
 </script>
-
 
 </body>
 </html>
