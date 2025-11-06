@@ -597,8 +597,9 @@
 <div class="main-content">
     <div id="live-view" class="view">
       <div class="left-info-bar">
-        <div class="info-block" id="currentDayBlock"></div>
         <div class="info-block" id="currentWeekBlock"></div>
+        <div class="info-block" id="currentDayBlock"></div>
+        <div class="info-block" id="currentTimeBlock"></div>
       </div>
       <div class="subjects-panel scroll-wrap">
           <div id="cardsCanvas" class="scroll-list"></div>
@@ -1117,13 +1118,27 @@ function startWeekge(){
         // Update current day and week blocks
         const currentDayBlock = $("#currentDayBlock");
         const currentWeekBlock = $("#currentWeekBlock");
+        const currentTimeBlock = $("#currentTimeBlock"); // Get the new time block
+
+        function updateLiveTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            if (currentTimeBlock) {
+                currentTimeBlock.innerHTML = `<div>${hours}:${minutes}:${seconds}</div>`;
+            }
+        }
+
         if (currentDayBlock && currentWeekBlock) {
             const today = new Date();
             const dayIndex = today.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
             const currentDayName = daysOfWeek[dayIndex === 0 ? 6 : dayIndex - 1]; // Adjust for 0-indexed Monday
-            currentDayBlock.innerHTML = `<div>${currentDayName}</div>`;
             currentWeekBlock.innerHTML = `<div>კვირა ${cur.n}</div>`;
+            currentDayBlock.innerHTML = `<div>${currentDayName}</div>`;
         }
+        updateLiveTime(); // Initial call to display time immediately
+        setInterval(updateLiveTime, 1000); // Update every second
 
         // De-activate all week items first
         document.querySelectorAll('#weeksBar .item').forEach(item => {
@@ -1377,3 +1392,4 @@ function startWeekge(){
 </script>
 </body>
 </html>
+
