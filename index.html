@@ -568,23 +568,21 @@
     background: #333; /* Subtle darker background on hover */
   }
 
-
+  /* Phone-specific styles */
   @media screen and (max-width: 768px) {
-      body {
-        margin: 0; /* Remove horizontal margin for phone */
-      }
+    body {
+      margin: 0 10px; /* Reduce horizontal margin for phone */
+    }
+
     .main-content {
       flex-direction: column; /* Stack main content vertically */
-      margin: 10px 10px; /* Adjust vertical margin */
+      margin: 10px 0; /* Adjust vertical margin */
     }
 
     #live-view, #resources-view, #settings-view {
       width: 100%; /* Full width for all main views */
       flex-direction: column; /* Stack elements within live-view vertically */
-      padding: 0;
     }
-
-    view{padding: 0;}
 
     .left-info-bar {
       display: none; /* Hide the left info bar on phone */
@@ -601,7 +599,6 @@
       padding: 0; /* Remove padding */
       overflow-x: hidden; /* No horizontal scroll for cards */
       overflow-y: auto; /* Allow vertical scroll for cards */
-      gap: 20px; /* Space between cards */
     }
 
     .subject-wrapper {
@@ -614,36 +611,6 @@
     .card {
       width: 100%; /* Full width for card within its wrapper */
       min-height: 100px; /* Ensure cards have a minimum height */
-      display: flex; /* Ensure flex properties apply */
-      flex-direction: column; /* Ensure flex properties apply */
-    }
-
-    /* Reorder elements within subject-wrapper */
-    .subject-wrapper .card {
-      order: 1; /* Card comes first */
-    }
-    .subject-wrapper .week-toggle-buttons {
-      order: 2; /* Toggle buttons come second */
-    }
-
-    /* Reorder elements within card */
-    .card .card-main-bottom {
-      order: 1; /* Card main bottom comes first */
-    }
-    .card .card-main-top {
-      order: 2; /* Card main top comes second */
-    }
-
-    /* Reorder elements within card-main-top */
-    .card-main-top {
-      display: flex; /* Ensure flex properties apply */
-      flex-direction: column; /* Ensure flex properties apply */
-    }
-    .card-main-top .card-sub-top {
-      order: 1; /* Topic comes first */
-    }
-    .card-main-top .card-sub-bottom {
-      order: 2; /* Embeds come second */
     }
 
     .card-main-bottom {
@@ -681,17 +648,10 @@
     }
 
     /* Settings page adjustments for phone */
-  .settings-layout {
-    flex-direction: column;
-    padding: 0; /* Add horizontal padding */
-  }
-
-  .settings-main-content {
-    padding: 0px; /* Adjust padding for content */
-    display: none; /* Hidden by default */
-    flex-direction: column; /* Allow content to stack */
-    overflow-y: auto; /* Allow content to scroll */
-  }
+    .settings-layout {
+      flex-direction: column; /* Stack side panel and main page vertically */
+      padding: 0; /* Remove padding */
+    }
 
     .settings-side-panel {
       width: 100%; /* Full width for side panel */
@@ -699,8 +659,7 @@
       border-bottom: 1px solid var(--line); /* Add bottom border */
       flex-direction: row; /* Arrange nav items horizontally */
       justify-content: space-around; /* Distribute items evenly */
-      padding: 0px; /* Adjust padding */
-      box-sizing: border-box; /* Include padding and border in width calculation */
+      padding: 5px; /* Adjust padding */
     }
 
     .settings-block {
@@ -712,13 +671,10 @@
       width: 100%; /* Full width for main settings content */
       border-top: none; /* Remove top border */
       padding: 0; /* Remove padding */
-      /* Removed centering styles */
-      box-sizing: border-box; /* Include padding and border in width calculation */
     }
 
     .settings-main-content {
-      padding: 0; /* Adjust padding for content */
-      box-sizing: border-box; /* Include padding in width calculation */
+      padding: 15px; /* Adjust padding for content */
     }
 
     .save {
@@ -779,11 +735,6 @@
     .search-box, .day-select {
       font-size: 0.9rem; /* Smaller font for search box and day select */
       padding: 8px; /* Adjust padding */
-    }
-
-    .bottom-weeks .item.selected-non-current-week {
-      background-color: #fff; /* White background for selected non-current week */
-      color: #000; /* Black text */
     }
 
     .bottom-weeks .fade-edge {
@@ -1005,11 +956,9 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     overlay.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ config.json ვერ ჩაიტვირთა.</h2>";
   });
 
-  function startWeekge(){
+function startWeekge(){
   const auth = firebase.auth(), db = firebase.firestore();
   let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={};
-  let currentWeekData = null; // Global within startWeekge scope
-  let selectedWeekNumber = null; // Global within startWeekge scope
   const $=s=>document.querySelector(s);
   const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
 
@@ -1036,6 +985,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"},
     {n:13,start1:"2025-12-15",end1:"2025-12-20",start2:"2026-06-01",end2:"2026-06-06"}
   ];
+
   const colorMap = {
     yellow: ["#f7ab14", "#000"],
     green:  ["#22bf3d", "#fff"],
@@ -1154,49 +1104,14 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       };
   }
 
-    async function bootAfterLogin(){
-
-      await loadCatalog();
-
-      await loadUserSelection();
-
-      await ensureSubjectsLoaded();
-
-      flattenWeeks();
-
-      // Initialize currentWeekData and selectedWeekNumber here
-
-      const iso=todayISO();
-
-      currentWeekData = weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
-
-      selectedWeekNumber = currentWeekData ? currentWeekData.n : null;
-
-  
-
-      paintWeeksBar();
-
-      goToday();
-
-  
-
-      // Move bottom-weeks inside live-view for phone version
-
-      if (isPhoneView()) {
-
-        const liveView = $("#live-view");
-
-        const bottomWeeks = $(".bottom-weeks");
-
-        if (liveView && bottomWeeks) {
-
-          liveView.prepend(bottomWeeks);
-
-        }
-
-      }
-
-    }
+  async function bootAfterLogin(){
+    await loadCatalog();
+    await loadUserSelection();
+    await ensureSubjectsLoaded();
+    flattenWeeks();
+    paintWeeksBar();
+    goToday();
+  }
 
   async function loadCatalog(){
     catalog=[];
@@ -1222,30 +1137,6 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       if(w.start1) weekDates.push({n:w.n,start:w.start1,end:w.end1});
       if(w.start2) weekDates.push({n:w.n,start:w.start2,end:w.end2});
     });
-  }
-
-  function renderCollapsedWeekBar(weekNum) {
-    weeksBar.innerHTML = "";
-    const chip = el("div", {className:"item", textContent:`Week ${weekNum}`});
-    chip.dataset.week = weekNum;
-
-    if (currentWeekData && weekNum === currentWeekData.n) {
-      chip.classList.add('active');
-      chip.classList.add('current-week');
-    } else {
-      chip.classList.add('active');
-      chip.classList.add('selected-non-current-week');
-    }
-
-    chip.addEventListener('click', () => {
-      const bottomWeeks = $(".bottom-weeks");
-      bottomWeeks.classList.toggle('expanded');
-      if (bottomWeeks.classList.contains('expanded')) {
-        paintWeeksBar(); // Re-render to expanded state
-      }
-    });
-    weeksBar.append(chip);
-    showWeek(weekNum); // Ensure the selected week's content is shown
   }
 
   function paintWeeksBar(){
