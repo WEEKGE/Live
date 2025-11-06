@@ -476,9 +476,7 @@
   }
 
   .settings-main-content {
-    position: absolute; /* Position content divs absolutely */
-    inset: 0; /* Fill the parent */
-    padding: 20px;
+    padding: 15px; /* Adjust padding for content */
     display: none; /* Hidden by default */
     flex-direction: column; /* Allow content to stack */
     overflow-y: auto; /* Allow content to scroll */
@@ -486,6 +484,7 @@
 
   .settings-main-content.active {
     display: flex; /* Show when active */
+    flex: 1; /* Ensure it takes up available space */
   }
 
 
@@ -570,10 +569,9 @@
 
   /* Phone-specific styles */
   @media screen and (max-width: 768px) {
-    body {
-      margin: 0 10px; /* Reduce horizontal margin for phone */
-    }
-
+      body {
+        margin: 0; /* Remove horizontal margin for phone */
+      }
     .main-content {
       flex-direction: column; /* Stack main content vertically */
       margin: 10px 0; /* Adjust vertical margin */
@@ -679,10 +677,10 @@
     }
 
     /* Settings page adjustments for phone */
-    .settings-layout {
-      flex-direction: column; /* Stack side panel and main page vertically */
-      padding: 0; /* Remove padding */
-    }
+  .settings-layout {
+    flex-direction: column;
+    padding: 0 10px; /* Add horizontal padding */
+  }
 
     .settings-side-panel {
       width: 100%; /* Full width for side panel */
@@ -702,6 +700,7 @@
       width: 100%; /* Full width for main settings content */
       border-top: none; /* Remove top border */
       padding: 0; /* Remove padding */
+      /* Removed centering styles */
     }
 
     .settings-main-content {
