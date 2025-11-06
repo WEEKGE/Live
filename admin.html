@@ -267,7 +267,7 @@ input,select{width:100%;padding:10px;border:none;background:var(--field);color:v
 
     <!-- NAV: Apply / Delete -->
     <button id="applyNavBtn" title="Ctrl + S">
-      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Apply
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" style="color: white;" alt="">Apply
     </button>
     <button id="deleteNavBtn">
       <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">Delete
@@ -541,56 +541,76 @@ function startAdmin(){
 
   const COLOR_NAMES = ["yellow","red","blue","green"];
 
-function createButtonEditor(b){
+function createButtonEditor(b, weekIndex = null){
     const wrap = el("div",{className:"customBtnRow"});
     const selected = b.colorName || "yellow";
-    wrap.dataset.colorName = selected;
+    const isEmbed = ['slide', 'video', 'book'].includes(b.type);
+
+    wrap.dataset.type = b.type;
+    wrap.dataset.colorName = selected; // Still store it, even if not shown
+
+    const labelField = isEmbed 
+        ? `<input class="btnLabel" type="text" value="${b.label||""}" readonly style="background:#222; cursor: default;">`
+        : `<input class="btnLabel" type="text" value="${b.label||""}" placeholder="სახელი">`;
+
+    const colorPalette = isEmbed
+        ? ''
+        : `<div class="colorPalette">
+             ${COLOR_NAMES.map(c=>`<div class="colorBox ${c===selected?"active":""}" data-color="${c}"></div>`).join("")}
+           </div>`;
+
     wrap.innerHTML = `
       <span class="drag-handle">&#x2630;</span>
-      <input class="btnLabel" type="text" value="${b.label||""}" placeholder="სახელი">
+      ${labelField}
       <input class="btnLink" type="text" value="${b.link||""}" placeholder="ლინკი">
-      <div class="colorPalette">
-        ${COLOR_NAMES.map(c=>`<div class="colorBox ${c===selected?"active":""}" data-color="${c}"></div>`).join("")}
-      </div>
+      ${colorPalette}
       <button class="removeBtn" title="Remove">
         <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">
       </button>
     `;
 
-    wrap.querySelectorAll(".btnLabel,.btnLink").forEach(inp=>{
-      inp.addEventListener("input", markDirty);
+    wrap.querySelectorAll("input").forEach(inp => {
+      if (!inp.readOnly) inp.addEventListener("input", markDirty);
     });
 
-    wrap.querySelectorAll(".colorBox").forEach(box=>{
-      box.onclick=()=>{
-        wrap.querySelectorAll(".colorBox").forEach(bx=>bx.classList.remove("active"));
-        box.classList.add("active");
-        wrap.dataset.colorName = box.dataset.color;
-        markDirty();
-      };
-    });
+    if (!isEmbed) {
+        wrap.querySelectorAll(".colorBox").forEach(box=>{
+          box.onclick=()=>{
+            wrap.querySelectorAll(".colorBox").forEach(bx=>bx.classList.remove("active"));
+            box.classList.add("active");
+            wrap.dataset.colorName = box.dataset.color;
+            markDirty();
+          };
+        });
+    }
 
-    wrap.querySelector(".removeBtn").onclick = () => { wrap.remove(); markDirty(); };
+    wrap.querySelector(".removeBtn").onclick = () => { 
+        wrap.remove(); 
+        if (weekIndex !== null) {
+            updateAddButtonsVisibility(weekIndex);
+        }
+        markDirty(); 
+    };
     return wrap;
   }
 
   function renderGlobal(btns){
     const box = $("#globalBtns"); box.innerHTML = "";
-    btns.forEach(b => box.append(createButtonEditor(b)));
+    btns.forEach(b => box.append(createButtonEditor({ ...b, type: b.type || 'custom' })));
     new Sortable(box, {
         animation: 150,
         handle: '.drag-handle',
         onEnd: () => markDirty()
     });
     $("#addGlobalBtn").onclick = () => {
-      box.append(createButtonEditor({label:"New", link:"", colorName:"yellow"}));
+      box.append(createButtonEditor({type: 'custom', label:"New", link:"", colorName:"yellow"}));
       markDirty();
     };
   }
 
   function renderWeeks(weeks){
     const box = $("#weeksContainer"); box.innerHTML = "";
-    for(let i=1;i<=12;i++){ // 12 კვირა
+    for(let i=1;i<=13;i++){ // 12 კვირა
       const w = weeks.find(x=>x.week===i)||{};
       const div = el("div",{className:"week"});
       div.innerHTML = `
@@ -615,6 +635,9 @@ function createButtonEditor(b){
           <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515;">
             <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">ვიდეოს დამატება
           </button>
+          <button class="addBtn bookBtn" data-week="${i}" style="background-color:#0e86e8;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">წიგნის დამატება
+          </button>
           <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742;">
             <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სხვა რესურსის დამატება
           </button>
@@ -623,7 +646,7 @@ function createButtonEditor(b){
       box.append(div);
 
       const btnBox = div.querySelector(`#buttons-${i}`);
-      (w.buttons||[]).forEach(b => btnBox.append(createButtonEditor(b)));
+      (w.buttons||[]).forEach(b => btnBox.append(createButtonEditor(b, i)));
       new Sortable(btnBox, {
         animation: 150,
         handle: '.drag-handle',
@@ -635,24 +658,44 @@ function createButtonEditor(b){
 
       div.querySelector(`#type-${i}`).addEventListener("input", markDirty);
 
+      const checkEmbedLimit = () => {
+          const embedCount = [...btnBox.querySelectorAll(".customBtnRow")].filter(row => row.dataset.type !== 'custom').length;
+          if (embedCount >= 3) {
+              alert("You can add a maximum of 3 embeds (slides, videos, or books).");
+              return false;
+          }
+          return true;
+      };
+
       div.querySelector(".slideBtn").onclick = () => {
-        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.trim().toLowerCase() === "სლაიდი" || el.value.trim().toLowerCase() === "slide");
+        if (!checkEmbedLimit()) return;
+        const exists = [...btnBox.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'slide');
         if(!exists){
-          btnBox.append(createButtonEditor({label:"სლაიდი",link:"DRIVELINK/preview",colorName:"yellow"}));
+          btnBox.append(createButtonEditor({type: 'slide', label:"სლაიდი", link:"DRIVELINK/preview", colorName:"yellow"}, i));
           updateAddButtonsVisibility(i);
           markDirty();
         }
       };
       div.querySelector(".videoBtn").onclick = () => {
-        const exists = [...btnBox.querySelectorAll(".btnLabel")].some(el => el.value.trim().toLowerCase() === "ვიდეო" || el.value.trim().toLowerCase() === "video");
+        if (!checkEmbedLimit()) return;
+        const exists = [...btnBox.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'video');
         if(!exists){
-          btnBox.append(createButtonEditor({label:"ვიდეო",link:"",colorName:"red"}));
+          btnBox.append(createButtonEditor({type: 'video', label:"ვიდეო", link:"", colorName:"red"}, i));
+          updateAddButtonsVisibility(i);
+          markDirty();
+        }
+      };
+      div.querySelector(".bookBtn").onclick = () => {
+        if (!checkEmbedLimit()) return;
+        const exists = [...btnBox.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'book');
+        if(!exists){
+          btnBox.append(createButtonEditor({type: 'book', label:"წიგნი", link:"", colorName:"blue"}, i));
           updateAddButtonsVisibility(i);
           markDirty();
         }
       };
       div.querySelector(".addCustom").onclick = () => {
-        btnBox.append(createButtonEditor({label:"",link:"",colorName:"blue"}));
+        btnBox.append(createButtonEditor({type: 'custom', label:"", link:"", colorName:"green"}, i));
         markDirty();
       };
 
@@ -661,13 +704,26 @@ function createButtonEditor(b){
   }
 
   function updateAddButtonsVisibility(i){
+    const weekBtnsContainer = document.querySelector(`#weekBtns-${i}`);
     const weekBox = document.querySelector(`#buttons-${i}`);
-    const slideBtn = document.querySelector(`#weekBtns-${i} .slideBtn`);
-    const videoBtn = document.querySelector(`#weekBtns-${i} .videoBtn`);
-    const hasSlide = [...weekBox.querySelectorAll(".btnLabel")].some(el=>el.value.trim().toLowerCase()==="სლაიდი" || el.value.trim().toLowerCase()==="slide");
-    const hasVideo = [...weekBox.querySelectorAll(".btnLabel")].some(el=>el.value.trim().toLowerCase()==="ვიდეო" || el.value.trim().toLowerCase()==="video");
-    slideBtn.style.display = hasSlide ? "none" : "inline-flex";
-    videoBtn.style.display = hasVideo ? "none" : "inline-flex";
+    
+    const slideBtn = weekBtnsContainer.querySelector('.slideBtn');
+    const videoBtn = weekBtnsContainer.querySelector('.videoBtn');
+    const bookBtn = weekBtnsContainer.querySelector('.bookBtn');
+    const customBtn = weekBtnsContainer.querySelector('.addCustom');
+
+    const buttons = [...weekBox.querySelectorAll(".customBtnRow")];
+    const hasSlide = buttons.some(row => row.dataset.type === 'slide');
+    const hasVideo = buttons.some(row => row.dataset.type === 'video');
+    const hasBook = buttons.some(row => row.dataset.type === 'book');
+    const embedCount = buttons.filter(row => row.dataset.type !== 'custom').length;
+
+    const limitReached = embedCount >= 3;
+
+    if (slideBtn) slideBtn.style.display = hasSlide || limitReached ? "none" : "inline-flex";
+    if (videoBtn) videoBtn.style.display = hasVideo || limitReached ? "none" : "inline-flex";
+    if (bookBtn) bookBtn.style.display = hasBook || limitReached ? "none" : "inline-flex";
+    if (customBtn) customBtn.style.display = limitReached ? "none" : "inline-flex";
   }
 
   /* === Collect and Save (manual) === */
@@ -675,6 +731,7 @@ function createButtonEditor(b){
     if(!currentId) return null;
 
     const globalBtns=[...document.querySelectorAll("#globalBtns .customBtnRow")].map(b=>({
+      type: b.dataset.type,
       label:b.querySelector(".btnLabel").value,
       link:b.querySelector(".btnLink").value,
       colorName:b.dataset.colorName
@@ -686,6 +743,7 @@ function createButtonEditor(b){
       const type=(document.querySelector("#type-"+i)?.value)||"ლექცია";
       const weekDiv=document.querySelector("#buttons-"+i);
       const buttons=[...(weekDiv?.querySelectorAll(".customBtnRow")||[])].map(b=>({
+        type: b.dataset.type,
         label:b.querySelector(".btnLabel").value,
         link:b.querySelector(".btnLink").value,
         colorName:b.dataset.colorName
