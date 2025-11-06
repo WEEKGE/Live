@@ -158,6 +158,7 @@
     font-size:1.3rem;
     cursor:pointer;
     transition:transform .2s ease,border-color .2s ease,background .2s ease;
+    user-select: none; /* Prevent text selection */
   }
 
   .top-nav .item {
@@ -192,7 +193,7 @@
     cursor: pointer;
     transition: background .2s ease;
     border-radius: 0; /* No rounded edges */
-    padding: 0; /* No padding */
+    padding: 30px 0; /* No padding */
   }
 
   .week-toggle-buttons button:hover {
@@ -231,7 +232,7 @@
       background: transparent;
       padding: 0;
       width: 100%;
-      max-width: 1200px; /* Optional: constrain width */
+      max-width: 1500px; /* Optional: constrain width */
       height: 100%;
       margin: 0;
       border: none;
@@ -264,7 +265,7 @@
     background: var(--card, hsl(0, 0%, 8%));
     display: flex;
     flex-direction: column; /* Main vertical split */
-    width: 500px; 
+    width: 700px; 
     flex: 1; /* Make card fill remaining height of subject-wrapper */
     flex-shrink: 0;
     /* Remove padding and gap from here, move to sub-sections */
@@ -285,15 +286,24 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Align content to the left */
     background: hsl(0, 0%, 10%); /* Background for main bottom */
     padding: 0 15px; /* Horizontal padding */
+  }
+
+  .card.upcoming-day .card-main-bottom {
+    background: var(--color); /* Red background */
+  }
+
+  .card.upcoming-day .card-main-bottom h4,
+  .card.upcoming-day .card-main-bottom h5 {
+    color: #000 !important; /* Black text for content inside */
   }
 
   .card-sub-top { /* Upper part of card-main-top (Topic) */
     flex: 1; /* Take remaining space */
     overflow-y: auto; /* Allow topic to scroll */
-    padding: 10px;
+    padding: 30px;
   }
 
   .card-sub-bottom { /* Lower part of card-main-top (Embeds) */
@@ -311,18 +321,21 @@
     white-space: pre-wrap; 
     word-wrap: break-word;
     line-height: 1.5;
-    font-size: 1rem;
+    font-size: 1.5rem;
   }
 
   .link-button {
     flex: 1;
     display: flex;
+    flex-direction: column; /* Arrange icon and label vertically */
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: filter 0.2s ease;
     text-decoration: none;
     color: white;
+    gap: 5px; /* Space between icon and label */
+    background-color: #272727;
   }
 
   .link-button:hover {
@@ -330,8 +343,15 @@
   }
 
   .link-button .material-symbols-rounded {
-    font-size: 48px; /* Adjust size as needed */
+    font-size: 60px; /* Adjusted size to be a little bigger */
     color: inherit; /* Inherit color from parent link-button */
+  }
+  
+  .button-label {
+    font-size: 1rem; /* Adjusted font size to be a little bigger */
+    opacity: 0.8; /* Slightly less prominent */
+    text-align: center;
+    line-height: 1; /* Compact line height */
   }
   
   .subhead {
@@ -352,16 +372,95 @@
   }
 
   /* === SETTINGS (themed) === */
-  .catalog{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,400px);gap:14px;padding:16px 0;}
-  .list,.sidebox{background: #000000; border: 1px solid var(--line); padding:10px;overflow:auto;}
-  .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:10px 12px;color:var(--text);width:100%;margin-bottom:10px;font-size:1rem;outline:none;}
-  #mySubjects{max-height: calc(100vh - 250px); overflow-y:auto;}
+  .settings-layout {
+    display: flex;
+    height: 100%;
+    gap: 14px;
+    padding: 16px 0;
+
+  }
+
+  .settings-side-panel {
+    width: 250px; /* Fixed width for the side panel */
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: #00000000;
+    border: 1px solid var(--line);
+    padding: 10px;
+    border-right: 1px solid #ffffff21;;
+  }
+
+  .settings-block {
+    flex: 1; /* Make blocks take equal vertical space */
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0; /* Adjusted padding */
+    border-bottom: 1px solid var(--line);
+  }
+
+  .settings-nav-item {
+    cursor: pointer;
+    transition: background 0.2s ease;
+    justify-content: center; /* Center the text */
+    align-items: center; /* Center the text */
+  }
+
+  .settings-nav-item:hover {
+    background: #2b2b2b; /* Darker on hover */
+  }
+
+  .settings-nav-item.active {
+    background: var(--color); /* Active color */
+    color: #fff;
+  }
+
+  .settings-block:last-child {
+    border-bottom: none; /* No border for the last block */
+  }
+
+  .settings-main-page {
+    flex: 1; /* Take remaining space */
+    background: #00000000;
+    border: 1px solid var(--line);
+    padding: 10px;
+    overflow-y: auto;
+    display: flex; /* For centering content */
+    justify-content: center;
+    align-items: center;
+    position: relative; /* For absolute positioning of content divs */
+  }
+
+  .settings-main-content {
+    position: absolute; /* Position content divs absolutely */
+    inset: 0; /* Fill the parent */
+    padding: 20px;
+    display: none; /* Hidden by default */
+    flex-direction: column; /* Allow content to stack */
+    overflow-y: auto; /* Allow content to scroll */
+  }
+
+  .settings-main-content.active {
+    display: flex; /* Show when active */
+  }
+
+
+  /* Existing rules to keep/adjust */
+  .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:10px 0px;color:var(--text);width:100%;margin-bottom:10px;font-size:1rem;outline:none;}
+  #mySubjects{max-height: none; overflow-y: visible;} /* Adjust for new block structure */
+  #catalogList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Gap between subject blocks */
+  }
+
   .item-settings {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 6px;
-    border-bottom: 1px solid var(--line);
+    padding: 8px 10px; /* Slightly more horizontal padding */
+    background: #1a1a1a; /* Brighter background */
+    border: 1px solid var(--line); /* Border around the block */
     flex-wrap: wrap;
   }
   .item-settings > div:first-child { flex: 1; }
@@ -406,6 +505,7 @@
   <div class="scroll-wrap" style="height: 100%;">
     <div class="scroll-list" id="main-nav">
       <div class="item active" data-view="live-view">LIVE</div>
+      <div class="item" data-view="resources-view">Resources</div>
       <div class="item" data-view="settings-view">Settings</div>
     </div>
   </div>
@@ -413,33 +513,52 @@
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
-  <div id="live-view" class="view">
-    <div class="left-info-bar">
-      <div class="info-block" id="currentDayBlock"></div>
-      <div class="info-block" id="currentWeekBlock"></div>
+    <div id="live-view" class="view">
+      <div class="left-info-bar">
+        <div class="info-block" id="currentDayBlock"></div>
+        <div class="info-block" id="currentWeekBlock"></div>
+      </div>
+      <div class="subjects-panel scroll-wrap">
+          <div id="cardsCanvas" class="scroll-list"></div>
+          <div class="fade-edge left"></div>
+          <div class="fade-edge right"></div>
+      </div>
     </div>
-    <div class="subjects-panel scroll-wrap">
-        <div id="cardsCanvas" class="scroll-list"></div>
-        <div class="fade-edge left"></div>
-        <div class="fade-edge right"></div>
-    </div>
-
-  </div>
-
+  
+      <div id="resources-view" class="view" style="display: none;">
+          <div class="resources-content" style="padding: 20px; width: 100%; height: 100%; overflow-y: auto;">
+              <h2 style="text-align: center; margin-bottom: 20px;">Global Resources</h2>
+              <div id="global-resources-list">
+                  <!-- Subjects and their global embeds will be rendered here by JS -->
+                  <div class="empty">Loading global resources...</div>
+              </div>
+          </div>
+      </div>
   <div id="settings-view" class="view" style="display: none;">
       <div class="settings-content">
-          <div class="catalog">
-            <!-- My Subjects -->
-            <div class="sidebox">
-              <div style="margin-bottom:6px;font-weight:700;">My Subjects</div>
-              <div id="mySubjects"></div>
-              <button id="saveSubjects" class="save">Save</button>
+          <div class="settings-layout">
+            <div class="settings-side-panel">
+              <div class="settings-block settings-nav-item active" data-target="my-subjects-content">
+                <div style="font-weight:700;">My Subjects</div>
+              </div>
+              <div class="settings-block settings-nav-item" data-target="catalog-content">
+                <div style="font-weight:700;">Subjects Catalog</div>
+              </div>
+              <div class="settings-block">
+                <button id="signOutBtn" class="save" style="margin-top:0;">Log Out</button>
+              </div>
             </div>
-
-            <!-- Catalog -->
-            <div class="list">
-              <input type="text" id="searchCatalog" class="search-box" placeholder="Search subjects...">
-              <div id="catalogList"><div class="empty">Loading...</div></div>
+            <div class="settings-main-page">
+              <div id="my-subjects-content" class="settings-main-content active">
+                <div id="mySubjects"></div>
+                <button id="saveSubjects" class="save">Save</button>
+              </div>
+              <div id="catalog-content" class="settings-main-content">
+                <input type="text" id="searchCatalog" class="search-box" placeholder="Search subjects...">
+                <div id="catalogList"><div class="empty">Loading...</div></div>
+              </div>
+              <!-- Initial placeholder, will be hidden by JS -->
+              <div class="empty initial-placeholder" style="margin:auto; display:none;">Select a section from the left panel.</div>
             </div>
           </div>
       </div>
@@ -468,13 +587,14 @@
 const scrollListeners = {}; // Store listeners to avoid duplicates
 
 function initHorizontalScroll(selector, cardWidth = null){
-  const list = document.querySelector(selector);
+  const list = typeof selector === 'string' ? document.querySelector(selector) : selector; // Handle element directly
   if(!list) return;
 
   // If listeners were already added for this selector, remove them to prevent duplicates
   if (scrollListeners[selector]) {
     list.removeEventListener('mousemove', scrollListeners[selector].move);
     list.removeEventListener('mouseleave', scrollListeners[selector].leave);
+    list.removeEventListener('wheel', scrollListeners[selector].wheel); // Remove wheel listener
   }
 
   const items = [...list.children];
@@ -496,12 +616,13 @@ function initHorizontalScroll(selector, cardWidth = null){
   }
   function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
   function stepOnce(){
-    if(smoothDir === 0) return;
-    const step = getStepSize();
-    const cur = nearestIndex();
-    const next = clamp(cur + (smoothDir>0?1:-1), 0, items.length - 1);
-    const target = next * step;
-    list.scrollTo({ left: target, behavior:'smooth' });
+    if(Math.abs(smoothDir) > 0.1 && dir !== 0){ // Only step if there's a significant smoothDir and edge detection is active
+      const step = getStepSize();
+      const cur = nearestIndex();
+      const next = clamp(cur + (smoothDir>0?1:-1), 0, items.length - 1);
+      const target = next * step;
+      list.scrollTo({ left: target, behavior:'smooth' });
+    }
   }
   function disableHover(disabled){
     items.forEach(el => el.style.pointerEvents = disabled ? "none" : "");
@@ -546,13 +667,22 @@ function initHorizontalScroll(selector, cardWidth = null){
     dir = 0; smoothDir = 0; stepping = false; disableHover(false);
   };
 
+  const handleWheel = e => {
+    // Prevent horizontal scrolling from mouse wheel, especially with Shift key
+    if (e.deltaX !== 0 || e.shiftKey) {
+      e.preventDefault();
+    }
+  };
+
   list.addEventListener('mousemove', handleMouseMove);
   list.addEventListener('mouseleave', handleMouseLeave);
+  list.addEventListener('wheel', handleWheel, { passive: false }); // Add wheel listener
 
   // Store the new listeners so they can be removed on re-init
   scrollListeners[selector] = {
     move: handleMouseMove,
-    leave: handleMouseLeave
+    leave: handleMouseLeave,
+    wheel: handleWheel // Store wheel listener
   };
 }
 
@@ -635,18 +765,18 @@ function startWeekge(){
                   className: 'link-button',
                   href: b.link,
                   target: '_blank',
-                  style: `background-color: ${bg}; color: ${txt};`,
+                  style: `background-color: hsl(0, 0%, 13%);`,
                   title: b.label
               });
           } else { // Otherwise, make it a non-clickable div
               buttonElement = el('div', {
                   className: 'link-button', // Keep the styling
-                  style: `background-color: ${bg}; color: ${txt}; cursor: default; opacity: 0.7;`, // Indicate non-clickable
+                  style: `background-color: hsl(0, 0%, 13%); cursor: default; opacity: 0.7;`, // Indicate non-clickable
                   title: b.label + ' (No link provided)'
               });
           }
           
-          buttonElement.innerHTML = `<span class="material-symbols-rounded">${iconName}</span>`;
+          buttonElement.innerHTML = `<span class="material-symbols-rounded" style="color: ${bg};">${iconName}</span><span class="button-label">${b.label}</span>`;
           
           container.append(buttonElement);
       });
@@ -696,6 +826,20 @@ function startWeekge(){
             alert("Sign-in failed. Please try again.");
         }
     };
+  }
+
+  const signOutBtn = $("#signOutBtn");
+  if (signOutBtn) {
+      signOutBtn.onclick = async () => {
+          try {
+              await auth.signOut();
+              // Optionally, redirect or update UI after sign out
+              location.reload(); // Reload the page to reflect logged out state
+          } catch (error) {
+              console.error("Error signing out:", error);
+              alert("Error signing out. Please try again.");
+          }
+      };
   }
 
   async function bootAfterLogin(){
@@ -810,8 +954,8 @@ function startWeekge(){
                   }
 
                   // Content for card-main-bottom (Subject Name & Lecture Type)
-                  const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: var(--color);" });
-                  const typeEl = el("h5", { textContent: weekData.type || '', style: "margin: 0; font-weight: 400; opacity: .8;" });
+                  const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;" });
+                  const typeEl = el("h5", { textContent: weekData.type || '', style: "margin: 0; font-weight: 600; opacity: .8;" });
                   cardMainBottom.append(titleEl, typeEl);
 
                   // Content for card-sub-top (Topic)
@@ -819,7 +963,7 @@ function startWeekge(){
                   cardSubTop.append(topicText);
 
                   // Content for card-sub-bottom (Buttons)
-                  const allButtons = [...(subj.globalButtons || []), ...(weekData.buttons || [])];
+                  const allButtons = [...(weekData.buttons || [])];
                   addBtns(cardSubBottom, allButtons);
               };
               
@@ -849,6 +993,11 @@ function startWeekge(){
               } else {
                   updateCardContent(thisWeekData);
                   thisWeekBtn.classList.add('active');
+              }
+
+              // Add upcoming-day class if subjectDay is current day or in the future
+              if (subjectDay >= adjustedToday) {
+                  card.classList.add('upcoming-day');
               }
 
               wrapper.append(toggleButtons, card);
@@ -902,6 +1051,67 @@ function startWeekge(){
             });
         }
     }
+  }
+
+  function renderGlobalResources() {
+      const globalResourcesList = $("#global-resources-list");
+      globalResourcesList.innerHTML = ""; // Clear previous content
+
+      let anyGlobalResources = false;
+
+      // Iterate through selected subjects instead of all catalog subjects
+      selected.forEach(id => {
+          const subj = cache[id] || catalog.find(c => c.id === id); // Get subject data
+          if (!subj) return; // Skip if subject data not found
+
+          if (subj.globalButtons && subj.globalButtons.length > 0) {
+              anyGlobalResources = true;
+
+              const subjectSection = el("div", { className: "resource-subject-section", style: "margin-bottom: 30px;" });
+              subjectSection.append(el("h3", { textContent: subj.name, style: "color: var(--color); margin-bottom: 15px; text-align: center;" }));
+
+              // New scrollable structure
+              const scrollWrap = el("div", { className: "scroll-wrap", style: "height: 100px;" }); // Fixed height for scroll area
+              const scrollList = el("div", { className: "scroll-list" });
+
+              // Each button will be an 'item'
+              subj.globalButtons.forEach(b => {
+                  const [bg, txt] = colorMap[b.colorName || b.color || 'green'] || ['#38d98a', '#fff'];
+                  const iconName = getIcon(b);
+                  
+                  let buttonElement;
+                  if (b.link && b.link.trim() !== '' && b.link.trim() !== '#') {
+                      buttonElement = el('a', {
+                          className: 'item link-button', // Add 'item' class
+                          href: b.link,
+                          target: '_blank',
+                          style: `background-color: hsl(0, 0%, 13%);`,
+                          title: b.label
+                      });
+                  } else {
+                      buttonElement = el('div', {
+                          className: 'item link-button', // Add 'item' class
+                          style: `background-color: hsl(0, 0%, 13%); cursor: default; opacity: 0.7;`,
+                          title: b.label + ' (No link provided)'
+                      });
+                  }
+                  
+                  buttonElement.innerHTML = `<span class="material-symbols-rounded" style="color: ${bg};">${iconName}</span><span class="button-label">${b.label}</span>`;
+                  scrollList.append(buttonElement);
+              });
+
+              scrollWrap.append(scrollList);
+              subjectSection.append(scrollWrap);
+              globalResourcesList.append(subjectSection);
+
+              // Initialize horizontal scroll for this subject's buttons
+              initHorizontalScroll(scrollList); // Pass the element directly
+          }
+      });
+
+      if (!anyGlobalResources) {
+          globalResourcesList.append(el("div", { className: "empty", textContent: "No global resources available for your selected subjects." }));
+      }
   }
 
   /* === Profile === */
@@ -970,6 +1180,7 @@ function startWeekge(){
   const mainNav = document.getElementById('main-nav');
   const liveView = document.getElementById('live-view');
   const settingsView = document.getElementById('settings-view');
+  const resourcesView = document.getElementById('resources-view');
   const bottomWeeks = document.querySelector('.bottom-weeks');
 
   mainNav.addEventListener('click', async (e) => {
@@ -979,6 +1190,12 @@ function startWeekge(){
           // Toggle active class on nav items
           mainNav.querySelectorAll('.item').forEach(item => item.classList.remove('active'));
           e.target.classList.add('active');
+
+          // Hide all views first
+          liveView.style.display = 'none';
+          settingsView.style.display = 'none';
+          resourcesView.style.display = 'none'; // NEW
+          bottomWeeks.style.display = 'none';
 
           if (viewId === 'settings-view') {
               if (!user) {
@@ -990,20 +1207,25 @@ function startWeekge(){
                       alert("Please sign in to access settings.");
                       mainNav.querySelector('[data-view="live-view"]').classList.add('active');
                       e.target.classList.remove('active');
+                      liveView.style.display = 'flex'; // Show live view if sign-in fails
+                      bottomWeeks.style.display = 'block'; // Show bottom weeks
                       return;
                   }
               }
               if (!catalog.length) await loadCatalog();
               if (!selected.length) await loadUserSelection();
 
-              liveView.style.display = 'none';
               settingsView.style.display = 'block';
-              bottomWeeks.style.display = 'none';
               renderProfile();
 
-          } else { // Switching to live-view
-              settingsView.style.display = 'none';
-              liveView.style.display = 'flex'; // Correct display property
+          } else if (viewId === 'resources-view') { // NEW
+              if (!catalog.length) await loadCatalog(); // Ensure catalog is loaded
+              resourcesView.style.display = 'block';
+              renderGlobalResources(); // Call the new function
+              // No bottomWeeks for resources for now, similar to settings
+
+          } else { // Default to live-view
+              liveView.style.display = 'flex';
               bottomWeeks.style.display = 'block';
               // Re-initialize scroll on view switch
               setTimeout(() => initHorizontalScroll("#cardsCanvas"), 50);
@@ -1013,6 +1235,49 @@ function startWeekge(){
 
   // Initialize top nav scroll (disabled by user request)
   // initHorizontalScroll("#main-nav");
+
+  // Settings side panel navigation
+  const settingsNavItems = document.querySelectorAll('.settings-nav-item');
+  const settingsMainContents = document.querySelectorAll('.settings-main-content');
+  const initialSettingsPlaceholder = $('.settings-main-page .initial-placeholder');
+
+  settingsNavItems.forEach(item => {
+      item.addEventListener('click', () => {
+          // Remove active from all nav items
+          settingsNavItems.forEach(nav => nav.classList.remove('active'));
+          // Add active to clicked nav item
+          item.classList.add('active');
+
+          // Hide initial placeholder if visible
+          if (initialSettingsPlaceholder) {
+              initialSettingsPlaceholder.style.display = 'none';
+          }
+
+          // Hide all main contents
+          settingsMainContents.forEach(content => content.classList.remove('active'));
+
+          // Show the target content
+          const targetId = item.dataset.target;
+          const targetContent = document.getElementById(targetId);
+          if (targetContent) {
+              targetContent.classList.add('active');
+          }
+      });
+  });
+
+  // Initial display for settings main page
+  // If there's an active nav item on load, show its content
+  const activeSettingsNavItem = document.querySelector('.settings-nav-item.active');
+  if (activeSettingsNavItem) {
+      const targetId = activeSettingsNavItem.dataset.target;
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) {
+          targetContent.classList.add('active');
+      }
+  } else if (initialSettingsPlaceholder) {
+      // If no active item, show the placeholder
+      initialSettingsPlaceholder.style.display = 'flex';
+  }
 }
 </script>
 </body>
