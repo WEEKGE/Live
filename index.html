@@ -135,7 +135,7 @@
 
   .scroll-list{
     display:flex;
-    gap:var(--gap);
+    gap:2px;
     overflow-x:auto;
     scroll-behavior:smooth;
     scrollbar-width:none;
@@ -166,7 +166,11 @@
   }
 
   .item:hover{background-color:#2b2b2b;}
-  .item.active{background:var(--color);border-color:#000;}
+  .item.active{background:var(--color);border-color:#000;color: black;}
+
+  .item.active.current-week {
+    color: #000; /* Black text for active current week */
+  }
 
   .item.current-week:not(.active){
     background-color: #ffffff1a;
@@ -312,7 +316,7 @@
     gap: 2px;
   }
   
-  h4{font-size: 1.3rem;}
+  h4{font-size: 1.6rem;}
   h5{font-size: 1.2rem;}
 
 
@@ -335,7 +339,7 @@
     text-decoration: none;
     color: white;
     gap: 5px; /* Space between icon and label */
-    background-color: #272727;
+    background-color: #3a3a3a;
   }
 
   .link-button:hover {
@@ -412,7 +416,7 @@
 
   .settings-nav-item.active {
     background: var(--color); /* Active color */
-    color: #fff;
+    color: black;
   }
 
   .settings-block:last-child {
@@ -446,7 +450,7 @@
 
 
   /* Existing rules to keep/adjust */
-  .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:20px;color:var(--text);width:100%;margin-bottom:40px;font-size:1rem;outline:none;}
+  .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:20px;color:var(--text);margin-bottom:40px;font-size:1rem;outline:none;}
   .day-select {
     background:#1f1f1f;
     border: 1px solid var(--line);
@@ -623,8 +627,8 @@ function initHorizontalScroll(selector, cardWidth = null){
   const items = [...list.children];
   if (items.length === 0) return;
   const EDGE_ZONE = 120;
-  const STEP_DELAY = 5;
-  const SMOOTH_FACTOR = 0.1;
+  const STEP_DELAY = 2;
+  const SMOOTH_FACTOR = 0.05;
   let dir = 0, stepping = false, smoothDir = 0;
 
   function getStepSize(){
