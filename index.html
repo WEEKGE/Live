@@ -1,472 +1,459 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>Weekge — University Syllabus Platform</title>
-
-  <meta name="description" content="Weekge (Week.ge) — უნივერსიტეტის საგნების და სილაბუსების პლატფორმა. ნახე შენი საგნები კვირების მიხედვით და იოლი ნავიგაციით.">
-  <meta name="theme-color" content="#0B1216">
-  <link rel="icon" href="https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/logo/weekge%20logo.png">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Weekge</title>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@100..900&display=swap');
-
-  :root {
-    --bg: #000000;
-    --top: #13181d;
-    --card: hsl(0, 0%, 8%);
-    --cardin: hsl(0, 0%, 13%);
-    --line: #ffffff6b;
-    --text: #EDEFF2;
-    --muted: #9e9e9e;
-    --accent: #4b4b4b;
-    --accentnone: #1d1d1d;
-    --accentdone: var(--defcolor);
-    --done: #1ae63c;
-    --pending: #5c5c5c;
-    --danger: #ED3737;
-    --subject-title: #ffd829;
-    --shadow: 0 8px 28px rgba(0, 0, 0, .35);
-    --defcolor: #ffbb00;
-    --dot: #ffffff;
-    --remove: var(--danger);
-    --sidebar: #000000;
-    --botline: 1px solid var(--defcolor);
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0');
+  :root{
+    --bg:#0c0c0c;
+    --color:#e41515;
+    --gap:0px;
+    --cardW:320px;
+    --top-nav-h: 60px;
+    --top-nav-margin: 50px 0 0 0;
+    --weeks-bar-h: 100px;
+    --weeks-bar-h-margin: 0 0 50px 0;
+    --line: #ffffff00;
   }
 
-  * { box-sizing: border-box; }
-  html, body {
-    overflow-y: hidden;
-    height: 100%;
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Noto Sans Georgian", sans-serif;
-  }
-
-  ::-webkit-scrollbar { width: .2rem ;}
-  ::-webkit-scrollbar-thumb { background: var(--defcolor); border-radius: 0px;}
-  ::-webkit-scrollbar-track {margin-top: 5px; margin-bottom: 5;}
-
-  /* === Loading Overlay === */
-  #loadingOverlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: var(--bg);
-    display: flex;
+  
+  body{
+    margin:0;
+    background:var(--bg);
+    color: #fff;
+    display:flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    height:100vh;
+    overflow:hidden;
+    font-family:Inter,system-ui,Arial,sans-serif;
+    margin: 0 40px;
+  }
+
+  /* === LOADER === */
+  #loadingOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg); display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     transition: opacity .3s ease, visibility .3s ease;
   }
-  #loadingOverlay.hidden {
-    opacity: 0;
-    visibility: hidden;
-  }
+  #loadingOverlay.hidden { opacity: 0; visibility: hidden; }
   #loadingOverlay .spinner {
-    width: 100px;
-    height: 100px;
-    border: 10px solid rgba(255, 255, 255, 0.068);
-    border-top: 10px solid var(--defcolor);
-    border-radius: 50%;
+    width: 100px; height: 100px; border: 10px solid rgba(255, 255, 255, 0.068);
+    border-top: 10px solid var(--color); border-radius: 50%;
     animation: spin 0.3s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  #loadingOverlay p {
-    margin-top: 16px;
-    opacity: .9;
-  }
+  #loadingOverlay p { margin-top: 16px; opacity: .9; }
 
-  /* NAV */
-  .nav {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    height: 64px;
-    background: var(--top);
+
+  /* === TOP NAV === */
+  .top-nav {
+    height: var(--top-nav-h);
+    border-bottom: 1px solid var(--line);
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
+    margin: var(--top-nav-margin)
   }
 
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-  .week-toggle {
-    background: transparent; border: none; color: var(--text);
-    font-size: 1rem; cursor: pointer; border-radius: 0;
+  /* === MAIN CONTENT === */
+  .main-content {
+    flex: 1;
+    display: flex; /* Use flexbox for main content area */
+    margin: 20px 0 20px 0;
+    overflow: hidden; /* Prevent main content from scrolling */
   }
 
-  .today-btn {
-    background: var(--accent); color: #000; border: none;
-    padding: 8px 14px; border-radius: 10px; font-weight: 700; cursor: pointer;
+  #live-view {
+    width: 100%;
+    display: flex; /* Arrange left panel and subject details */
+    height: 100%;
+    overflow: hidden; /* Prevent live-view from scrolling */
   }
 
-  .signin-btn {
-    background: #fff; color: #0B1216; border: none;
-    padding: 10px 14px; border-radius: 999px; cursor: pointer;
-  }
-
-  .avatar {
-    width: 42px; height: 42px; border-radius: 50%; border: 0;
-    cursor: pointer; object-fit: cover; display: none; box-shadow: var(--shadow);
-  }
-
-  /* MENU */
-  .menu {
-    position: absolute; right: 16px; top: 64px;
-    width: 200px; background: rgba(43,47,49,.9);
-    box-shadow: var(--shadow); transform: translateY(-10px) scale(1);
-    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-  }
-  .menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; filter: blur(0)}
-
-    .menu a, .menu button {
-      width: 100%;
-      background: transparent;
-      color: #fff;
-      padding: 15px 15px;
-      display: flex;              /* ✅ ცენტრში მოსაყვანად */
-      align-items: center;        /* ვერტიკალურად */
-      justify-content: center;    /* ჰორიზონტალურად */
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: 0.2s ease;
-      font-weight: bold;
-      font-weight: 300;
-      border: 0;
-      letter-spacing: 1px;
-    }
-
-  .menu a:hover, .menu button:hover { background: rgba(255,255,255,0.1); }
-  .menu .sep { height: 1px; width: 100%; background: #FFFFFF22;}
-
-
-
-  /* LAYOUT */
-  .wrap {
-    height: calc(100% - 64px);
-    display: grid;
-    grid-template-columns: 370px 1fr;
-    gap: 18px;
-  }
-  .left {
+  .left-subject-panel {
+    width: 250px; /* Specific width for the left panel */
+    height: 100%;
+    background: #1a1a1a; /* Darker background for the panel */
     border-right: 1px solid var(--line);
-    padding: 10px 20px;
-    overflow: auto;
-    background: var(--sidebar);
-    transition: transform .3s ease;
+    overflow-y: auto; /* Allow scrolling if many subjects */
+    flex-shrink: 0; /* Prevent panel from shrinking */
   }
-  .right-panel { overflow: auto; }
 
-  /* WEEKS LIST */
-  .week-item {
-    display: grid; grid-template-columns: 50px 1fr;
-    align-items: center; gap: 10px; padding: 25px 8px;
-    border-radius: 0; cursor: pointer;
+  .left-info-bar {
+    width: 250px; /* Fixed width for the info bar */
+    height: 100%;
+    background: #1a1a1a; /* Darker background, similar to left-subject-panel */
+    border-right: 0px solid #ffffff15;
+    display: flex;
+    flex-direction: column; /* Stack blocks vertically */
+    flex-shrink: 0; /* Prevent panel from shrinking */
   }
-  .week-item.active { background: #1b1b1b; color: var(--defcolor);}
-  .dot {
-    width: 45px; height: 45px; border-radius: 50%;
-    border: 5px solid var(--accent); background: var(--accentnone);
-  }
-  .dot.current { background: var(--accentdone); }
-  .dot.done { background: #000000; }
 
-  .wk-title { font-weight: 600; margin-bottom: .2rem; }
-  .wk-dates {font-weight: 700; font-size: 0.8rem; color: var(--muted); }
-
-  /* CARDS */
-  #cardsCanvas { transition: opacity .35s ease, filter .35s ease; }
-  .card-stack {
-    display: flex; flex-direction: column; gap: 60px;
-    max-width: 1300px; min-width: 1000px; margin: 0 auto; padding: 20px;
-  }
-  .card {
-    background: var(--card); border-radius: 0; box-shadow: var(--shadow);
-    padding: 10px; border: 0px solid rgba(255, 255, 255, 0.333);
-    display: flex; flex-direction: column; gap: 16px;
-  }
-  .subhead {letter-spacing: 1px;text-align: center; font-weight: 400; opacity: .9;margin-top: 10px;; margin-bottom: 0px; font-size: 1.4rem;color:var(--subject-title);}
-  .card-sections { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; }
-  .card-section {
-    flex: 1; background: var(--cardin); border: 0px solid rgba(255,255,255,.13);
-    border-radius: 0; padding: 16px; display: flex; flex-direction: column;
-    justify-content: space-between; transition: ease 0.2s;
-  }
-  .card-section:hover { filter: brightness(1.2); }
-  .card-section h4 {letter-spacing: 1px;text-align: center; margin: 0 0 20px; font-weight: 300; color: #b3b3b3; font-size: 1.2rem; border-bottom: var(--botline); padding-bottom: 10px;}
-
-
-
-.card-section.this-week {
-  border: 0px solid var(--defcolor) !important; /* მწვანე ჩარჩო */
-}
-
-.card-section.this-week h4{color: var(--defcolor);font-weight: 600;}
-
-  .global-files {
-    background: var(--cardin);
-    border: 0;
-    padding: 14px 16px;
-  }
-  .global-files h4 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: var(--subject-title);
-    font-weight: 300;
-    font-size: 1.2rem;
-    border-bottom: var(--botline); 
-    padding-bottom: 10px;
-    color: white;
+  .info-block {
+    flex: 1; /* Make blocks take equal vertical space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--line); /* Separator between blocks */
+    color: #fff;
+    font-size: 1.1rem;
     text-align: center;
   }
 
-  .btns { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
-  .pill {
-    border: none; border-radius: 0px; padding: 10px 20px;
-    font-weight: 700; cursor: pointer; font-size: 1.1rem; width: 100%;
-    transition: ease 0.1s;
+  .info-block:last-child {
+    border-bottom: none; /* No border for the last block */
   }
 
-  .pill:hover{filter:brightness(1.1)}
-
-  .empty { opacity: .75; text-align: center; margin-top: 14vh; }
-
-  /* MODAL */
-  .modal{position:fixed;inset:0;z-index:200;background:rgba(11,18,22,.75);backdrop-filter:blur(12px);
-    display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.35s;}
-  .modal.open{opacity:1;pointer-events:auto;}
-  .modal-inner{background:#121A1F;width:96%;max-width:1100px;height:92vh;box-shadow:0 8px 40px rgba(0,0,0,.4);
-    transform:scale(.9);opacity:0;transition:.35s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow:hidden;}
-  .modal.open .modal-inner{transform:scale(1);opacity:1;}
-  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#1C2A2F;border-bottom:1px solid #0005;}
-  .close{background:0;color:#fff;border:0;padding:4px 8px;font-weight:700;cursor:pointer;font-size:1rem;}
-  .modal-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding-bottom:20px;}
-  .catalog{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,400px);gap:14px;padding:16px 20px;}
-  .list,.sidebox{background:hsl(200,30%,7%);padding:10px;overflow:auto;}
-  .search-box{background:#23343b;border:0;padding:10px 12px;color:var(--text);width:100%;margin-bottom:10px;font-size:1rem;outline:none;}
-  #mySubjects{max-height:55vh;overflow-y:auto;}
-  .item {
-  display: flex;
-  flex-direction: column; /* 👈 ეს დავამატეთ, რათა ელემენტები ქვემოთ იყოს ერთმანეთის ქვეშ */
-  align-items: flex-start;
-  gap: 6px;
-  padding: 8px 6px;
-  border-bottom: 1px solid #fff1;
-  flex-wrap: wrap;
-}
-
-.item div:first-child {
-  width: 100%;
-}
-
-/* ყველა ღილაკი */
-.item button {
-  background: #2e3a40;
-  border: 0;
-  color: #fff;
-  padding: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0;
-  width: 36px;
-  height: 36px;
-  margin-top: 4px;
-  transition: background 0.25s ease, transform 0.15s ease;
-}
-
-.item button:hover {
-  background: #213035;
-}
-
-.day-select {
-  background: #23343b;
-  color: #fff;
-  padding: 15px;
-  border-radius: 0;
-  font-size: 1rem;
-  width: 100%;
-  margin-top: 6px;
-  border: 0;
-}
-
-.item .added {
-  background: var(--defcolor) !important; /* მწვანე ფონზე */
-  color: #fff !important;          /* თეთრი აიქონი */
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  transition: background 0.2s ease;
-}
-
-.item .added:hover {
-  background: #1a7017 !important;  /* hover-ზე ოდნავ მუქი მწვანე */
-}
+  .subjects-panel { /* This will now be the container for the selected subject's details */
+    flex: 1; /* Take remaining space */
+    position: relative;
+    overflow-y: auto; /* Allow content to scroll if needed */
+    padding: 0 0 0 20px; /* Add some padding */
+  }
 
 
-  .save{width:100%;margin-top:10px;background:#38D98A;color:#111;border:none;padding:15px 10px;font-weight:700;cursor:pointer;font-size:1rem;}
+  /* === BOTTOM WEEKS BAR === */
+  .bottom-weeks {
+    height: var(--weeks-bar-h);
+    border-top: 1px solid var(--line);
+    margin: var(--weeks-bar-h-margin);
+  }
+
+  /* === HORIZONTAL SCROLL LIST === */
+  .scroll-wrap{
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+
+  .scroll-list{
+    display:flex;
+    gap:var(--gap);
+    overflow-x:auto;
+    scroll-behavior:smooth;
+    scrollbar-width:none;
+    width:100%;
+    height:100%;
+    position:relative;
+  }
+  .scroll-list::-webkit-scrollbar{display:none;}
+
+  .item{
+    flex:0 0 var(--cardW);
+    height:100%;
+    background:#ffffff0a;
+    border:0px solid transparent;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#fff;
+    font-weight:700;
+    font-size:1.3rem;
+    cursor:pointer;
+    transition:transform .2s ease,border-color .2s ease,background .2s ease;
+  }
+
+  .top-nav .item {
+    flex: 1;
+  }
+
+  .item:hover{background-color:#2b2b2b;}
+  .item.active{background:var(--color);border-color:#000;}
+
+  .item.current-week:not(.active){
+    background-color: #ffffff1a;
+  }
+
+  .week-toggle-buttons {
+    display: flex;
+    flex: 0 0 auto; /* Don't grow or shrink, take content width */
+    gap: 2px; /* Small gap between buttons */
+    width: 100%; /* Fill the width of the parent subject-wrapper */
+  }
+
+  .week-toggle-buttons button {
+    flex: 1; /* Make buttons fill available space */
+    height: 40px; /* Fixed height for consistency */
+    background: #ffffff0a; /* Same as .item */
+    border: 0px solid transparent; /* No border */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem; /* Slightly smaller font than weeks */
+    cursor: pointer;
+    transition: background .2s ease;
+    border-radius: 0; /* No rounded edges */
+    padding: 0; /* No padding */
+  }
+
+  .week-toggle-buttons button:hover {
+    background-color: #2b2b2b; /* Same as .item:hover */
+  }
+
+  .week-toggle-buttons button.active {
+    background: var(--color); /* Same as .item.active */
+    border-color: #000; /* Same as .item.active */
+  }
+
+  .week-toggle-buttons button.next-week-btn.active {
+    background: #2b2b2b; /* Brighter than default, not red */
+    border-color: transparent; /* No border */
+  }
+
+
+  .fade-edge{
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:180px;
+    pointer-events:none;
+    z-index:5;
+  }
+  .fade-edge.left{ left:0; background:transparent; }
+  .fade-edge.right{ right:0; background:transparent; }
+
+  /* === SETTINGS PAGE === */
+  #settings-view {
+    width: 100%;
+    padding: 20px;
+    display: none; /* Hidden by default */
+  }
+  .settings-content {
+      background: transparent;
+      padding: 0;
+      width: 100%;
+      max-width: 1200px; /* Optional: constrain width */
+      height: 100%;
+      margin: 0;
+      border: none;
+  }
+
+  /* === CARDS (NEW STRUCTURE) === */
+  #cardsCanvas {
+    display: flex;
+    gap: 20px;
+    padding: 0 0px;
+    height: 100%;
+    /* Removed align-items: center; to allow children to stretch */
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+  #cardsCanvas::-webkit-scrollbar{display:none;}
+
+  .subject-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Re-add to center toggle buttons and card */
+    gap: 2px;
+    flex-shrink: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  .card {
+    background: var(--card, hsl(0, 0%, 8%));
+    display: flex;
+    flex-direction: column; /* Main vertical split */
+    width: 500px; 
+    flex: 1; /* Make card fill remaining height of subject-wrapper */
+    flex-shrink: 0;
+    /* Remove padding and gap from here, move to sub-sections */
+  }
+
+  .card-main-top { /* Upper half of the card */
+    flex: 1; /* Take remaining space */
+    display: flex;
+    flex-direction: column; /* For sub-top and sub-bottom */
+    padding: 0; /* Add padding here */
+    gap: 0; /* Add gap here */
+    background: hsl(0, 0%, 13%); /* Background for main top */
+    height: auto;
+  }
+
+  .card-main-bottom { /* Lower half of the card */
+    height: 20%; /* Fixed height for name/type */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: hsl(0, 0%, 10%); /* Background for main bottom */
+    padding: 0 15px; /* Horizontal padding */
+  }
+
+  .card-sub-top { /* Upper part of card-main-top (Topic) */
+    flex: 1; /* Take remaining space */
+    overflow-y: auto; /* Allow topic to scroll */
+    padding: 10px;
+  }
+
+  .card-sub-bottom { /* Lower part of card-main-top (Embeds) */
+    height: 50%; /* Fixed height for buttons */
+    display: flex;
+    gap: 2px;
+  }
+  
+  h4{font-size: 1.3rem;}
+  h5{font-size: 1.2rem;}
+
 
 
   .topic-text {
-  white-space: pre-wrap;         /* ახსენებს გამოტოვებებს და Enter-ებს */
-  word-wrap: break-word;         /* აძლევს გრძელი სიტყვების გადატანას */
-  line-height: 1.5;
-  font-size: 1.1rem;
-  color: var(--text);
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: break-word;   /* ✅ newer version, better support */
-  max-width: 350px;             /* ✅ არ დაარღვიოს მშობელი კონტეინერი */
-  display: block;
-  color: #e9e9e9;
-  line-height: 1.7;
-  margin-bottom: 20px;
-  }
-  .topic-text b {
-    font-weight: 700;
-  }
-  .topic-text i {
-    font-style: italic;
-  }
-  .topic-text u {
-    text-decoration: underline;
+    white-space: pre-wrap; 
+    word-wrap: break-word;
+    line-height: 1.5;
+    font-size: 1rem;
   }
 
-
-
-
-  /* Responsive */
-@media(max-width:900px){
-  .wrap{grid-template-columns:1fr;}
-  .left{
-    position:absolute;
-    left:0;top:64px;bottom:0;width:100%;
-    transform:translateY(-100%);
-    z-index:30;
-  }
-  .left.open{transform:translateY(0);}
-  .card-sections{flex-direction:column;}
-  .card-stack{width:100%;max-width:100vw;min-width:50px;padding: 0.5rem;}
-  .card{padding: 1rem;}
-  .card-section{padding: 0.5rem;}
-  .card-section h4{font-size: 1rem;}
-
-  .card-section.this-week {
-    border: 2px solid var(--defcolor) !important; /* მწვანე ჩარჩო */
-    box-shadow: 0 0 12px rgba(3, 255, 57, 0.932);   /* მსუბუქი შუქი ირგვლივ */
+  .link-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: filter 0.2s ease;
+    text-decoration: none;
+    color: white;
   }
 
-  .global-files {padding: 0.5rem;}
-
-  /* ✅ Profile Settings layout */
-  .catalog{
-    grid-template-columns:1fr;
-    grid-template-rows:auto auto;
-  }
-  .sidebox{
-    order:1;
-    margin-bottom:15px;
-    height: calc(100vh - 200px); /* ზემოდან-ქვემოთ იკავებს სრულ ადგილს */
-    overflow: visible; /* აღარ სქროლავს */
-  }
-  #mySubjects{
-    max-height: none; /* full height */
-    overflow: visible;
-  }
-  .list{
-    order:2;
+  .link-button:hover {
+    filter: brightness(1.2);
   }
 
-  .item {
-    flex-direction: column;
-    align-items: flex-start;
+  .link-button .material-symbols-rounded {
+    font-size: 48px; /* Adjust size as needed */
+    color: inherit; /* Inherit color from parent link-button */
   }
-  .item div:first-child {
-    width: 100%;
+  
+  .subhead {
+      letter-spacing: 1px;
+      text-align: center;
+      font-weight: 400;
+      opacity: .9;
+      margin-bottom: 10px;
+      font-size: 1.4rem;
+      color: var(--subject-title, #ffd829);
   }
-  .item button {
-    align-self: flex-end;
-    width: 36px;
-    height: 36px;
-    margin-top: 4px;
-  }
-  .day-select {
-    width: 100%;
-    margin-top: 6px;
-  }
-}
 
-
-  @media(min-width:901px){
-    #weekToggle,#todayBtn{display:none!important;pointer-events:none;}
+  .empty { 
+      opacity: .75; 
+      text-align: center; 
+      margin: auto;
+      font-size: 1.2rem;
   }
+
+  /* === SETTINGS (themed) === */
+  .catalog{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,400px);gap:14px;padding:16px 0;}
+  .list,.sidebox{background: #000000; border: 1px solid var(--line); padding:10px;overflow:auto;}
+  .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:10px 12px;color:var(--text);width:100%;margin-bottom:10px;font-size:1rem;outline:none;}
+  #mySubjects{max-height: calc(100vh - 250px); overflow-y:auto;}
+  .item-settings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .item-settings > div:first-child { flex: 1; }
+  .item-settings button {
+    background: #222;
+    border: 1px solid var(--line);
+    color: #fff;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    width: 38px;
+    height: 38px;
+    transition: background 0.25s ease;
+  }
+  .item-settings button:hover { background: #333; }
+  .day-select { background:#1f1f1f; border: 1px solid var(--line); color: #fff; padding: 10px; border-radius: 0; font-size: 1rem; margin-top: 6px; }
+  .item-settings .added { background: var(--color) !important; border-color: var(--color) !important; }
+  .item-settings .added:hover { background: #c52d2d !important; }
+  .save{width:100%;margin-top:10px;background:var(--color);color:#fff;border:none;padding:15px 10px;font-weight:700;cursor:pointer;font-size:1.2rem;}
+
 </style>
 </head>
-
 <body>
-<!-- ✅ Loading Overlay -->
-<div id="loadingOverlay">
-  <div class="spinner"></div>
-  <p>იტვირთება</p>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay" style="display: none; position: fixed; inset: 0; background: var(--bg); z-index: 10000; flex-direction: column; align-items: center; justify-content: center;">
+  <h1 style="font-size: 3rem; color: var(--color); margin-bottom: 20px;">Weekge</h1>
+  <button id="signInBtn" style="background: #fff; color: #000; border: none; padding: 15px 30px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="height: 24px;">
+    Sign in with Google
+  </button>
 </div>
 
-<div class="nav">
-  <div class="brand">
-    <button id="weekToggle" class="week-toggle">📅 Week —</button>
-    <button id="todayBtn" class="today-btn">Today</button>
-  </div>
-  <div class="right">
-    <button id="signinBtn" class="signin-btn">Sign in with Google</button>
-    <img id="avatar" class="avatar" src="" alt="profile" />
-    <div id="menu" class="menu">
-      <button id="openProfile">პარამეტრები</button>
-      <button id="logoutBtn">გასვლა</button>
+<!-- LOADER -->
+<div id="loadingOverlay"><div class="spinner"></div><p>იტვირთება</p></div>
+
+<!-- TOP NAV -->
+<div class="top-nav">
+  <div class="scroll-wrap" style="height: 100%;">
+    <div class="scroll-list" id="main-nav">
+      <div class="item active" data-view="live-view">LIVE</div>
+      <div class="item" data-view="settings-view">Settings</div>
     </div>
   </div>
 </div>
 
-<div class="wrap">
-  <div id="weeksList" class="left"></div>
-  <div class="right-panel">
-    <div id="cardsCanvas" class="card-stack">
-      <div class="empty">აირჩიე საგნები პარამეტრებში-ში.</div>
+<!-- MAIN CONTENT -->
+<div class="main-content">
+  <div id="live-view" class="view">
+    <div class="left-info-bar">
+      <div class="info-block" id="currentDayBlock"></div>
+      <div class="info-block" id="currentWeekBlock"></div>
     </div>
+    <div class="subjects-panel scroll-wrap">
+        <div id="cardsCanvas" class="scroll-list"></div>
+        <div class="fade-edge left"></div>
+        <div class="fade-edge right"></div>
+    </div>
+
   </div>
-</div>
 
-<!-- ✅ Profile Settings -->
-<div id="modal" class="modal">
-  <div class="modal-inner">
-    <div class="modal-head">
-      <div>Profile Settings</div>
-      <button id="closeModal" class="close">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="catalog">
-        
-        <!-- ჩემი საგნები -->
-        <div class="sidebox">
-          <div style="margin-bottom:6px;font-weight:700;">ჩემი საგნები</div>
-          <div id="mySubjects"></div>
-          <button id="saveSubjects" class="save">Save</button>
-        </div>
+  <div id="settings-view" class="view" style="display: none;">
+      <div class="settings-content">
+          <div class="catalog">
+            <!-- My Subjects -->
+            <div class="sidebox">
+              <div style="margin-bottom:6px;font-weight:700;">My Subjects</div>
+              <div id="mySubjects"></div>
+              <button id="saveSubjects" class="save">Save</button>
+            </div>
 
-        <!-- კატალოგი -->
-        <div class="list">
-          <input type="text" id="searchCatalog" class="search-box" placeholder="მოძებნე საგანი">
-          <div id="catalogList"><div class="empty">იტვირთება...</div></div>
-        </div>
+            <!-- Catalog -->
+            <div class="list">
+              <input type="text" id="searchCatalog" class="search-box" placeholder="Search subjects...">
+              <div id="catalogList"><div class="empty">Loading...</div></div>
+            </div>
+          </div>
       </div>
+  </div>
+</div>
+
+<!-- BOTTOM WEEKS BAR -->
+<div class="bottom-weeks">
+  <div class="scroll-wrap">
+    <div class="scroll-list" id="weeksBar">
+      <!-- Weeks will be generated by JS -->
     </div>
+    <div class="fade-edge left"></div>
+    <div class="fade-edge right"></div>
   </div>
 </div>
 
@@ -476,10 +463,100 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-
-
-<!-- JS -->
 <script>
+/* ========== UNIVERSAL HORIZONTAL STEP SCROLL ========== */
+const scrollListeners = {}; // Store listeners to avoid duplicates
+
+function initHorizontalScroll(selector, cardWidth = null){
+  const list = document.querySelector(selector);
+  if(!list) return;
+
+  // If listeners were already added for this selector, remove them to prevent duplicates
+  if (scrollListeners[selector]) {
+    list.removeEventListener('mousemove', scrollListeners[selector].move);
+    list.removeEventListener('mouseleave', scrollListeners[selector].leave);
+  }
+
+  const items = [...list.children];
+  if (items.length === 0) return;
+  const EDGE_ZONE = 120;
+  const STEP_DELAY = 10;
+  const SMOOTH_FACTOR = 0.15;
+  let dir = 0, stepping = false, smoothDir = 0;
+
+  function getStepSize(){
+    if (cardWidth) return cardWidth;
+    if(items.length < 2)
+      return parseInt(getComputedStyle(list).getPropertyValue('--cardW')) || 320;
+    return items[1].offsetLeft - items[0].offsetLeft;
+  }
+  function nearestIndex(){
+    const step = getStepSize();
+    return Math.round(list.scrollLeft / step);
+  }
+  function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+  function stepOnce(){
+    if(smoothDir === 0) return;
+    const step = getStepSize();
+    const cur = nearestIndex();
+    const next = clamp(cur + (smoothDir>0?1:-1), 0, items.length - 1);
+    const target = next * step;
+    list.scrollTo({ left: target, behavior:'smooth' });
+  }
+  function disableHover(disabled){
+    items.forEach(el => el.style.pointerEvents = disabled ? "none" : "");
+  }
+  function startStepping(){
+    if(stepping) return;
+    stepping = true;
+    disableHover(true);
+    function loop(){
+      if(Math.abs(smoothDir) > 0.1 && dir !== 0){
+        stepOnce();
+        setTimeout(loop, STEP_DELAY);
+      } else {
+        stepping = false;
+        disableHover(false);
+      }
+    }
+    loop();
+  }
+  
+  const handleMouseMove = e => {
+    const rect = list.getBoundingClientRect();
+    const x = e.clientX;
+    const leftDist = x - rect.left;
+    const rightDist = rect.right - x;
+    let targetDir = 0;
+
+    if(leftDist < EDGE_ZONE && list.scrollLeft > 0) targetDir = -1;
+    else if(rightDist < EDGE_ZONE && list.scrollLeft < list.scrollWidth - list.clientWidth - 1) targetDir = 1;
+
+    smoothDir += (targetDir - smoothDir) * SMOOTH_FACTOR;
+
+    if(targetDir !== 0 && !stepping){
+      dir = targetDir;
+      startStepping();
+    } else if(targetDir === 0){
+      dir = 0;
+    }
+  };
+
+  const handleMouseLeave = () => {
+    dir = 0; smoothDir = 0; stepping = false; disableHover(false);
+  };
+
+  list.addEventListener('mousemove', handleMouseMove);
+  list.addEventListener('mouseleave', handleMouseLeave);
+
+  // Store the new listeners so they can be removed on re-init
+  scrollListeners[selector] = {
+    move: handleMouseMove,
+    leave: handleMouseLeave
+  };
+}
+
+/* ========== MAIN APP SCRIPT (adapted for new UI) ========== */
 const overlay = document.getElementById("loadingOverlay");
 
 fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
@@ -497,9 +574,9 @@ function startWeekge(){
   let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={};
   const $=s=>document.querySelector(s);
   const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
+
   const todayISO=()=>new Date().toISOString().slice(0,10);
   const isBetween=(d,s,e)=>d>=s&&d<=e;
-  const hasPassed=(d,e)=>d>e;
   const fmtRange=(s,e)=>{const f=d=>new Date(d+"T12:00:00").toLocaleString(undefined,{month:"short",day:"numeric"});return f(s)+" → "+f(e);};
 
   const SEMESTER_WEEKS=[
@@ -525,177 +602,54 @@ function startWeekge(){
     blue:   ["#1a76ed", "#fff"]
   };
 
-  const daysOfWeek = ["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
-
-  $("#weekToggle").onclick=()=>toggleWeeks();
-
-  /* === Sign In / Out === */
-  const provider = new firebase.auth.GoogleAuthProvider();
-  $("#signinBtn").onclick = async () => {
-    overlay.querySelector("p").textContent = "ავტორიზაცია მიმდინარეობს...";
-    overlay.classList.remove("hidden");
-    try {
-      await auth.signInWithPopup(provider);
-    } catch (err) {
-      console.error("Sign-in error:", err);
-      alert("❌ შესვლისას შეცდომაა");
-      overlay.classList.add("hidden");
-    }
-  };
-  $("#logoutBtn").onclick = async () => {
-    overlay.querySelector("p").textContent = "გასვლა...";
-    overlay.classList.remove("hidden");
-    try {
-      await auth.signOut();
-    } catch (err) {
-      console.error("Logout error:", err);
-      alert("❌ გასვლისას შეცდომაა");
-      overlay.classList.add("hidden");
-    }
-  };
-
-  $("#avatar").onclick = () => $("#menu").classList.toggle("open");
-  document.addEventListener("click", e=>{
-    if(!e.target.closest(".avatar") && !e.target.closest(".menu"))
-      $("#menu").classList.remove("open");
-  });
-
-  $("#openProfile").onclick = async () => {
-    $("#menu").classList.remove("open");
-    $("#modal").classList.add("open");
-    if (!catalog.length) await loadCatalog();
-    renderProfile();
-  };
-  $("#closeModal").onclick = () => $("#modal").classList.remove("open");
-  document.addEventListener("keydown", e => { if(e.key==="Escape") $("#modal").classList.remove("open"); });
-
-  /* === AUTH STATE === */
-  auth.onAuthStateChanged(async u=>{
-    user = u || null;
-    guardUI(!!user);
-    if(user){
-      $("#avatar").src = user.photoURL || "https://i.pravatar.cc/100";
-      overlay.querySelector("p").textContent = "იტვირთება...";
-      await bootAfterLogin();
-      setTimeout(()=>overlay.classList.add("hidden"), 800);
-    } else setTimeout(()=>overlay.classList.add("hidden"),800);
-  });
-
-  function guardUI(signed){
-    $("#signinBtn").style.display = signed?"none":"inline-flex";
-    $("#logoutBtn").style.display = signed?"inline-flex":"none";
-    $("#avatar").style.display = signed?"block":"none";
-    if(!signed) $("#cardsCanvas").innerHTML="<div class='empty'>შედი Google-ით რომ ნახო საგნები.</div>";
-  }
-
-  /* === Catalog Load — READ ONLY === */
-  async function loadCatalog(){
-    catalog=[];
-    const snap = await db.collection("subjects").get();
-    snap.forEach(d=>{
-      const safeData = JSON.parse(JSON.stringify(d.data())); // clone, remove references
-      catalog.push(Object.freeze({ id: d.id, ...safeData })); // freeze to lock edits
-    });
-    Object.freeze(catalog);
-  }
-
-  /* === User Selection === */
-  async function loadUserSelection(){
-    const snap = await db.collection("users").doc(user.uid).get();
-    const data = snap.exists ? snap.data() : {};
-    selected = Array.isArray(data.subjects) ? [...data.subjects] : [];
-    userDays = typeof data.days === "object" ? {...data.days} : {};
-  }
-
-  async function ensureSubjectsLoaded(){
-    const toLoad = selected.filter(id=>!cache[id]);
-    for(const id of toLoad){
-      const subj = catalog.find(c=>c.id===id);
-      if(subj){
-        cache[id]=Object.freeze({...subj});
-      }else{
-        console.warn("⚠️ subject not found:",id);
+  function addBtns(container, buttons) { // container is cardSubBottom now
+      container.innerHTML = ''; // Clear previous buttons
+      if (!buttons || buttons.length === 0) {
+          container.innerHTML = '<div style="text-align:center;color:#888;margin:auto;">No links</div>';
+          return;
       }
-    }
-    Object.freeze(cache);
-  }
 
-  function flattenWeeks(){
-    weekDates=[];
-    SEMESTER_WEEKS.forEach(w=>{
-      if(w.start1) weekDates.push({n:w.n,start:w.start1,end:w.end1});
-      if(w.start2) weekDates.push({n:w.n,start:w.start2,end:w.end2});
-    });
-  }
-
-  async function bootAfterLogin(){
-    await Promise.all([loadCatalog(), loadUserSelection()]);
-    await ensureSubjectsLoaded();
-    flattenWeeks();
-    paintWeeks();
-    goToday();
-  }
-
-  function paintWeeks(){
-    const iso=todayISO();
-    const list=$("#weeksList"); list.innerHTML="";
-    let activeWeekN=null;
-    for(const w of SEMESTER_WEEKS){
-      if(isBetween(iso,w.start1,w.end1)||isBetween(iso,w.start2,w.end2)){activeWeekN=w.n;break;}
-    }
-    SEMESTER_WEEKS.forEach(w=>{
-      const isCurrent=activeWeekN===w.n;
-      const done=hasPassed(iso,w.end1)&&hasPassed(iso,w.end2);
-      const status=isCurrent?"current":done?"done":"pending";
-      const row=el("div",{className:`week-item${isCurrent?" active":""}`});
-      row.setAttribute("data-week",w.n);
-      row.append(
-        el("div",{className:"dot "+status}),
-        el("div",{},[
-          el("div",{className:"wk-title",textContent:`კვირა ${w.n}`}),
-          el("div",{className:"wk-dates",textContent:fmtRange(w.start1,w.end1)+" / "+fmtRange(w.start2,w.end2)})
-        ])
-      );
-      row.onclick=()=>{
-        document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));
-        row.classList.add("active");
-        showWeek(w.n);
-        toggleWeeks(false);
-        updateWeekLabel(w.n);
+      const getIcon = (button) => { // Accept the whole button object
+          const type = button.type ? button.type.toLowerCase().trim() : '';
+          console.log("Normalized button type in getIcon: ", type, "for button label:", button.label); // Debugging line
+          switch (type) {
+              case 'slide':
+                  return 'dashboard';
+              case 'video':
+                  return 'smart_display';
+              case 'book':
+                  return 'book';
+              case 'custom':
+              default:
+                  return 'link';
+          }
       };
-      list.append(row);
-    });
-    updateWeekLabel(activeWeekN);
-  }
 
-  function updateWeekLabel(n){ $("#weekToggle").textContent=`კვირა ${n||"-"} ▼`; }
-
-  function addBtns(wrap,weekObj){
-    const btns=el("div",{className:"btns"});
-    const add=(label,url,colorName)=>{
-      const [bg,txt]=colorMap[colorName]||["#38d98a","#fff"];
-      const b=el("button",{className:"pill",textContent:label,style:`background:${bg};color:${txt}`});
-      if(url) b.onclick=()=>window.open(url,"_blank");
-      btns.append(b);
-    };
-    (weekObj.buttons||[]).forEach(b=>add(b.label,b.link,b.colorName||b.color||"green"));
-    wrap.append(btns);
-  }
-
-  function addGlobalBtns(card,subj){
-    if(subj.globalButtons && subj.globalButtons.length>0){
-      const box=el("div",{className:"global-files"});
-      box.append(el("h4",{textContent:"მთავარი ფაილები:"}));
-      const btns=el("div",{className:"btns"});
-      subj.globalButtons.forEach(b=>{
-        const [bg,txt]=colorMap[b.colorName||b.color]||["#38d98a","#fff"];
-        const btn=el("button",{className:"pill",textContent:b.label,style:`background:${bg};color:${txt}`});
-        if(b.link) btn.onclick=()=>window.open(b.link,"_blank");
-        btns.append(btn);
+      buttons.forEach(b => {
+          const [bg, txt] = colorMap[b.colorName || b.color || 'green'] || ['#38d98a', '#fff'];
+          const iconName = getIcon(b);
+          
+          let buttonElement;
+          if (b.link && b.link.trim() !== '' && b.link.trim() !== '#') { // Only make it a link if b.link is valid
+              buttonElement = el('a', {
+                  className: 'link-button',
+                  href: b.link,
+                  target: '_blank',
+                  style: `background-color: ${bg}; color: ${txt};`,
+                  title: b.label
+              });
+          } else { // Otherwise, make it a non-clickable div
+              buttonElement = el('div', {
+                  className: 'link-button', // Keep the styling
+                  style: `background-color: ${bg}; color: ${txt}; cursor: default; opacity: 0.7;`, // Indicate non-clickable
+                  title: b.label + ' (No link provided)'
+              });
+          }
+          
+          buttonElement.innerHTML = `<span class="material-symbols-rounded">${iconName}</span>`;
+          
+          container.append(buttonElement);
       });
-      box.append(btns);
-      card.append(box);
-    }
   }
 
   function todayDayIndex(){
@@ -714,70 +668,240 @@ function startWeekge(){
     });
   }
 
-  function showWeek(n){
-    const canvas=$("#cardsCanvas");
-    canvas.style.opacity="0";canvas.style.filter="blur(8px)";
-    setTimeout(()=>{
-      const stack=el("div",{className:"card-stack"}); let any=false;
-      const subs=sortByDayProximity(selected.map(id=>{
-        const subj=cache[id];
-        if(!subj) return null;
-        const day=userDays?.[id]??null;
-        return {...subj,dayIndex:daysOfWeek.indexOf(day)};
-      }).filter(Boolean));
+  const daysOfWeek=["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
 
-      subs.forEach(subj=>{
-        const cur=subj.weeks?.find(w=>w.week===n);
-        const prev=n>1?subj.weeks?.find(w=>w.week===n-1):null;
-        if(!cur && !prev) return;
-        any=true;
-        const card=el("div",{className:"card"});
-        card.append(el("div",{className:"subhead",textContent:subj.name+(userDays?.[subj.id]?` (${userDays[subj.id]})`:"")}));
+  const weeksBar=$("#weeksBar");
 
-        const typeText=cur?.type||prev?.type||null;
-        if(typeText){
-          const typeEl=el("div",{style:"text-align:center;font-size:1.4rem;margin:10px 0 20px;font-weight:600;color:white;letter-spacing:3px;",textContent:typeText});
-          card.append(typeEl);
-        }
+  auth.onAuthStateChanged(async u=>{
+    user=u||null;
+    const loginOverlay = $("#login-overlay");
+    if(user){
+        if(loginOverlay) loginOverlay.style.display = "none";
+        await bootAfterLogin();
+        overlay.classList.add("hidden");
+    } else {
+        if(loginOverlay) loginOverlay.style.display = "flex";
+        overlay.classList.add("hidden");
+    }
+  });
 
-        addGlobalBtns(card,subj);
-        const wrap=el("div",{className:"card-sections"});
-        if(prev){
-          const sec=el("div",{className:"card-section this-week"});
-          sec.append(el("h4",{textContent:"ამ კვირისთვის:"}));
-          if(prev.topic) sec.append(el("div",{className:"topic-text",innerHTML:prev.topic}));
-          addBtns(sec,prev); wrap.append(sec);
+  const signInBtn = $("#signInBtn");
+  if(signInBtn) {
+      signInBtn.onclick = async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            await auth.signInWithPopup(provider);
+        } catch (err) { 
+            console.error("Sign-in error:", err);
+            alert("Sign-in failed. Please try again.");
         }
-        if(cur){
-          const sec=el("div",{className:"card-section"});
-          sec.append(el("h4",{textContent:"შემდეგი კვირისთვის:"}));
-          if(cur.topic) sec.append(el("div",{className:"topic-text",innerHTML:cur.topic}));
-          addBtns(sec,cur); wrap.append(sec);
-        }
-        card.append(wrap); stack.append(card);
+    };
+  }
+
+  async function bootAfterLogin(){
+    await loadCatalog();
+    await loadUserSelection();
+    await ensureSubjectsLoaded();
+    flattenWeeks();
+    paintWeeksBar();
+    goToday();
+  }
+
+  async function loadCatalog(){
+    catalog=[];
+    const snap=await db.collection("subjects").get();
+    snap.forEach(d=>catalog.push({id:d.id,...d.data()}));
+  }
+  async function loadUserSelection(){
+    const snap=await db.collection("users").doc(user.uid).get();
+    const data=snap.exists?snap.data():{};
+    selected=data.subjects||[];
+    userDays=data.days||{};
+  }
+  async function ensureSubjectsLoaded(){
+    const toLoad=selected.filter(id=>!cache[id]);
+    for(const id of toLoad){
+      const subj=catalog.find(c=>c.id===id);
+      if(subj) cache[id]=subj;
+    }
+  }
+  function flattenWeeks(){
+    weekDates=[];
+    SEMESTER_WEEKS.forEach(w=>{
+      if(w.start1) weekDates.push({n:w.n,start:w.start1,end:w.end1});
+      if(w.start2) weekDates.push({n:w.n,start:w.start2,end:w.end2});
+    });
+  }
+
+  function paintWeeksBar(){
+    weeksBar.innerHTML="";
+    SEMESTER_WEEKS.forEach(w=>{
+      const chip=el("div",{className:"item",textContent:`Week ${w.n}`});
+      chip.dataset.week = w.n;
+      chip.addEventListener('click',()=>showWeek(w.n));
+      weeksBar.append(chip);
+    });
+    // Re-initialize horizontal scroll for weeks bar
+    initHorizontalScroll("#weeksBar");
+  }
+
+  function showWeek(n) {
+      document.querySelectorAll('#weeksBar .item').forEach(item => {
+          item.classList.remove('active');
       });
-      canvas.innerHTML="";
-      canvas.append(any?stack:el("div",{className:"empty",textContent:"საგნები არ არის. დაამატე პარამეტრებში"}));
-      canvas.style.filter="blur(0)";canvas.style.opacity="1";
-    },300);
+      const selectedItem = document.querySelector(`#weeksBar .item[data-week='${n}']`);
+      if (selectedItem) {
+          selectedItem.classList.add('active');
+      }
+
+      const canvas = $("#cardsCanvas");
+      canvas.style.opacity = "0";
+      canvas.style.filter = "blur(8px)";
+      setTimeout(() => {
+          canvas.innerHTML = "";
+          let any = false;
+          const subs = sortByDayProximity(selected.map(id => {
+              const subj = cache[id];
+              if (!subj) return null;
+              const day = userDays ?.[id] ?? null;
+              return { ...subj, dayIndex: daysOfWeek.indexOf(day) };
+          }).filter(Boolean));
+
+          subs.forEach(subj => {
+              const thisWeekData = subj.weeks?.find(w => w.week === n);
+              const nextWeekData = subj.weeks?.find(w => w.week === n + 1);
+
+              if (!thisWeekData && !nextWeekData) return;
+              any = true;
+
+              const wrapper = el("div", { className: "subject-wrapper" });
+              const card = el("div", { className: "card" });
+              const topicText = el("div", { className: "topic-text" });
+
+              const toggleButtons = el("div", { className: "week-toggle-buttons" });
+              const thisWeekBtn = el("button", { textContent: "ამ კვირისთვის" });
+              const nextWeekBtn = el("button", { textContent: "შემდეგი კვირისთვის", className: "next-week-btn" });
+              
+              if (thisWeekData) {
+                toggleButtons.append(thisWeekBtn);
+              }
+              if (nextWeekData) {
+                toggleButtons.append(nextWeekBtn);
+              }
+
+              const updateCardContent = (weekData) => {
+                  card.innerHTML = ''; // Clear the entire card
+
+                  // Create the new nested structure
+                  const cardMainTop = el("div", { className: "card-main-top" });
+                  const cardMainBottom = el("div", { className: "card-main-bottom" });
+                  const cardSubTop = el("div", { className: "card-sub-top" });
+                  const cardSubBottom = el("div", { className: "card-sub-bottom" });
+
+                  cardMainTop.append(cardSubTop, cardSubBottom);
+                  card.append(cardMainTop, cardMainBottom);
+
+                  if (!weekData) {
+                      // Handle no data case
+                      cardMainBottom.append(el("h4", { textContent: subj.name, style: "margin: 0; color: var(--color);" }));
+                      cardSubTop.append(el("div", { textContent: 'No topic available.' }));
+                      addBtns(cardSubBottom, []); // Add empty buttons
+                      return;
+                  }
+
+                  // Content for card-main-bottom (Subject Name & Lecture Type)
+                  const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: var(--color);" });
+                  const typeEl = el("h5", { textContent: weekData.type || '', style: "margin: 0; font-weight: 400; opacity: .8;" });
+                  cardMainBottom.append(titleEl, typeEl);
+
+                  // Content for card-sub-top (Topic)
+                  topicText.innerHTML = weekData.topic || 'No topic for this week.';
+                  cardSubTop.append(topicText);
+
+                  // Content for card-sub-bottom (Buttons)
+                  const allButtons = [...(subj.globalButtons || []), ...(weekData.buttons || [])];
+                  addBtns(cardSubBottom, allButtons);
+              };
+              
+              thisWeekBtn.onclick = () => {
+                  updateCardContent(thisWeekData);
+                  thisWeekBtn.classList.add('active');
+                  nextWeekBtn.classList.remove('active');
+              };
+
+              nextWeekBtn.onclick = () => {
+                  updateCardContent(nextWeekData);
+                  nextWeekBtn.classList.add('active');
+                  thisWeekBtn.classList.remove('active');
+              };
+
+              // Default selection logic
+              const today = new Date().getDay(); // Sunday = 0, Monday = 1, ...
+              const subjectDay = subj.dayIndex; // Monday = 0, Tuesday = 1, ...
+              const adjustedToday = today === 0 ? 6 : today - 1;
+
+              if (thisWeekData && (!nextWeekData || adjustedToday <= subjectDay)) {
+                  updateCardContent(thisWeekData);
+                  thisWeekBtn.classList.add('active');
+              } else if (nextWeekData) {
+                  updateCardContent(nextWeekData);
+                  nextWeekBtn.classList.add('active');
+              } else {
+                  updateCardContent(thisWeekData);
+                  thisWeekBtn.classList.add('active');
+              }
+
+              wrapper.append(toggleButtons, card);
+              canvas.append(wrapper);
+          });
+
+          if (!any) canvas.append(el("div", { className: "empty", textContent: "საგნები არ არის. დაამატე პარამეტრებში" }));
+          
+          canvas.style.filter = "blur(0)";
+          canvas.style.opacity = "1";
+          
+          initHorizontalScroll("#cardsCanvas"); 
+      }, 300);
   }
 
   function goToday(){
     const iso=todayISO();
     const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
-    if(cur){
-      showWeek(cur.n);
-      updateWeekLabel(cur.n);
-      document.querySelectorAll(".week-item").forEach(x=>x.classList.remove("active"));
-      const elx=document.querySelector(`.week-item[data-week="${cur.n}"]`);
-      if(elx) elx.classList.add("active");
-    }
-    toggleWeeks(false);
-  }
+    if(cur) {
+        showWeek(cur.n);
 
-  function toggleWeeks(force){
-    const left=$("#weeksList");
-    left.classList.toggle("open",force!==undefined?force:!left.classList.contains("open"));
+        // Update current day and week blocks
+        const currentDayBlock = $("#currentDayBlock");
+        const currentWeekBlock = $("#currentWeekBlock");
+        if (currentDayBlock && currentWeekBlock) {
+            const today = new Date();
+            const dayIndex = today.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+            const currentDayName = daysOfWeek[dayIndex === 0 ? 6 : dayIndex - 1]; // Adjust for 0-indexed Monday
+            currentDayBlock.innerHTML = `<div>${currentDayName}</div>`;
+            currentWeekBlock.innerHTML = `<div>კვირა ${cur.n}</div>`;
+        }
+
+        // De-activate all week items first
+        document.querySelectorAll('#weeksBar .item').forEach(item => {
+            item.classList.remove('active');
+            item.classList.remove('current-week');
+        });
+
+        // Find and activate the current week item
+        const activeItem = document.querySelector(`#weeksBar .item[data-week='${cur.n}']`);
+        if (activeItem) {
+            activeItem.classList.add('active');
+            activeItem.classList.add('current-week'); // Add current-week class
+
+            // Scroll the item into view
+            const weeksBar = document.getElementById('weeksBar');
+            const scrollTarget = activeItem.offsetLeft - (weeksBar.clientWidth / 2) + (activeItem.clientWidth / 2);
+            weeksBar.scrollTo({
+                left: scrollTarget,
+                behavior: 'smooth'
+            });
+        }
+    }
   }
 
   /* === Profile === */
@@ -786,13 +910,13 @@ function startWeekge(){
     const mine=$("#mySubjects"); mine.innerHTML="";
     catalog.forEach(x=>{
       const added=selected.includes(x.id);
-      const row=el("div",{className:"item"});
+      const row=el("div",{className:"item-settings"});
       const left=el("div",{},[
         el("div",{textContent:x.name,style:"font-weight:700"}),
         el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
       ]);
       const action=added
-        ? el("button",{className:"added",style:"background:#38d98a;color:#fff;",innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>`})
+        ? el("button",{className:"added",innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>`})
         : el("button",{innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg' style='width:25px;height:25px;'>`,onclick:async()=>{
             if(!selected.includes(x.id)) selected.push(x.id);
             await saveSelection(true); renderProfile();
@@ -802,7 +926,7 @@ function startWeekge(){
 
     selected.forEach(id=>{
       const subj=catalog.find(c=>c.id===id);
-      const row=el("div",{className:"item"});
+      const row=el("div",{className:"item-settings"});
       const left=el("div",{},[
         el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
         el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
@@ -826,7 +950,6 @@ function startWeekge(){
     $("#saveSubjects").onclick=async()=>await saveSelection(true);
   }
 
-  /* === User Save Only (read-only for subjects) === */
   async function saveSelection(immediate=false){
     if(!user) return;
     try{
@@ -836,20 +959,61 @@ function startWeekge(){
       );
       if(immediate){
         await ensureSubjectsLoaded();
-        paintWeeks();
+        paintWeeksBar();
         goToday();
       }
     }catch(e){ console.error("User save failed:",e); }
   }
+
+
+  // UI Switching
+  const mainNav = document.getElementById('main-nav');
+  const liveView = document.getElementById('live-view');
+  const settingsView = document.getElementById('settings-view');
+  const bottomWeeks = document.querySelector('.bottom-weeks');
+
+  mainNav.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('item')) {
+          const viewId = e.target.dataset.view;
+          
+          // Toggle active class on nav items
+          mainNav.querySelectorAll('.item').forEach(item => item.classList.remove('active'));
+          e.target.classList.add('active');
+
+          if (viewId === 'settings-view') {
+              if (!user) {
+                  try {
+                      const provider = new firebase.auth.GoogleAuthProvider();
+                      await auth.signInWithPopup(provider);
+                  } catch (err) {
+                      console.error("Sign-in error:", err);
+                      alert("Please sign in to access settings.");
+                      mainNav.querySelector('[data-view="live-view"]').classList.add('active');
+                      e.target.classList.remove('active');
+                      return;
+                  }
+              }
+              if (!catalog.length) await loadCatalog();
+              if (!selected.length) await loadUserSelection();
+
+              liveView.style.display = 'none';
+              settingsView.style.display = 'block';
+              bottomWeeks.style.display = 'none';
+              renderProfile();
+
+          } else { // Switching to live-view
+              settingsView.style.display = 'none';
+              liveView.style.display = 'flex'; // Correct display property
+              bottomWeeks.style.display = 'block';
+              // Re-initialize scroll on view switch
+              setTimeout(() => initHorizontalScroll("#cardsCanvas"), 50);
+          }
+      }
+  });
+
+  // Initialize top nav scroll (disabled by user request)
+  // initHorizontalScroll("#main-nav");
 }
 </script>
-
-
-
-
-
-
-
-
 </body>
 </html>
