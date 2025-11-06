@@ -215,11 +215,13 @@
   .week-toggle-buttons button.active {
     background: var(--color); /* Same as .item.active */
     border-color: #000; /* Same as .item.active */
+    color: #000; /* Black text for active button */
   }
 
   .week-toggle-buttons button.next-week-btn.active {
     background: #2b2b2b; /* Brighter than default, not red */
     border-color: transparent; /* No border */
+    color: #fff; /* White text for active next week button */
   }
 
 
@@ -566,6 +568,179 @@
     background: #333; /* Subtle darker background on hover */
   }
 
+  /* Phone-specific styles */
+  @media screen and (max-width: 768px) {
+    body {
+      margin: 0 10px; /* Reduce horizontal margin for phone */
+    }
+
+    .main-content {
+      flex-direction: column; /* Stack main content vertically */
+      margin: 10px 0; /* Adjust vertical margin */
+    }
+
+    #live-view, #resources-view, #settings-view {
+      width: 100%; /* Full width for all main views */
+      flex-direction: column; /* Stack elements within live-view vertically */
+    }
+
+    .left-info-bar {
+      display: none; /* Hide the left info bar on phone */
+    }
+
+    .subjects-panel {
+      width: 100%; /* Full width for subjects panel */
+      padding: 0; /* Remove padding */
+    }
+
+    #cardsCanvas {
+      flex-direction: column; /* Stack subject cards vertically */
+      align-items: center; /* Center cards */
+      padding: 0; /* Remove padding */
+      overflow-x: hidden; /* No horizontal scroll for cards */
+      overflow-y: auto; /* Allow vertical scroll for cards */
+    }
+
+    .subject-wrapper {
+      width: 100%; /* Full width for subject wrapper */
+      max-width: 400px; /* Limit card width for better readability */
+      margin-bottom: 10px; /* Space between cards */
+      height: 300px;
+    }
+
+    .card {
+      width: 100%; /* Full width for card within its wrapper */
+      min-height: 100px; /* Ensure cards have a minimum height */
+    }
+
+    .card-main-bottom {
+      height: 40%; /* Increased height of bottom section */
+      padding: 0 15px; /* Adjust padding */
+    }
+
+    .card-symbol-container {
+      width: 40px; /* Smaller symbol container */
+      margin-right: 15px; /* Adjust margin */
+    }
+
+    .card-symbol-container .material-symbols-outlined {
+      font-size: 2.5rem; /* Smaller symbol size */
+    }
+
+    h4 { font-size: 1rem; } /* Even smaller subject name */
+    h5 { font-size: 0.9rem; } /* Smaller lecture type */
+
+    .card-sub-top {
+      flex: unset; /* Make height adjust to content */
+      padding: 20px; /* Adjust padding */
+    }
+
+    .topic-text {
+      font-size: 1.2rem; /* Smaller topic text */
+    }
+
+    .link-button .material-symbols-outlined {
+      font-size: 40px; /* Smaller embed icon size */
+    }
+
+    .button-label {
+      font-size: 0.8rem; /* Smaller embed label */
+    }
+
+    /* Settings page adjustments for phone */
+    .settings-layout {
+      flex-direction: column; /* Stack side panel and main page vertically */
+      padding: 0; /* Remove padding */
+    }
+
+    .settings-side-panel {
+      width: 100%; /* Full width for side panel */
+      border-right: none; /* Remove right border */
+      border-bottom: 1px solid var(--line); /* Add bottom border */
+      flex-direction: row; /* Arrange nav items horizontally */
+      justify-content: space-around; /* Distribute items evenly */
+      padding: 5px; /* Adjust padding */
+    }
+
+    .settings-block {
+      border-bottom: none; /* Remove bottom border for nav items */
+      padding: 10px; /* Adjust padding */
+    }
+
+    .settings-main-page {
+      width: 100%; /* Full width for main settings content */
+      border-top: none; /* Remove top border */
+      padding: 0; /* Remove padding */
+    }
+
+    .settings-main-content {
+      padding: 15px; /* Adjust padding for content */
+    }
+
+    .save {
+      margin-bottom: 20px; /* Adjust margin */
+    }
+
+    /* Weeks bar adjustments for phone */
+    .bottom-weeks {
+      height: auto; /* Allow height to adjust */
+      margin: 10px 0; /* Adjust margin */
+      border-top: none; /* Remove top border */
+      border-bottom: 1px solid var(--line); /* Add bottom border */
+    }
+
+    .bottom-weeks .scroll-wrap {
+      height: auto; /* Allow height to adjust */
+    }
+
+    .bottom-weeks .scroll-list {
+      flex-direction: column; /* Stack weeks vertically when expanded */
+      overflow-x: hidden; /* No horizontal scroll */
+      overflow-y: hidden; /* Initially hide vertical scroll */
+      max-height: var(--weeks-bar-h); /* Collapsed height */
+      transition: max-height 0.3s ease-out;
+    }
+
+    .bottom-weeks.expanded .scroll-list {
+      max-height: 300px; /* Expanded height (adjust as needed) */
+      overflow-y: auto; /* Allow vertical scroll when expanded */
+    }
+
+    .bottom-weeks .item {
+      flex: 0 0 auto; /* Don't grow or shrink, take content width */
+      width: 100%; /* Full width for each week item */
+      height: 50px; /* Fixed height for week items */
+      justify-content: flex-start; /* Align text to start */
+      padding-left: 20px; /* Add padding */
+      font-size: 1rem; /* Smaller font size */
+    }
+
+    .top-nav .item {
+      font-size: 0.9rem; /* Smaller font for top nav items */
+    }
+
+    .settings-block div {
+      font-size: 0.9rem; /* Smaller font for settings nav items */
+    }
+
+    .item-settings {
+      font-size: 0.9rem; /* Smaller font for item settings */
+    }
+
+    .settings-action-button {
+      font-size: 1rem; /* Smaller font for settings action buttons */
+      padding: 10px; /* Adjust padding */
+    }
+
+    .search-box, .day-select {
+      font-size: 0.9rem; /* Smaller font for search box and day select */
+      padding: 8px; /* Adjust padding */
+    }
+
+    .bottom-weeks .fade-edge {
+      display: none; /* Hide fade edges on phone */
+    }
+  }
 </style>
 </head>
 <body>
@@ -885,6 +1060,7 @@ function startWeekge(){
   }
 
   const daysOfWeek=["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
+  const isPhoneView = () => window.matchMedia('(max-width: 768px)').matches;
 
   const weeksBar=$("#weeksBar");
 
@@ -965,14 +1141,69 @@ function startWeekge(){
 
   function paintWeeksBar(){
     weeksBar.innerHTML="";
-    SEMESTER_WEEKS.forEach(w=>{
-      const chip=el("div",{className:"item",textContent:`Week ${w.n}`});
-      chip.dataset.week = w.n;
-      chip.addEventListener('click',()=>showWeek(w.n));
-      weeksBar.append(chip);
-    });
-    // Re-initialize horizontal scroll for weeks bar
-    initHorizontalScroll("#weeksBar", null, WEEKS_BAR_SCROLL_DELAY);
+    const isPhone = isPhoneView();
+    const bottomWeeks = $(".bottom-weeks");
+
+    if (isPhone) {
+      // Phone view: initially show only the current week
+      const currentWeekData = weekDates.find(w => isBetween(todayISO(), w.start, w.end)) || weekDates[0];
+      if (currentWeekData) {
+        const chip = el("div", {className:"item", textContent:`Week ${currentWeekData.n}`});
+        chip.dataset.week = currentWeekData.n;
+        chip.classList.add('active'); // Mark as active
+        chip.classList.add('current-week'); // Mark as current week
+        weeksBar.append(chip);
+
+        chip.addEventListener('click', () => {
+          bottomWeeks.classList.toggle('expanded');
+
+          if (bottomWeeks.classList.contains('expanded')) {
+            // Expand: add all other weeks
+            weeksBar.innerHTML = ""; // Clear to re-add in order
+            SEMESTER_WEEKS.forEach(w => {
+              const weekChip = el("div", {className:"item", textContent:`Week ${w.n}`});
+              weekChip.dataset.week = w.n;
+              if (w.n === currentWeekData.n) {
+                weekChip.classList.add('active');
+                weekChip.classList.add('current-week');
+              }
+              weekChip.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent collapsing when clicking other weeks
+                showWeek(w.n);
+                bottomWeeks.classList.remove('expanded'); // Collapse after selection
+                // Re-render the collapsed state to show the newly selected week
+                paintWeeksBar();
+              });
+              weeksBar.append(weekChip);
+            });
+          } else {
+            // Collapse: remove all other weeks, re-show current week
+            weeksBar.innerHTML = "";
+            const currentChip = el("div", {className:"item", textContent:`Week ${currentWeekData.n}`});
+            currentChip.dataset.week = currentWeekData.n;
+            currentChip.classList.add('active');
+            currentChip.classList.add('current-week');
+            weeksBar.append(currentChip);
+            currentChip.addEventListener('click', () => {
+              bottomWeeks.classList.toggle('expanded');
+              if (bottomWeeks.classList.contains('expanded')) {
+                paintWeeksBar(); // Re-render to expanded state
+              }
+            });
+            showWeek(currentWeekData.n); // Ensure current week is shown
+          }
+        });
+      }
+    } else {
+      // Desktop view: show all weeks horizontally
+      SEMESTER_WEEKS.forEach(w=>{
+        const chip=el("div",{className:"item",textContent:`Week ${w.n}`});
+        chip.dataset.week = w.n;
+        chip.addEventListener('click',()=>showWeek(w.n));
+        weeksBar.append(chip);
+      });
+      initHorizontalScroll("#weeksBar", null, WEEKS_BAR_SCROLL_DELAY);
+    }
   }
 
   function showWeek(n) {
@@ -1115,50 +1346,60 @@ function startWeekge(){
     if(cur) {
         showWeek(cur.n);
 
-        // Update current day and week blocks
+        const isPhone = isPhoneView();
         const currentDayBlock = $("#currentDayBlock");
         const currentWeekBlock = $("#currentWeekBlock");
-        const currentTimeBlock = $("#currentTimeBlock"); // Get the new time block
+        const currentTimeBlock = $("#currentTimeBlock");
 
-        function updateLiveTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            if (currentTimeBlock) {
-                currentTimeBlock.innerHTML = `<div>${hours}:${minutes}:${seconds}</div>`;
+        if (!isPhone) { // Only update these blocks if not in phone view
+            function updateLiveTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                if (currentTimeBlock) {
+                    currentTimeBlock.innerHTML = `<div>${hours}:${minutes}:${seconds}</div>`;
+                }
             }
+
+            if (currentDayBlock && currentWeekBlock) {
+                const today = new Date();
+                const dayIndex = today.getDay();
+                const currentDayName = daysOfWeek[dayIndex === 0 ? 6 : dayIndex - 1];
+                currentWeekBlock.innerHTML = `<div>კვირა ${cur.n}</div>`;
+                currentDayBlock.innerHTML = `<div>${currentDayName}</div>`;
+            }
+            updateLiveTime();
+            setInterval(updateLiveTime, 1000);
         }
 
-        if (currentDayBlock && currentWeekBlock) {
-            const today = new Date();
-            const dayIndex = today.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-            const currentDayName = daysOfWeek[dayIndex === 0 ? 6 : dayIndex - 1]; // Adjust for 0-indexed Monday
-            currentWeekBlock.innerHTML = `<div>კვირა ${cur.n}</div>`;
-            currentDayBlock.innerHTML = `<div>${currentDayName}</div>`;
-        }
-        updateLiveTime(); // Initial call to display time immediately
-        setInterval(updateLiveTime, 1000); // Update every second
-
-        // De-activate all week items first
-        document.querySelectorAll('#weeksBar .item').forEach(item => {
-            item.classList.remove('active');
-            item.classList.remove('current-week');
-        });
-
-        // Find and activate the current week item
-        const activeItem = document.querySelector(`#weeksBar .item[data-week='${cur.n}']`);
-        if (activeItem) {
-            activeItem.classList.add('active');
-            activeItem.classList.add('current-week'); // Add current-week class
-
-            // Scroll the item into view
-            const weeksBar = document.getElementById('weeksBar');
-            const scrollTarget = activeItem.offsetLeft - (weeksBar.clientWidth / 2) + (activeItem.clientWidth / 2);
-            weeksBar.scrollTo({
-                left: scrollTarget,
-                behavior: 'smooth'
+        // Ensure week bar is collapsed on phone view when goToday is called
+        if (isPhone) {
+            const bottomWeeks = $(".bottom-weeks");
+            bottomWeeks.classList.remove('expanded');
+            // Re-paint weeks bar to ensure only current week is shown
+            paintWeeksBar();
+        } else {
+            // De-activate all week items first
+            document.querySelectorAll('#weeksBar .item').forEach(item => {
+                item.classList.remove('active');
+                item.classList.remove('current-week');
             });
+
+            // Find and activate the current week item
+            const activeItem = document.querySelector(`#weeksBar .item[data-week='${cur.n}']`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+                activeItem.classList.add('current-week'); // Add current-week class
+
+                // Scroll the item into view (desktop only)
+                const weeksBar = document.getElementById('weeksBar');
+                const scrollTarget = activeItem.offsetLeft - (weeksBar.clientWidth / 2) + (activeItem.clientWidth / 2);
+                weeksBar.scrollTo({
+                    left: scrollTarget,
+                    behavior: 'smooth'
+                });
+            }
         }
     }
   }
