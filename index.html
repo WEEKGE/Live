@@ -476,7 +476,9 @@
   }
 
   .settings-main-content {
-    padding: 15px; /* Adjust padding for content */
+    position: absolute; /* Position content divs absolutely */
+    inset: 0; /* Fill the parent */
+    padding: 20px;
     display: none; /* Hidden by default */
     flex-direction: column; /* Allow content to stack */
     overflow-y: auto; /* Allow content to scroll */
@@ -484,7 +486,6 @@
 
   .settings-main-content.active {
     display: flex; /* Show when active */
-    flex: 1; /* Ensure it takes up available space */
   }
 
 
@@ -567,20 +568,23 @@
     background: #333; /* Subtle darker background on hover */
   }
 
-  /* Phone-specific styles */
+
   @media screen and (max-width: 768px) {
       body {
         margin: 0; /* Remove horizontal margin for phone */
       }
     .main-content {
       flex-direction: column; /* Stack main content vertically */
-      margin: 10px 0; /* Adjust vertical margin */
+      margin: 10px 10px; /* Adjust vertical margin */
     }
 
     #live-view, #resources-view, #settings-view {
       width: 100%; /* Full width for all main views */
       flex-direction: column; /* Stack elements within live-view vertically */
+      padding: 0;
     }
+
+    view{padding: 0;}
 
     .left-info-bar {
       display: none; /* Hide the left info bar on phone */
@@ -679,7 +683,14 @@
     /* Settings page adjustments for phone */
   .settings-layout {
     flex-direction: column;
-    padding: 0 10px; /* Add horizontal padding */
+    padding: 0; /* Add horizontal padding */
+  }
+
+  .settings-main-content {
+    padding: 0px; /* Adjust padding for content */
+    display: none; /* Hidden by default */
+    flex-direction: column; /* Allow content to stack */
+    overflow-y: auto; /* Allow content to scroll */
   }
 
     .settings-side-panel {
@@ -688,7 +699,8 @@
       border-bottom: 1px solid var(--line); /* Add bottom border */
       flex-direction: row; /* Arrange nav items horizontally */
       justify-content: space-around; /* Distribute items evenly */
-      padding: 5px; /* Adjust padding */
+      padding: 0px; /* Adjust padding */
+      box-sizing: border-box; /* Include padding and border in width calculation */
     }
 
     .settings-block {
@@ -701,10 +713,12 @@
       border-top: none; /* Remove top border */
       padding: 0; /* Remove padding */
       /* Removed centering styles */
+      box-sizing: border-box; /* Include padding and border in width calculation */
     }
 
     .settings-main-content {
-      padding: 15px; /* Adjust padding for content */
+      padding: 0; /* Adjust padding for content */
+      box-sizing: border-box; /* Include padding in width calculation */
     }
 
     .save {
