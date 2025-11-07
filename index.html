@@ -838,12 +838,11 @@
       <div id="resources-view" class="view" style="display: none; flex-direction: column; padding: 0px 0px 0px 0px;">
           <div class="subjects-panel" style="flex-grow: 1; padding: 0;">
               <div class="scroll-wrap" style="height: 100%;">
-                  <div id="global-resources-list" class="scroll-list">
+                  <div id="global-resources-list" style="display: flex; flex-direction: column; gap: 10px; padding: 0; overflow-y: auto; scrollbar-width: none;">
                       <!-- Subjects and their global embeds will be rendered here by JS -->
                       <div class="empty">Loading global resources...</div>
                   </div>
-                  <div class="fade-edge left"></div>
-                  <div class="fade-edge right"></div>
+
               </div>
           </div>
       </div>
@@ -1522,31 +1521,33 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               anyGlobalResources = true;
 
               const wrapper = el("div", { className: "subject-wrapper" });
-              const card = el("div", { className: "card" });
+              const card = el("div", { className: "card", style: "flex-direction: row; justify-content: space-between; align-items: stretch;" });
 
-              // Create the new nested structure
-              const cardMainTop = el("div", { className: "card-main-top", style: "flex: initial;" });
-              const cardMainBottom = el("div", { className: "card-main-bottom" });
-              const cardSubBottom = el("div", { className: "card-sub-bottom", style: isPhoneView() ? "height: auto;" : "height: 120px;" }); // Adjusted height
-              cardMainTop.append(cardSubBottom);
-              card.append(cardMainTop, cardMainBottom);
+              // Create left section for symbol and name
+              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: hsl(0, 0%, 10%); width: 30%; flex-shrink: 0;" });
 
-              // --- Populate card-main-bottom (Symbol and Name) ---
+              // Create right section for embeds
+              const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: hsl(0, 0%, 13%);" });
+
+              // Append sections to card
+              card.append(cardLeftSection, cardRightSection);
+
+              // --- Populate card-left-section (Symbol and Name) ---
               const cardSymbolContainer = el("div", { className: "card-symbol-container" });
               const symbolSpan = el("span", { className: "material-symbols-outlined", textContent: subj.theme || "" });
               if (!subj.theme) {
                 symbolSpan.style.visibility = "hidden";
               }
               cardSymbolContainer.append(symbolSpan);
-              cardMainBottom.append(cardSymbolContainer);
+              cardLeftSection.append(cardSymbolContainer);
 
               const textContainer = el("div", { style: "display: flex; flex-direction: column; justify-content: center;" });
               const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;" });
               textContainer.append(titleEl);
-              cardMainBottom.append(textContainer);
+              cardLeftSection.append(textContainer);
 
-              // --- Populate card-sub-bottom (Global Buttons) ---
-              addBtns(cardSubBottom, subj.globalButtons);
+              // --- Populate card-right-section (Global Buttons) ---
+              addBtns(cardRightSection, subj.globalButtons);
 
               wrapper.append(card);
               globalResourcesList.append(wrapper);
@@ -1679,9 +1680,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               if (!catalog.length) await loadCatalog(); // Ensure catalog is loaded
               resourcesView.style.display = 'flex';
               renderGlobalResources(); // Call the new function
-              if (!isPhoneView()) {
-                setTimeout(() => initHorizontalScroll("#global-resources-list", null, SUBJECTS_CARD_RENDER_DELAY), SUBJECTS_CARD_RENDER_DELAY);
-              }
+
               // No bottomWeeks for resources for now, similar to settings
 
           } else { // Default to live-view
