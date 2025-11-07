@@ -1542,7 +1542,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               // Create the new nested structure
               const cardMainTop = el("div", { className: "card-main-top", style: "flex: initial;" });
               const cardMainBottom = el("div", { className: "card-main-bottom" });
-              const cardSubBottom = el("div", { className: "card-sub-bottom", style: "height: 100%;" }); // Adjusted height
+              const cardSubBottom = el("div", { className: "card-sub-bottom", style: "min-height: 400px; padding: 20px 0;" }); // Adjusted height
               cardMainTop.append(cardSubBottom);
               card.append(cardMainTop, cardMainBottom);
 
