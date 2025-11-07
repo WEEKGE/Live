@@ -16,18 +16,18 @@
 <style>
   :root{
     --bg:#0c0c0c;
-    --color:#e60c0c;
+    --color:#ff0f0f;
     --gap:0px;
-    --cardW:320px;
+    --cardW:250px;
     --top-nav-h: 60px;
     --top-nav-margin: 50px 0 0 0;
-    --weeks-bar-h: 100px;
+    --weeks-bar-h: 80px;
     --weeks-bar-h-margin: 0 0 50px 0;
     --line: #ffffff00;
   }
 
   body{
-    margin:0;
+    margin:0 50px;
     background:var(--bg);
     color: #fff;
     display:flex;
@@ -35,7 +35,6 @@
     height:100vh;
     overflow:hidden;
     font-family:Inter,system-ui,Arial,sans-serif;
-    margin: 0 40px;
   }
 
   /* === LOADER === */
@@ -80,51 +79,17 @@
     overflow: hidden; /* Prevent live-view from scrolling */
   }
 
-  .left-subject-panel {
-    width: 250px; /* Specific width for the left panel */
-    height: 100%;
-    background: #1a1a1a; /* Darker background for the panel */
-    border-right: 1px solid var(--line);
-    overflow-y: auto; /* Allow scrolling if many subjects */
-    flex-shrink: 0; /* Prevent panel from shrinking */
-  }
+    .subjects-panel { /* This will now be the container for the selected subject\'s details */
 
-  .left-info-bar {
-    width: 200px; /* Fixed width for the info bar */
-    height: 100%;
-    background: #1a1a1a00; /* Darker background, similar to left-subject-panel */
-    border-right: 0;
-    display: flex;
-    flex-direction: column; /* Stack blocks vertically */
-    flex-shrink: 0; /* Prevent panel from shrinking */
-    gap: 2px; /* Add gap between info blocks */
-  }
+      flex: 1; /* Take remaining space */
 
-  .info-block {
-    flex: 1; /* Make blocks take equal vertical space */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid var(--line); /* Separator between blocks */
-    color: #fff;
-    font-size: 1.4rem;
-    font-weight: 500;
-    text-align: center;
-    background-color: #1a1a1a;
-  }
+      position: relative;
 
-  .info-block:last-child {
-    border-bottom: none; /* No border for the last block */
-  }
+      overflow-y: auto; /* Allow content to scroll if needed */
 
-  .subjects-panel { /* This will now be the container for the selected subject's details */
-    flex: 1; /* Take remaining space */
-    position: relative;
-    overflow-y: auto; /* Allow content to scroll if needed */
-    padding: 0 0 0 20px; /* Add some padding */
-  }
+      padding: 0 0 0 20px; /* Add some padding */
+
+    }
 
 
   /* === BOTTOM WEEKS BAR === */
@@ -143,7 +108,7 @@
 
   .scroll-list{
     display:flex;
-    gap:2px;
+    gap:5px;
     overflow-x:auto;
     scroll-behavior:smooth;
     scrollbar-width:none;
@@ -159,7 +124,7 @@
     background:#ffffff0a;
     border:0px solid transparent;
     display:flex;
-    justify-content:center;
+    justify-content:flex-start;
     align-items:center;
     color:#fff;
     font-weight:700;
@@ -167,17 +132,20 @@
     cursor:pointer;
     transition:transform .2s ease,border-color .2s ease,background .2s ease;
     user-select: none; /* Prevent text selection */
+    padding: 0 20px;
   }
 
   .top-nav .item {
     flex: 1;
+    justify-content: center;
+    padding: 0;
   }
 
   .item:hover{background-color:#2b2b2b;}
-  .item.active{background:var(--color);border-color:#000;color: black;}
+  .item.active{background:var(--color);border-color:#000;color: rgb(255, 255, 255);}
 
   .item.active.current-week {
-    color: #000; /* Black text for active current week */
+    color: #ffffff; /* Black text for active current week */
   }
 
   .item.current-week:not(.active){
@@ -215,7 +183,7 @@
   .week-toggle-buttons button.active {
     background: var(--color); /* Same as .item.active */
     border-color: #000; /* Same as .item.active */
-    color: #000; /* Black text for active button */
+    color: #ffffff; /* Black text for active button */
   }
 
   .week-toggle-buttons button.next-week-btn.active {
@@ -255,14 +223,14 @@
   /* === CARDS (NEW STRUCTURE) === */
   #cardsCanvas {
     display: flex;
-    gap: 20px;
+    gap: 5px;
     padding: 0 0px;
     height: 100%;
     /* Removed align-items: center; to allow children to stretch */
     overflow-x: auto;
     scroll-behavior: smooth;
     scrollbar-width: none;
-    transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out; /* Add transition */
+    transition: opacity 0.1s ease-in-out, filter 0.1s ease-in-out; /* Add transition */
   }
   #cardsCanvas::-webkit-scrollbar{display:none;}
 
@@ -270,7 +238,7 @@
     display: flex;
     flex-direction: column;
     align-items: center; /* Re-add to center toggle buttons and card */
-    gap: 2px;
+    gap: 5px;
     flex-shrink: 0;
     padding: 0;
     height: 100%;
@@ -280,7 +248,7 @@
     background: var(--card, hsl(0, 0%, 8%));
     display: flex;
     flex-direction: column; /* Main vertical split */
-    width: 700px; 
+    width: 550px; 
     flex: 1; /* Make card fill remaining height of subject-wrapper */
     flex-shrink: 0;
     /* Remove padding and gap from here, move to sub-sections */
@@ -296,9 +264,7 @@
     height: auto;
   }
 
-  #resources-view .card {
-    height: 100%;
-  }
+
 
   .card-main-bottom { /* Lower half of the card */
     height: 20%; /* Fixed height for name/type */
@@ -306,7 +272,7 @@
     flex-direction: row; /* Changed to row */
     align-items: center; /* Align items vertically in the center */
     background: hsl(0, 0%, 10%); /* Background for main bottom */
-    padding: 0 25px; /* Horizontal padding */
+    padding: 0 20px; /* Horizontal padding */
   }
 
   .card-symbol-container {
@@ -316,25 +282,28 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0; /* Prevent shrinking */
-    margin-right: 25px; /* Space between symbol and text */
-    /* Optional: add a border or background to make the square visible */
-    /* border: 1px solid #fff; */
+    margin-right: 20px; /* Space between symbol and text */
   }
 
   .card-symbol-container .material-symbols-outlined {
-    font-size: 3.5rem; /* Adjust symbol size within the container */
+    font-size: 3.7rem; /* Adjust symbol size within the container */
     color: #ffffff; /* Default color for the symbol */
     font-family: 'Material Symbols Outlined';
 
     font-variation-settings:
-      'FILL' 1,
-      'wght' 300,
-      'GRAD' 0,
-      'opsz' 48
+      'FILL' 0,
+      'wght' 100,
+      'GRAD' -25,
+      'opsz' 24;
   }
 
   .card.upcoming-day .card-symbol-container .material-symbols-outlined {
-    color: #000; /* Black color for upcoming-day cards */
+    color: #ffffff; /* Black color for upcoming-day cards */
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 100,
+      'GRAD' -25,
+      'opsz' 24;
   }
 
   .card.upcoming-day .card-main-bottom {
@@ -343,7 +312,7 @@
 
   .card.upcoming-day .card-main-bottom h4,
   .card.upcoming-day .card-main-bottom h5 {
-    color: #000 !important; /* Black text for content inside */
+    color: #ffffff !important; /* Black text for content inside */
   }
 
   .card-sub-top { /* Upper part of card-main-top (Topic) */
@@ -358,8 +327,8 @@
     gap: 2px;
   }
   
-  h4{font-size: 1.6rem;}
-  h5{font-size: 1.2rem;}
+  h4{font-size: 1.3rem;}
+  h5{font-size: 1.1rem;}
 
 
 
@@ -439,7 +408,6 @@
   }
 
   .settings-block {
-    flex: 1; /* Make blocks take equal vertical space */
     display: flex;
     flex-direction: column;
     padding: 15px; /* Adjusted padding to match save button */
@@ -567,6 +535,7 @@
     transition: background 0.2s ease;
     width: 100%; /* Make it full width */
     text-align: center;
+    
   }
 
   .settings-action-button:hover {
@@ -577,10 +546,12 @@
   @media screen and (max-width: 768px) {
       body {
         margin: 0; /* Remove horizontal margin for phone */
+        overflow-y: auto;
       }
     .main-content {
       flex-direction: column; /* Stack main content vertically */
       margin: 10px 10px; /* Adjust vertical margin */
+      overflow-y: auto; /* Allow vertical scroll for main content */
     }
 
     #live-view, #resources-view, #settings-view {
@@ -591,9 +562,7 @@
 
     view{padding: 0;}
 
-    .left-info-bar {
-      display: none; /* Hide the left info bar on phone */
-    }
+
 
     .subjects-panel {
       width: 100%; /* Full width for subjects panel */
@@ -637,6 +606,7 @@
     }
     .card .card-main-top {
       order: 2; /* Card main top comes second */
+      
     }
 
     /* Reorder elements within card-main-top */
@@ -649,6 +619,7 @@
     }
     .card-main-top .card-sub-bottom {
       order: 2; /* Embeds come second */
+      padding: 20px 0px;
     }
 
     .card-main-bottom {
@@ -663,6 +634,7 @@
 
     .card-symbol-container .material-symbols-outlined {
       font-size: 2.5rem; /* Smaller symbol size */
+      border-radius: 20px;
     }
 
     h4 { font-size: 1rem; } /* Even smaller subject name */
@@ -699,8 +671,10 @@
   }
 
     .settings-side-panel {
+      order: 1; /* Move to top */
       width: 100%; /* Full width for side panel */
       border-right: none; /* Remove right border */
+      border-top: none; /* Remove top border */
       border-bottom: 1px solid var(--line); /* Add bottom border */
       flex-direction: row; /* Arrange nav items horizontally */
       justify-content: space-around; /* Distribute items evenly */
@@ -709,14 +683,17 @@
     }
 
     .settings-block {
+      flex: 1; /* Make buttons fill horizontal space */
       border-bottom: none; /* Remove bottom border for nav items */
       padding: 10px; /* Adjust padding */
     }
 
     .settings-main-page {
+      order: 2; /* Move to bottom */
       width: 100%; /* Full width for main settings content */
       border-top: none; /* Remove top border */
       padding: 0; /* Remove padding */
+      display: block; /* Fix for content visibility */
       /* Removed centering styles */
       box-sizing: border-box; /* Include padding and border in width calculation */
     }
@@ -738,6 +715,31 @@
       border-bottom: 1px solid var(--line); /* Add bottom border */
     }
 
+    #resources-view #global-resources-list {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    #resources-view .subject-wrapper {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 10px;
+      height: auto;
+    }
+    #resources-view .card {
+      width: 100%;
+    }
+    #resources-view .card .card-main-bottom {
+      order: 1;
+      height: 70px;
+    }
+    #resources-view .card .card-main-top {
+      order: 2;
+      height: auto;
+    }
+
     .bottom-weeks .scroll-wrap {
       height: auto; /* Allow height to adjust */
     }
@@ -747,7 +749,7 @@
       overflow-x: hidden; /* No horizontal scroll */
       overflow-y: hidden; /* Initially hide vertical scroll */
       max-height: var(--weeks-bar-h); /* Collapsed height */
-      transition: max-height 0.3s ease-out;
+      transition: max-height 0.2s ease-out;
     }
 
     .bottom-weeks.expanded .scroll-list {
@@ -825,12 +827,8 @@
 <!-- MAIN CONTENT -->
 <div class="main-content">
     <div id="live-view" class="view">
-      <div class="left-info-bar">
-        <div class="info-block" id="currentWeekBlock"></div>
-        <div class="info-block" id="currentDayBlock"></div>
-        <div class="info-block" id="currentTimeBlock"></div>
-      </div>
-      <div class="subjects-panel scroll-wrap">
+
+      <div class="subjects-panel scroll-wrap" style="padding: 0;">
           <div id="cardsCanvas" class="scroll-list"></div>
           <div class="fade-edge left"></div>
           <div class="fade-edge right"></div>
@@ -838,13 +836,15 @@
     </div>
   
       <div id="resources-view" class="view" style="display: none; flex-direction: column; padding: 0px 0px 0px 0px;">
-          <div class="subjects-panel scroll-wrap" style="flex-grow: 1; padding: 0;">
-              <div id="global-resources-list" class="scroll-list" style="height: 100%;">
-                  <!-- Subjects and their global embeds will be rendered here by JS -->
-                  <div class="empty">Loading global resources...</div>
+          <div class="subjects-panel" style="flex-grow: 1; padding: 0;">
+              <div class="scroll-wrap" style="height: 100%;">
+                  <div id="global-resources-list" class="scroll-list">
+                      <!-- Subjects and their global embeds will be rendered here by JS -->
+                      <div class="empty">Loading global resources...</div>
+                  </div>
+                  <div class="fade-edge left"></div>
+                  <div class="fade-edge right"></div>
               </div>
-              <div class="fade-edge left"></div>
-              <div class="fade-edge right"></div>
           </div>
       </div>
   <div id="settings-view" class="view" style="display: none;">
@@ -857,7 +857,7 @@
               <div class="settings-block settings-nav-item" data-target="catalog-content">
                 <div style="font-weight:700;">Subjects Catalog</div>
               </div>
-              <div class="settings-block">
+              <div class="settings-block" style="padding: 0;">
                 <button id="signOutBtn" class="settings-action-button">Log Out</button>
               </div>
             </div>
@@ -1016,13 +1016,13 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={};
   let currentWeekData = null; // Global within startWeekge scope
   let selectedWeekNumber = null; // Global within startWeekge scope
-  let timeUpdateInterval = null; // For the clock
+
   const $=s=>document.querySelector(s);
   const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
 
   // Configuration for delays
   const WEEKS_BAR_SCROLL_DELAY = 2; // Default delay for weeks bar scroll steps
-  const SUBJECTS_CARD_RENDER_DELAY = 300; // Default delay for subject card rendering
+  const SUBJECTS_CARD_RENDER_DELAY = 400; // Default delay for subject card rendering
 
   const todayISO=()=>new Date().toISOString().slice(0,10);
   const isBetween=(d,s,e)=>d>=s&&d<=e;
@@ -1313,8 +1313,10 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     } else {
       // Desktop view: show all weeks horizontally
       SEMESTER_WEEKS.forEach(w=>{
-        const chip=el("div",{className:"item",textContent:`Week ${w.n}`});
+        const text = `Week ${w.n}`;
+        const chip=el("div",{className:"item",textContent:text});
         chip.dataset.week = w.n;
+        chip.dataset.originalText = text; // Store original text
         chip.addEventListener('click',()=>showWeek(w.n));
         weeksBar.append(chip);
       });
@@ -1396,8 +1398,8 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                   cardMainBottom.append(cardSymbolContainer);
 
                   const textContainer = el("div", { style: "display: flex; flex-direction: column; justify-content: center;" });
-                  const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;" });
-                  const typeEl = el("h5", { textContent: weekData.type || '', style: "margin: 0; font-weight: 600; opacity: .8;" });
+                  const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;font-weight: 500;" });
+                  const typeEl = el("h5", { textContent: weekData.type || '', style: "margin: 0; font-weight: 400; opacity: .8;" });
                   textContainer.append(titleEl, typeEl);
                   cardMainBottom.append(textContainer);
 
@@ -1463,36 +1465,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         showWeek(cur.n);
 
         const isPhone = isPhoneView();
-        const currentDayBlock = $("#currentDayBlock");
-        const currentWeekBlock = $("#currentWeekBlock");
-        const currentTimeBlock = $("#currentTimeBlock");
 
-        if (timeUpdateInterval) {
-            clearInterval(timeUpdateInterval);
-            timeUpdateInterval = null;
-        }
-
-        if (!isPhone) { // Only update these blocks if not in phone view
-            function updateLiveTime() {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                if (currentTimeBlock) {
-                    currentTimeBlock.innerHTML = `<div>${hours}:${minutes}:${seconds}</div>`;
-                }
-            }
-
-            if (currentDayBlock && currentWeekBlock) {
-                const today = new Date();
-                const dayIndex = today.getDay();
-                const currentDayName = daysOfWeek[dayIndex === 0 ? 6 : dayIndex - 1];
-                currentWeekBlock.innerHTML = `<div>კვირა ${cur.n}</div>`;
-                currentDayBlock.innerHTML = `<div>${currentDayName}</div>`;
-            }
-            updateLiveTime();
-            timeUpdateInterval = setInterval(updateLiveTime, 1000);
-        }
 
         // Ensure week bar is collapsed on phone view when goToday is called
         if (isPhone) {
@@ -1504,6 +1477,9 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
             // De-activate all week items first
             document.querySelectorAll('#weeksBar .item').forEach(item => {
                 item.classList.remove('active');
+                if (item.classList.contains('current-week')) {
+                    item.innerHTML = item.dataset.originalText;
+                }
                 item.classList.remove('current-week');
             });
 
@@ -1511,7 +1487,16 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
             const activeItem = document.querySelector(`#weeksBar .item[data-week='${cur.n}']`);
             if (activeItem) {
                 activeItem.classList.add('active');
-                activeItem.classList.add('current-week'); // Add current-week class
+                activeItem.classList.add('current-week');
+
+                const weekText = activeItem.dataset.originalText;
+                activeItem.innerHTML = ''; // Clear the content
+
+                const content = el("div", { style: "display: flex; flex-direction: column; align-items: left; justify-content: center; height: 100%;" });
+                const weekTextEl = el("div", { textContent: weekText });
+                const nowTextEl = el("div", { textContent: "Now", style: "font-size: 0.8rem; opacity: 0.8;" });
+                content.append(weekTextEl, nowTextEl);
+                activeItem.append(content);
 
                 // Scroll the item into view (desktop only)
                 const weeksBar = document.getElementById('weeksBar');
@@ -1542,7 +1527,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               // Create the new nested structure
               const cardMainTop = el("div", { className: "card-main-top", style: "flex: initial;" });
               const cardMainBottom = el("div", { className: "card-main-bottom" });
-              const cardSubBottom = el("div", { className: "card-sub-bottom", style: "min-height: 400px; padding: 20px 0;" }); // Adjusted height
+              const cardSubBottom = el("div", { className: "card-sub-bottom", style: isPhoneView() ? "height: auto;" : "height: 120px;" }); // Adjusted height
               cardMainTop.append(cardSubBottom);
               card.append(cardMainTop, cardMainBottom);
 
@@ -1572,10 +1557,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
           globalResourcesList.append(el("div", { className: "empty", textContent: "No global resources available." }));
       }
 
-      // Initialize horizontal scroll for the cards, with a delay
-      setTimeout(() => {
-          initHorizontalScroll("#global-resources-list", null, WEEKS_BAR_SCROLL_DELAY);
-      }, 50);
+
   }
 
   /* === Profile === */
@@ -1684,15 +1666,18 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
           } else if (viewId === 'resources-view') { // NEW
               if (!catalog.length) await loadCatalog(); // Ensure catalog is loaded
-              resourcesView.style.display = 'block';
+              resourcesView.style.display = 'flex';
               renderGlobalResources(); // Call the new function
+              if (!isPhoneView()) {
+                setTimeout(() => initHorizontalScroll("#global-resources-list", null, SUBJECTS_CARD_RENDER_DELAY), SUBJECTS_CARD_RENDER_DELAY);
+              }
               // No bottomWeeks for resources for now, similar to settings
 
           } else { // Default to live-view
               liveView.style.display = 'flex';
               bottomWeeks.style.display = 'block';
               // Re-initialize scroll on view switch
-              setTimeout(() => initHorizontalScroll("#cardsCanvas"), 50);
+              setTimeout(() => initHorizontalScroll("#cardsCanvas", null, SUBJECTS_CARD_RENDER_DELAY), 50);
           }
       }
   });
