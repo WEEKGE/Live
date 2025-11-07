@@ -1259,6 +1259,26 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     });
   }
 
+  function sortByDayReverseProximity(subjs){
+    const t=todayDayIndex();
+    return subjs.sort((a,b)=>{
+      const da=(a.dayIndex??7)-t, db=(b.dayIndex??7)-t;
+      const wrapA=da<0?da+7:da, wrapB=db<0?db+7:db;
+      // Reverse the comparison for reverse order
+      if(a.dayIndex===t && b.dayIndex!==t) return 1; // Today's subject comes last
+      if(b.dayIndex===t && a.dayIndex!==t) return -1; // Today's subject comes last
+      return wrapB-wrapA; // Reverse the order
+    });
+  }
+
+  function sortByDayAscending(subjs) {
+    return subjs.sort((a, b) => {
+      const dayA = a.dayIndex ?? 7; // Assign 7 for subjects with no day (will appear last)
+      const dayB = b.dayIndex ?? 7;
+      return dayA - dayB;
+    });
+  }
+
   const daysOfWeek=["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
   const isPhoneView = () => window.matchMedia('(max-width: 768px)').matches;
 
@@ -1478,12 +1498,27 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       setTimeout(() => {
           canvas.innerHTML = "";
           let any = false;
-          const subs = sortByDayProximity(selected.map(id => {
-              const subj = cache[id];
-              if (!subj) return null;
-              const day = userDays ?.[id] ?? null;
-              return { ...subj, dayIndex: daysOfWeek.indexOf(day) };
-          }).filter(Boolean));
+          const subs = (() => {
+              const mappedSubjects = selected.map(id => {
+                  const subj = cache[id];
+                  if (!subj) return null;
+                  const day = userDays ?.[id] ?? null;
+                  return { ...subj, dayIndex: daysOfWeek.indexOf(day) };
+              }).filter(Boolean);
+
+              const actualCurrentWeekNumber = currentWeekData ? currentWeekData.n : null;
+
+              if (selectedWeekNumber < actualCurrentWeekNumber) {
+                  // For weeks before the current week, sort in reverse day order
+                  return sortByDayReverseProximity(mappedSubjects);
+              } else if (selectedWeekNumber === actualCurrentWeekNumber) {
+                  // For the current week, sort by day proximity
+                  return sortByDayProximity(mappedSubjects);
+              } else {
+                  // For weeks after the current week, sort strictly Monday to Sunday
+                  return sortByDayAscending(mappedSubjects);
+              }
+          })();
 
           subs.forEach(subj => {
               const thisWeekData = subj.weeks?.find(w => w.week === n - 1);
