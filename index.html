@@ -1253,21 +1253,34 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     return subjs.sort((a,b)=>{
       const da=(a.dayIndex??7)-t, db=(b.dayIndex??7)-t;
       const wrapA=da<0?da+7:da, wrapB=db<0?db+7:db;
+
       if(a.dayIndex===t && b.dayIndex!==t) return -1;
       if(b.dayIndex===t && a.dayIndex!==t) return 1;
-      return wrapA-wrapB;
+
+      if (wrapA !== wrapB) {
+        return wrapA-wrapB;
+      }
+
+      // If wrapped days are the same, sort by time
+      const timeA = a.time ? a.time.replace(':', '') : '9999';
+      const timeB = b.time ? b.time.replace(':', '') : '9999';
+      return timeA.localeCompare(timeB);
     });
   }
 
   function sortByDayReverseProximity(subjs){
-    const t=todayDayIndex();
     return subjs.sort((a,b)=>{
-      const da=(a.dayIndex??7)-t, db=(b.dayIndex??7)-t;
-      const wrapA=da<0?da+7:da, wrapB=db<0?db+7:db;
-      // Reverse the comparison for reverse order
-      if(a.dayIndex===t && b.dayIndex!==t) return 1; // Today's subject comes last
-      if(b.dayIndex===t && a.dayIndex!==t) return -1; // Today's subject comes last
-      return wrapB-wrapA; // Reverse the order
+      const dayA = a.dayIndex ?? 7; // Assign 7 for subjects with no day
+      const dayB = b.dayIndex ?? 7;
+
+      if (dayA !== dayB) {
+        return dayB - dayA; // Sort in descending order (Sunday to Monday)
+      }
+
+      // If days are the same, sort by time (descending for reverse proximity)
+      const timeA = a.time ? a.time.replace(':', '') : '0000'; // '0000' for subjects without time (should appear first in reverse)
+      const timeB = b.time ? b.time.replace(':', '') : '0000';
+      return timeB.localeCompare(timeA); // Reverse time order
     });
   }
 
@@ -1275,7 +1288,34 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     return subjs.sort((a, b) => {
       const dayA = a.dayIndex ?? 7; // Assign 7 for subjects with no day (will appear last)
       const dayB = b.dayIndex ?? 7;
-      return dayA - dayB;
+
+      if (dayA !== dayB) {
+        return dayA - dayB;
+      }
+
+      // If days are the same, sort by time
+      const timeA = a.time ? a.time.replace(':', '') : '9999'; // '9999' for subjects without time
+      const timeB = b.time ? b.time.replace(':', '') : '9999';
+      return timeA.localeCompare(timeB);
+    });
+  }
+
+  function sortByDayAndTime(subjs) {
+    const t = todayDayIndex();
+    return subjs.sort((a, b) => {
+      const da = (a.dayIndex ?? 7) - t;
+      const db = (b.dayIndex ?? 7) - t;
+      const wrapA = da < 0 ? da + 7 : da;
+      const wrapB = db < 0 ? db + 7 : db;
+
+      if (wrapA !== wrapB) {
+        return wrapA - wrapB;
+      }
+
+      // If wrapped days are the same, sort by time
+      const timeA = a.time ? a.time.replace(':', '') : '9999';
+      const timeB = b.time ? b.time.replace(':', '') : '9999';
+      return timeA.localeCompare(timeB);
     });
   }
 
@@ -1377,7 +1417,16 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     const snap=await db.collection("users").doc(user.uid).get();
     const data=snap.exists?snap.data():{};
     selected=data.subjects||[];
-    userDays=data.days||{};
+    // Initialize userDays to handle both day and time
+    userDays = data.days || {};
+    // Ensure userDays entries are objects with day and time properties
+    for (const subjId in userDays) {
+        if (typeof userDays[subjId] === 'string') {
+            userDays[subjId] = { day: userDays[subjId], time: null };
+        } else if (typeof userDays[subjId] !== 'object' || userDays[subjId] === null) {
+            userDays[subjId] = { day: null, time: null };
+        }
+    }
   }
   async function ensureSubjectsLoaded(){
     const toLoad=selected.filter(id=>!cache[id]);
@@ -1502,8 +1551,12 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               const mappedSubjects = selected.map(id => {
                   const subj = cache[id];
                   if (!subj) return null;
-                  const day = userDays ?.[id] ?? null;
-                  return { ...subj, dayIndex: daysOfWeek.indexOf(day) };
+                  const dayData = userDays?.[id] ?? { day: null, time: null };
+                  return {
+                      ...subj,
+                      dayIndex: daysOfWeek.indexOf(dayData.day),
+                      time: dayData.time // Add time to the subject object
+                  };
               }).filter(Boolean);
 
               const actualCurrentWeekNumber = currentWeekData ? currentWeekData.n : null;
@@ -1842,14 +1895,18 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     // Prepare subjects for sorting by adding dayIndex
     const subjectsWithDay = selected.map(id => {
       const subj = catalog.find(c => c.id === id);
-      const day = userDays?.[id] ?? null;
-      return { ...subj, id: id, dayIndex: day !== null ? daysOfWeek.indexOf(day) : 7 }; // Assign 7 for subjects with no day (will appear last)
+      const day = userDays?.[id]?.day ?? null; // Access .day property
+      const time = userDays?.[id]?.time ?? null; // Access .time property
+      return { ...subj, id: id, dayIndex: day !== null ? daysOfWeek.indexOf(day) : 7, time: time }; // Assign 7 for subjects with no day (will appear last)
     });
 
-    // Sort subjects by dayIndex
-    subjectsWithDay.sort((a, b) => a.dayIndex - b.dayIndex);
+    console.log("Subjects before sorting:", subjectsWithDay);
 
-    subjectsWithDay.forEach(subjData => {
+    // Sort subjects by dayIndex and then by time using the new function
+    const sortedSubjects = sortByDayAscending(subjectsWithDay);
+    console.log("Subjects after sorting:", sortedSubjects);
+
+    sortedSubjects.forEach(subjData => {
       const id = subjData.id;
       const subj = catalog.find(c => c.id === id); // Re-find original subject for full data if needed
       const row=el("div",{className:"item-settings"});
@@ -1865,12 +1922,48 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       }});
       const select=el("select",{className:"day-select"});
       daysOfWeek.forEach(d=>{
-        const opt=el("option",{textContent:d,value:d});
-        if(userDays?.[id]===d) opt.selected=true;
+        const opt=el("option", {textContent:d, value:d});
+        if(userDays?.[id]?.day===d) opt.selected=true;
         select.append(opt);
       });
-      select.onchange=()=>{userDays[id]=select.value; renderProfile();};
-      row.append(left,delBtn,select);
+      select.onchange=()=>{
+        if (!userDays[id]) userDays[id] = { day: null, time: null };
+        userDays[id].day = select.value;
+        renderProfile();
+      };
+
+      const timeContainer = el("div", { style: "display: flex; align-items: center; gap: 5px;" });
+      const hourSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
+      for (let i = 7; i <= 23; i++) {
+        const hour = String(i).padStart(2, '0');
+        const opt = el("option", { textContent: hour, value: hour });
+        if (userDays?.[id]?.time?.split(':')[0] === hour) opt.selected = true;
+        hourSelect.append(opt);
+      }
+      hourSelect.onchange = () => {
+        if (!userDays[id]) userDays[id] = { day: null, time: null };
+        const currentMinute = userDays[id].time ? userDays[id].time.split(':')[1] : '00';
+        userDays[id].time = `${hourSelect.value}:${currentMinute}`;
+        renderProfile();
+      };
+
+      const minuteSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
+      for (let i = 0; i <= 55; i += 5) {
+        const minute = String(i).padStart(2, '0');
+        const opt = el("option", { textContent: minute, value: minute });
+        if (userDays?.[id]?.time?.split(':')[1] === minute) opt.selected = true;
+        minuteSelect.append(opt);
+      }
+      minuteSelect.onchange = () => {
+        if (!userDays[id]) userDays[id] = { day: null, time: null };
+        const currentHour = userDays[id].time ? userDays[id].time.split(':')[0] : '07'; // Default to 07 if no hour is set
+        userDays[id].time = `${currentHour}:${minuteSelect.value}`;
+        renderProfile();
+      };
+
+      timeContainer.append(hourSelect, el("span", { textContent: ":", style: "font-size: 1.2rem; font-weight: bold;" }), minuteSelect);
+
+      row.append(left, delBtn, select, timeContainer);
       mine.append(row);
     });
     $("#saveSubjects").onclick=async()=>await saveSelection(true);
@@ -1879,8 +1972,16 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   async function saveSelection(immediate=false){
     if(!user) return;
     try{
+      // Filter out subjects with no day or time selected before saving
+      const daysToSave = {};
+      for (const subjId in userDays) {
+          if (userDays[subjId].day !== null || userDays[subjId].time !== null) {
+              daysToSave[subjId] = userDays[subjId];
+          }
+      }
+
       await db.collection("users").doc(user.uid).set(
-        { subjects:selected, days:userDays },
+        { subjects:selected, days:daysToSave },
         { merge:true }
       );
       if(immediate){
