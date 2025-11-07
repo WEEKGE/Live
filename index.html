@@ -1599,7 +1599,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                 toggleButtons.append(nextWeekBtn);
               }
 
-              const updateCardContent = (weekData) => {
+              const updateCardContent = (displayWeekData, subjectObj, currentSelectedWeekNumber) => {
                   card.innerHTML = ''; // Clear the entire card
 
                   // Create the new nested structure
@@ -1611,9 +1611,9 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                   cardMainTop.append(cardSubTop, cardSubBottom);
                   card.append(cardMainTop, cardMainBottom);
 
-                  if (!weekData) {
+                  if (!displayWeekData) {
                       // Handle no data case
-                      cardMainBottom.append(el("h4", { textContent: subj.name, style: "margin: 0; color: var(--color);" }));
+                      cardMainBottom.append(el("h4", { textContent: subjectObj.name, style: "margin: 0; color: var(--color);" }));
                       cardSubTop.append(el("div", { textContent: 'No topic available.' }));
                       addBtns(cardSubBottom, []); // Add empty buttons
                       return;
@@ -1621,20 +1621,22 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
                   // Content for card-main-bottom (Subject Name & Lecture Type)
                   const cardSymbolContainer = el("div", { className: "card-symbol-container" });
-                  const symbolSpan = el("span", { className: "material-symbols-outlined", textContent: subj.theme || "" });
-                  if (!subj.theme) {
+                  const symbolSpan = el("span", { className: "material-symbols-outlined", textContent: subjectObj.theme || "" });
+                  if (!subjectObj.theme) {
                     symbolSpan.style.visibility = "hidden"; // Hide if no symbol
                   }
                   cardSymbolContainer.append(symbolSpan);
                   cardMainBottom.append(cardSymbolContainer);
 
                   const textContainer = el("div", { style: "display: flex; flex-direction: column; justify-content: center;" });
-                  const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;font-weight: 500;" });
-                  const typeEl = el("h5", { textContent: weekData.type || '', style: "margin: 0; font-weight: 400; opacity: .8;" });
+                  const titleEl = el("h4", { textContent: subjectObj.name, style: "margin: 0; color: #fff;font-weight: 500;" });
+                  // Find the week data for the currently selected week (n) to get the fixed lecture type
+                  const fixedLectureWeekData = subjectObj.weeks?.find(w => w.week === currentSelectedWeekNumber - 1);
+                  const typeEl = el("h5", { textContent: fixedLectureWeekData?.type || '', style: "margin: 0; font-weight: 400; opacity: .8;" });
                   textContainer.append(titleEl, typeEl);
                   cardMainBottom.append(textContainer);
 
-                  if (!weekData || !weekData.topic) {
+                  if (!displayWeekData || !displayWeekData.topic) {
                       if (isPhoneView()) {
                           cardSubTop.style.display = 'none'; // Hide for phone
                       } else {
@@ -1642,13 +1644,13 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                           cardSubTop.style.display = ''; // Ensure visible
                       }
                   } else {
-                      topicText.innerHTML = weekData.topic;
+                      topicText.innerHTML = displayWeekData.topic;
                       cardSubTop.append(topicText);
                       cardSubTop.style.display = ''; // Ensure visible
                   }
 
                   // Content for card-sub-bottom (Buttons)
-                  const allButtons = [...(weekData.buttons || [])];
+                  const allButtons = [...(displayWeekData.buttons || [])];
                   addBtns(cardSubBottom, allButtons);
               };
               
@@ -1712,11 +1714,11 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               
                                           // Apply content and active state based on decision
                                           if (defaultToNextWeek && nextWeekData) {
-                                              updateCardContent(nextWeekData);
+                                              updateCardContent(nextWeekData, subj, selectedWeekNumber);
                                               nextWeekBtn.classList.add('active');
                                               nextWeekBtn.classList.add('past-day-active'); // NEW: Always add past-day-active to nextWeekBtn when active
                                           } else if (defaultToThisWeek && thisWeekData) {
-                                              updateCardContent(thisWeekData);
+                                              updateCardContent(thisWeekData, subj, selectedWeekNumber);
                                               thisWeekBtn.classList.add('active');
                                               if (isSelectedWeekCurrent && adjustedToday > subjectDay) {
                                                   thisWeekBtn.classList.add('past-day-active');
@@ -1726,11 +1728,11 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                                                   thisWeekBtn.classList.remove('past-day-active');
                                               }
                                           } else if (nextWeekData) { // Fallback if primary default was not possible but nextWeekData exists
-                                              updateCardContent(nextWeekData);
+                                              updateCardContent(nextWeekData, subj, selectedWeekNumber);
                                               nextWeekBtn.classList.add('active');
                                               nextWeekBtn.classList.add('past-day-active'); // NEW: Always add past-day-active to nextWeekBtn when active
                                           } else if (thisWeekData) { // Fallback if primary default was not possible but thisWeekData exists
-                                              updateCardContent(thisWeekData);
+                                              updateCardContent(thisWeekData, subj, selectedWeekNumber);
                                               thisWeekBtn.classList.add('active');
                                               if (isSelectedWeekPast) {
                                                   thisWeekBtn.classList.add('past-day-active');
@@ -1738,7 +1740,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                                                   thisWeekBtn.classList.remove('past-day-active');
                                               }
                                           } else { // Absolute fallback, no data
-                                              updateCardContent(thisWeekData); // Will show "No topic available."
+                                              updateCardContent(thisWeekData, subj, selectedWeekNumber); // Will show "No topic available."
                                               thisWeekBtn.classList.add('active');
                                               if (isSelectedWeekPast) {
                                                   thisWeekBtn.classList.add('past-day-active');
@@ -1749,7 +1751,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                             
                                           // Update onclick handlers
                                           thisWeekBtn.onclick = () => {
-                                              updateCardContent(thisWeekData);
+                                              updateCardContent(thisWeekData, subj, selectedWeekNumber);
                                               thisWeekBtn.classList.add('active');
                                               nextWeekBtn.classList.remove('active');
                                               nextWeekBtn.classList.remove('past-day-active'); // Ensure removed from nextWeekBtn
@@ -1764,7 +1766,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                                           };
                             
                                           nextWeekBtn.onclick = () => {
-                                              updateCardContent(nextWeekData);
+                                              updateCardContent(nextWeekData, subj, selectedWeekNumber);
                                               nextWeekBtn.classList.add('active');
                                               nextWeekBtn.classList.add('past-day-active'); // NEW: Always add past-day-active to nextWeekBtn when active
                                               thisWeekBtn.classList.remove('active');
