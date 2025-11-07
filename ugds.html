@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Charlie Kirk Debate Game</title>
+<title>UG DS SLIDES</title>
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap');
@@ -23,11 +23,11 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:h
 /* === Base Slide Animation === */
 .slide{
   position:absolute;inset:0;display:grid;place-items:center;
-  opacity:0;transform:translateY(60px);filter:blur(var(--blur));
+  opacity:0;transform:translateY(60px);filter:blur(var(--blur));overflow: hidden;
   transition:opacity var(--transition),transform var(--transition),filter var(--transition);
 }
-.slide.active{opacity:1;transform:translateY(0);filter:none;}
-.slide.exit{opacity:0;transform:translateY(-60px);filter:blur(var(--blur));}
+.slide.active{opacity:1;transform:translateY(0);filter:none;overflow: hidden;}
+.slide.exit{opacity:0;transform:translateY(-60px);filter:blur(var(--blur));overflow: hidden;}
 
 /* === Slide 1 (center photo) === */
 #slide-1 img{
