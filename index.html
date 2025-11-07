@@ -37,6 +37,118 @@
     font-family:Inter,system-ui,Arial,sans-serif;
   }
 
+  /* === RESOURCES VIEW === */
+  #resources-view {
+    width: 100%;
+    padding: 20px;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+  }
+
+  #resources-view #global-resources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    width: 100%;
+  }
+
+  #resources-view .subject-wrapper {
+    width: 100%;
+    margin: 0 auto; /* Center the cards */
+    height: auto; /* Allow height to adjust based on content */
+  }
+
+  #resources-view .card {
+    width: 100%;
+    flex-direction: row; /* Arrange content horizontally */
+    justify-content: space-between;
+    align-items: stretch;
+    min-height: 120px; /* Minimum height for resource cards */
+  }
+
+  #resources-view .card-left-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 20px;
+    background: hsl(0, 0%, 10%);
+    width: 25%; /* Allocate 25% width for left section */
+    flex-shrink: 0;
+  }
+
+  #resources-view .card-right-section {
+    flex: 1; /* Take remaining space */
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    background: hsl(0, 0%, 13%);
+  }
+
+  #resources-view .card-symbol-container .material-symbols-outlined {
+    font-size: 3rem; /* Adjust symbol size */
+  }
+
+  #resources-view .card h4 {
+    font-size: 1.2rem;
+  }
+
+  #resources-view .link-button {
+    background-color: hsl(0, 0%, 13%);
+  }
+
+  #resources-view .link-button .material-symbols-outlined {
+    font-size: 40px;
+  }
+
+  #resources-view .button-label {
+    font-size: 0.9rem;
+  }
+
+  @media screen and (max-width: 768px) {
+    #resources-view {
+      padding: 10px; /* Adjust padding for mobile */
+    }
+
+    #resources-view .subject-wrapper {
+      max-width: 100%; /* Full width on mobile */
+    }
+
+    #resources-view .card {
+      flex-direction: column; /* Stack content vertically on mobile */
+      min-height: auto;
+    }
+
+    #resources-view .card-left-section {
+      width: 100%; /* Full width on mobile */
+      padding: 10px 15px;
+      min-height: 70px;
+    }
+
+    #resources-view .card-right-section {
+      width: 100%; /* Full width on mobile */
+      min-height: 80px;
+    }
+
+    #resources-view .card-symbol-container .material-symbols-outlined {
+      font-size: 2.5rem;
+    }
+
+    #resources-view .card h4 {
+      font-size: 1rem;
+    }
+
+    #resources-view .link-button .material-symbols-outlined {
+      font-size: 30px;
+    }
+
+    #resources-view .button-label {
+      font-size: 0.8rem;
+    }
+  }
+
   /* === LOADER === */
   #loadingOverlay {
     position: fixed; inset: 0; z-index: 9999;
@@ -1524,7 +1636,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               const card = el("div", { className: "card", style: "flex-direction: row; justify-content: space-between; align-items: stretch;" });
 
               // Create left section for symbol and name
-              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: hsl(0, 0%, 10%); width: 30%; flex-shrink: 0;" });
+              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: hsl(0, 0%, 10%); width: 60%; flex-shrink: 0;" });
 
               // Create right section for embeds
               const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: hsl(0, 0%, 13%);" });
