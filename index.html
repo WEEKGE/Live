@@ -684,10 +684,10 @@
       width: 100%; /* Full width for all main views */
       flex-direction: column; /* Stack elements within live-view vertically */
       padding: 0;
+      height: 100%; /* Ensure it takes full height */
     }
 
     view{padding: 0;}
-
 
 
     .subjects-panel {
@@ -708,6 +708,7 @@
       width: 100%; /* Full width for subject wrapper */
       max-width: 400px; /* Limit card width for better readability */
       margin-bottom: 10px; /* Space between cards */
+      height: auto; /* Ensure it shrinks to content size */
     }
 
     .card {
@@ -786,6 +787,7 @@
   .settings-layout {
     flex-direction: column;
     padding: 0; /* Add horizontal padding */
+    height: 100%; /* Ensure it takes full height */
   }
 
   .settings-main-content {
@@ -810,7 +812,7 @@
     .settings-block {
       flex: 1; /* Make buttons fill horizontal space */
       border-bottom: none; /* Remove bottom border for nav items */
-      padding: 10px; /* Adjust padding */
+      padding: 5px 10px; /* Adjust padding */
     }
 
     .settings-main-page {
@@ -905,13 +907,15 @@
     }
 
     .settings-action-button {
-      font-size: 1rem; /* Smaller font for settings action buttons */
+      font-size: 0.9rem; /* Smaller font for settings action buttons */
       padding: 10px; /* Adjust padding */
     }
 
-    .search-box, .day-select {
+    .day-select {
       font-size: 0.9rem; /* Smaller font for search box and day select */
       padding: 8px; /* Adjust padding */
+      width: 100%; /* Make it take full width */
+      max-width: none; /* Remove max-width constraint */
     }
 
     .bottom-weeks .item.selected-non-current-week {
@@ -977,13 +981,13 @@
           <div class="settings-layout">
             <div class="settings-side-panel">
               <div class="settings-block settings-nav-item active" data-target="my-subjects-content">
-                <div style="font-weight:700;font-size: 1.5rem;">My Subjects</div>
+                <div style="font-weight:700;">My Subjects</div>
               </div>
               <div class="settings-block settings-nav-item" data-target="catalog-content">
-                <div style="font-weight:700;font-size: 1.5rem;">Subjects Catalog</div>
+                <div style="font-weight:700;">Subjects Catalog</div>
               </div>
               <div class="settings-block" style="padding: 0;">
-                <button style="font-weight:700;font-size: 1.5rem;padding: 40px 0px;" id="signOutBtn" class="settings-action-button">Log Out</button>
+                <button style="font-weight:700;padding: 40px 0px;" id="signOutBtn" class="settings-action-button">Log Out</button>
               </div>
             </div>
             <div class="settings-main-page">
@@ -1178,9 +1182,15 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   function addBtns(container, buttons) { // container is cardSubBottom now
       container.innerHTML = ''; // Clear previous buttons
       if (!buttons || buttons.length === 0) {
-          container.innerHTML = '<div style="text-align:center;color:#888;margin:auto;">No links</div>';
+          if (isPhoneView()) {
+              container.style.display = 'none'; // Hide for phone
+          } else {
+              container.innerHTML = ''; // Clear content for PC
+              container.style.display = ''; // Ensure visible
+          }
           return;
       }
+      container.style.display = ''; // Ensure visible if buttons exist
 
       const getIcon = (button) => { // Accept the whole button object
           const type = button.type ? button.type.toLowerCase().trim() : '';
@@ -1524,9 +1534,18 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                   textContainer.append(titleEl, typeEl);
                   cardMainBottom.append(textContainer);
 
-                  // Content for card-sub-top (Topic)
-                  topicText.innerHTML = weekData.topic || 'No topic for this week.';
-                  cardSubTop.append(topicText);
+                  if (!weekData || !weekData.topic) {
+                      if (isPhoneView()) {
+                          cardSubTop.style.display = 'none'; // Hide for phone
+                      } else {
+                          topicText.innerHTML = ''; // Clear content for PC
+                          cardSubTop.style.display = ''; // Ensure visible
+                      }
+                  } else {
+                      topicText.innerHTML = weekData.topic;
+                      cardSubTop.append(topicText);
+                      cardSubTop.style.display = ''; // Ensure visible
+                  }
 
                   // Content for card-sub-bottom (Buttons)
                   const allButtons = [...(weekData.buttons || [])];
