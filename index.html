@@ -296,6 +296,10 @@
     height: auto;
   }
 
+  #resources-view .card {
+    height: 100%;
+  }
+
   .card-main-bottom { /* Lower half of the card */
     height: 20%; /* Fixed height for name/type */
     display: flex;
@@ -378,6 +382,7 @@
     color: white;
     gap: 5px; /* Space between icon and label */
     background-color: #3a3a3a;
+    height: 100%;
   }
 
   .link-button:hover {
@@ -568,21 +573,23 @@
     background: #333; /* Subtle darker background on hover */
   }
 
-  /* Phone-specific styles */
-  @media screen and (max-width: 768px) {
-    body {
-      margin: 0 10px; /* Reduce horizontal margin for phone */
-    }
 
+  @media screen and (max-width: 768px) {
+      body {
+        margin: 0; /* Remove horizontal margin for phone */
+      }
     .main-content {
       flex-direction: column; /* Stack main content vertically */
-      margin: 10px 0; /* Adjust vertical margin */
+      margin: 10px 10px; /* Adjust vertical margin */
     }
 
     #live-view, #resources-view, #settings-view {
       width: 100%; /* Full width for all main views */
       flex-direction: column; /* Stack elements within live-view vertically */
+      padding: 0;
     }
+
+    view{padding: 0;}
 
     .left-info-bar {
       display: none; /* Hide the left info bar on phone */
@@ -599,6 +606,7 @@
       padding: 0; /* Remove padding */
       overflow-x: hidden; /* No horizontal scroll for cards */
       overflow-y: auto; /* Allow vertical scroll for cards */
+      gap: 20px; /* Space between cards */
     }
 
     .subject-wrapper {
@@ -611,6 +619,36 @@
     .card {
       width: 100%; /* Full width for card within its wrapper */
       min-height: 100px; /* Ensure cards have a minimum height */
+      display: flex; /* Ensure flex properties apply */
+      flex-direction: column; /* Ensure flex properties apply */
+    }
+
+    /* Reorder elements within subject-wrapper */
+    .subject-wrapper .card {
+      order: 1; /* Card comes first */
+    }
+    .subject-wrapper .week-toggle-buttons {
+      order: 2; /* Toggle buttons come second */
+    }
+
+    /* Reorder elements within card */
+    .card .card-main-bottom {
+      order: 1; /* Card main bottom comes first */
+    }
+    .card .card-main-top {
+      order: 2; /* Card main top comes second */
+    }
+
+    /* Reorder elements within card-main-top */
+    .card-main-top {
+      display: flex; /* Ensure flex properties apply */
+      flex-direction: column; /* Ensure flex properties apply */
+    }
+    .card-main-top .card-sub-top {
+      order: 1; /* Topic comes first */
+    }
+    .card-main-top .card-sub-bottom {
+      order: 2; /* Embeds come second */
     }
 
     .card-main-bottom {
@@ -648,10 +686,17 @@
     }
 
     /* Settings page adjustments for phone */
-    .settings-layout {
-      flex-direction: column; /* Stack side panel and main page vertically */
-      padding: 0; /* Remove padding */
-    }
+  .settings-layout {
+    flex-direction: column;
+    padding: 0; /* Add horizontal padding */
+  }
+
+  .settings-main-content {
+    padding: 0px; /* Adjust padding for content */
+    display: none; /* Hidden by default */
+    flex-direction: column; /* Allow content to stack */
+    overflow-y: auto; /* Allow content to scroll */
+  }
 
     .settings-side-panel {
       width: 100%; /* Full width for side panel */
@@ -659,7 +704,8 @@
       border-bottom: 1px solid var(--line); /* Add bottom border */
       flex-direction: row; /* Arrange nav items horizontally */
       justify-content: space-around; /* Distribute items evenly */
-      padding: 5px; /* Adjust padding */
+      padding: 0px; /* Adjust padding */
+      box-sizing: border-box; /* Include padding and border in width calculation */
     }
 
     .settings-block {
@@ -671,10 +717,13 @@
       width: 100%; /* Full width for main settings content */
       border-top: none; /* Remove top border */
       padding: 0; /* Remove padding */
+      /* Removed centering styles */
+      box-sizing: border-box; /* Include padding and border in width calculation */
     }
 
     .settings-main-content {
-      padding: 15px; /* Adjust padding for content */
+      padding: 0; /* Adjust padding for content */
+      box-sizing: border-box; /* Include padding in width calculation */
     }
 
     .save {
@@ -737,6 +786,11 @@
       padding: 8px; /* Adjust padding */
     }
 
+    .bottom-weeks .item.selected-non-current-week {
+      background-color: #fff; /* White background for selected non-current week */
+      color: #000; /* Black text */
+    }
+
     .bottom-weeks .fade-edge {
       display: none; /* Hide fade edges on phone */
     }
@@ -783,13 +837,14 @@
       </div>
     </div>
   
-      <div id="resources-view" class="view" style="display: none;">
-          <div class="resources-content" style="padding: 20px; width: 100%; height: 100%; overflow-y: auto;">
-              <h2 style="text-align: center; margin-bottom: 20px;">Global Resources</h2>
-              <div id="global-resources-list">
+      <div id="resources-view" class="view" style="display: none; flex-direction: column; padding: 0px 0px 0px 0px;">
+          <div class="subjects-panel scroll-wrap" style="flex-grow: 1; padding: 0;">
+              <div id="global-resources-list" class="scroll-list" style="height: 100%;">
                   <!-- Subjects and their global embeds will be rendered here by JS -->
                   <div class="empty">Loading global resources...</div>
               </div>
+              <div class="fade-edge left"></div>
+              <div class="fade-edge right"></div>
           </div>
       </div>
   <div id="settings-view" class="view" style="display: none;">
@@ -956,9 +1011,12 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     overlay.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ config.json ვერ ჩაიტვირთა.</h2>";
   });
 
-function startWeekge(){
+  function startWeekge(){
   const auth = firebase.auth(), db = firebase.firestore();
   let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={};
+  let currentWeekData = null; // Global within startWeekge scope
+  let selectedWeekNumber = null; // Global within startWeekge scope
+  let timeUpdateInterval = null; // For the clock
   const $=s=>document.querySelector(s);
   const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
 
@@ -985,7 +1043,6 @@ function startWeekge(){
     {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"},
     {n:13,start1:"2025-12-15",end1:"2025-12-20",start2:"2026-06-01",end2:"2026-06-06"}
   ];
-
   const colorMap = {
     yellow: ["#f7ab14", "#000"],
     green:  ["#22bf3d", "#fff"],
@@ -1104,14 +1161,49 @@ function startWeekge(){
       };
   }
 
-  async function bootAfterLogin(){
-    await loadCatalog();
-    await loadUserSelection();
-    await ensureSubjectsLoaded();
-    flattenWeeks();
-    paintWeeksBar();
-    goToday();
-  }
+    async function bootAfterLogin(){
+
+      await loadCatalog();
+
+      await loadUserSelection();
+
+      await ensureSubjectsLoaded();
+
+      flattenWeeks();
+
+      // Initialize currentWeekData and selectedWeekNumber here
+
+      const iso=todayISO();
+
+      currentWeekData = weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
+
+      selectedWeekNumber = currentWeekData ? currentWeekData.n : null;
+
+  
+
+      paintWeeksBar();
+
+      goToday();
+
+  
+
+      // Move bottom-weeks inside live-view for phone version
+
+      if (isPhoneView()) {
+
+        const liveView = $("#live-view");
+
+        const bottomWeeks = $(".bottom-weeks");
+
+        if (liveView && bottomWeeks) {
+
+          liveView.prepend(bottomWeeks);
+
+        }
+
+      }
+
+    }
 
   async function loadCatalog(){
     catalog=[];
@@ -1137,6 +1229,30 @@ function startWeekge(){
       if(w.start1) weekDates.push({n:w.n,start:w.start1,end:w.end1});
       if(w.start2) weekDates.push({n:w.n,start:w.start2,end:w.end2});
     });
+  }
+
+  function renderCollapsedWeekBar(weekNum) {
+    weeksBar.innerHTML = "";
+    const chip = el("div", {className:"item", textContent:`Week ${weekNum}`});
+    chip.dataset.week = weekNum;
+
+    if (currentWeekData && weekNum === currentWeekData.n) {
+      chip.classList.add('active');
+      chip.classList.add('current-week');
+    } else {
+      chip.classList.add('active');
+      chip.classList.add('selected-non-current-week');
+    }
+
+    chip.addEventListener('click', () => {
+      const bottomWeeks = $(".bottom-weeks");
+      bottomWeeks.classList.toggle('expanded');
+      if (bottomWeeks.classList.contains('expanded')) {
+        paintWeeksBar(); // Re-render to expanded state
+      }
+    });
+    weeksBar.append(chip);
+    showWeek(weekNum); // Ensure the selected week's content is shown
   }
 
   function paintWeeksBar(){
@@ -1351,6 +1467,11 @@ function startWeekge(){
         const currentWeekBlock = $("#currentWeekBlock");
         const currentTimeBlock = $("#currentTimeBlock");
 
+        if (timeUpdateInterval) {
+            clearInterval(timeUpdateInterval);
+            timeUpdateInterval = null;
+        }
+
         if (!isPhone) { // Only update these blocks if not in phone view
             function updateLiveTime() {
                 const now = new Date();
@@ -1370,7 +1491,7 @@ function startWeekge(){
                 currentDayBlock.innerHTML = `<div>${currentDayName}</div>`;
             }
             updateLiveTime();
-            setInterval(updateLiveTime, 1000);
+            timeUpdateInterval = setInterval(updateLiveTime, 1000);
         }
 
         // Ensure week bar is collapsed on phone view when goToday is called
@@ -1410,59 +1531,51 @@ function startWeekge(){
 
       let anyGlobalResources = false;
 
-      // Iterate through selected subjects instead of all catalog subjects
-      selected.forEach(id => {
-          const subj = cache[id] || catalog.find(c => c.id === id); // Get subject data
-          if (!subj) return; // Skip if subject data not found
-
+      // Iterate through all catalog subjects
+      catalog.forEach(subj => {
           if (subj.globalButtons && subj.globalButtons.length > 0) {
               anyGlobalResources = true;
 
-              const subjectSection = el("div", { className: "resource-subject-section", style: "margin-bottom: 30px;" });
-              subjectSection.append(el("h3", { textContent: subj.name, style: "color: var(--color); margin-bottom: 15px; text-align: center;" }));
+              const wrapper = el("div", { className: "subject-wrapper" });
+              const card = el("div", { className: "card" });
 
-              // New scrollable structure
-              const scrollWrap = el("div", { className: "scroll-wrap", style: "height: 100px;" }); // Fixed height for scroll area
-              const scrollList = el("div", { className: "scroll-list" });
+              // Create the new nested structure
+              const cardMainTop = el("div", { className: "card-main-top", style: "flex: initial;" });
+              const cardMainBottom = el("div", { className: "card-main-bottom" });
+              const cardSubBottom = el("div", { className: "card-sub-bottom", style: "height: 100%;" }); // Adjusted height
+              cardMainTop.append(cardSubBottom);
+              card.append(cardMainTop, cardMainBottom);
 
-              // Each button will be an 'item'
-              subj.globalButtons.forEach(b => {
-                  const [bg, txt] = colorMap[b.colorName || b.color || 'green'] || ['#38d98a', '#fff'];
-                  const iconName = getIcon(b);
-                  
-                  let buttonElement;
-                  if (b.link && b.link.trim() !== '' && b.link.trim() !== '#') {
-                      buttonElement = el('a', {
-                          className: 'item link-button', // Add 'item' class
-                          href: b.link,
-                          target: '_blank',
-                          style: `background-color: hsl(0, 0%, 13%);`,
-                          title: b.label
-                      });
-                  } else {
-                      buttonElement = el('div', {
-                          className: 'item link-button', // Add 'item' class
-                          style: `background-color: hsl(0, 0%, 13%); cursor: default; opacity: 0.7;`,
-                          title: b.label + ' (No link provided)'
-                      });
-                  }
-                  
-                  buttonElement.innerHTML = `<span class="material-symbols-rounded" style="color: ${bg};">${iconName}</span><span class="button-label">${b.label}</span>`;
-                  scrollList.append(buttonElement);
-              });
+              // --- Populate card-main-bottom (Symbol and Name) ---
+              const cardSymbolContainer = el("div", { className: "card-symbol-container" });
+              const symbolSpan = el("span", { className: "material-symbols-outlined", textContent: subj.theme || "" });
+              if (!subj.theme) {
+                symbolSpan.style.visibility = "hidden";
+              }
+              cardSymbolContainer.append(symbolSpan);
+              cardMainBottom.append(cardSymbolContainer);
 
-              scrollWrap.append(scrollList);
-              subjectSection.append(scrollWrap);
-              globalResourcesList.append(subjectSection);
+              const textContainer = el("div", { style: "display: flex; flex-direction: column; justify-content: center;" });
+              const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;" });
+              textContainer.append(titleEl);
+              cardMainBottom.append(textContainer);
 
-              // Initialize horizontal scroll for this subject's buttons
-              initHorizontalScroll(scrollList, null, WEEKS_BAR_SCROLL_DELAY); // Pass the element directly
+              // --- Populate card-sub-bottom (Global Buttons) ---
+              addBtns(cardSubBottom, subj.globalButtons);
+
+              wrapper.append(card);
+              globalResourcesList.append(wrapper);
           }
       });
 
       if (!anyGlobalResources) {
-          globalResourcesList.append(el("div", { className: "empty", textContent: "No global resources available for your selected subjects." }));
+          globalResourcesList.append(el("div", { className: "empty", textContent: "No global resources available." }));
       }
+
+      // Initialize horizontal scroll for the cards, with a delay
+      setTimeout(() => {
+          initHorizontalScroll("#global-resources-list", null, WEEKS_BAR_SCROLL_DELAY);
+      }, 50);
   }
 
   /* === Profile === */
@@ -1629,7 +1742,34 @@ function startWeekge(){
       // If no active item, show the placeholder
       initialSettingsPlaceholder.style.display = 'flex';
   }
+
+  let wasPhoneView = isPhoneView();
+  window.addEventListener('resize', () => {
+    const isNowPhoneView = isPhoneView();
+    if (wasPhoneView === isNowPhoneView) return;
+
+    const bottomWeeks = document.querySelector('.bottom-weeks');
+    const mainContent = document.querySelector('.main-content');
+    const liveView = document.getElementById('live-view');
+
+    if (isNowPhoneView) {
+      // Switched to Phone View
+      if (bottomWeeks && liveView) {
+        liveView.prepend(bottomWeeks);
+      }
+    } else {
+      // Switched to Desktop View
+      if (bottomWeeks && mainContent) {
+        mainContent.insertAdjacentElement('afterend', bottomWeeks);
+      }
+    }
+    
+    goToday(); // Re-initialize view
+    
+    wasPhoneView = isNowPhoneView;
+  });
 }
 </script>
 </body>
 </html>
+
