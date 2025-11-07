@@ -1845,8 +1845,11 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
       let anyGlobalResources = false;
 
-      // Iterate through all catalog subjects
-      catalog.forEach(subj => {
+      // Iterate through selected subjects
+      selected.forEach(subjId => { // Change: Iterate over selected subject IDs
+          const subj = catalog.find(c => c.id === subjId); // Find the full subject object
+          if (!subj) return; // Skip if subject not found in catalog
+
           if (subj.globalButtons && subj.globalButtons.length > 0) {
               anyGlobalResources = true;
 
@@ -1938,6 +1941,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         delete cache[id];
         await saveSelection(true);
         renderProfile();
+        renderGlobalResources();
       }});
       const select=el("select",{className:"day-select"});
       daysOfWeek.forEach(d=>{
