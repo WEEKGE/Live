@@ -2,2145 +2,1194 @@
 <html lang="ka">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Weekge</title>
-
-  <meta name="description" content="Weekge (Week.ge) — უნივერსიტეტის საგნების და სილაბუსების პლატფორმა. ნახე შენი საგნები კვირების მიხედვით და იოლი ნავიგაციით.">
-  <meta name="theme-color" content="#0B1216">
-  <link rel="icon" href="https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/logo/weekge%20logo.png">
-
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-</style>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-<style>
-  :root{
-    --bg:#0c0c0c;
-    --color:#eb1313;
-    --gap:0px;
-    --cardW:233px;
-    --top-nav-h: 60px;
-    --top-nav-margin: 50px 0 0 0;
-    --weeks-bar-h: 80px;
-    --weeks-bar-h-margin: 0 0 50px 0;
-    --line: #ffffff00;
-  }
-
-  body{
-    margin:0 50px;
-    background:var(--bg);
-    color: #fff;
-    display:flex;
-    flex-direction: column;
-    height:100vh;
-    overflow:hidden;
-    font-family:Inter,system-ui,Arial,sans-serif;
-  }
-
-  /* === RESOURCES VIEW === */
-  #resources-view {
-    width: 100%;
-    padding: 20px;
-    display: none; /* Hidden by default */
-    flex-direction: column;
-  }
-
-  #resources-view #global-resources-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0;
-    overflow-y: auto;
-    scrollbar-width: none;
-    width: 100%;
-  }
-
-  #resources-view .subject-wrapper {
-    width: 100%;
-    margin: 0 auto; /* Center the cards */
-    height: auto; /* Allow height to adjust based on content */
-  }
-
-  #resources-view .card {
-    width: 100%;
-    flex-direction: row; /* Arrange content horizontally */
-    justify-content: space-between;
-    align-items: stretch;
-    min-height: 120px; /* Minimum height for resource cards */
-  }
-
-  #resources-view .card-left-section {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0 20px;
-    background: hsl(0, 0%, 10%);
-    width: 50%; /* Allocate 25% width for left section */
-    flex-shrink: 0;
-  }
-
-  #resources-view .card-right-section {
-    flex: 1; /* Take remaining space */
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    background: hsl(0, 0%, 13%);
-  }
-
-  #resources-view .card-symbol-container .material-symbols-outlined {
-    font-size: 3rem; /* Adjust symbol size */
-  }
-
-  #resources-view .card h4 {
-    font-size: 1.2rem;
-  }
-
-  #resources-view .link-button {
-    background-color: hsl(0, 0%, 13%);
-  }
-
-  #resources-view .link-button .material-symbols-outlined {
-    font-size: 40px;
-  }
-
-  #resources-view .button-label {
-    font-size: 0.9rem;
-  }
-
-  @media screen and (max-width: 768px) {
-    #resources-view {
-      padding: 10px; /* Adjust padding for mobile */
-    }
-
-    #resources-view .subject-wrapper {
-      max-width: 100%; /* Full width on mobile */
-    }
-
-    #resources-view .card {
-      flex-direction: column; /* Stack content vertically on mobile */
-      min-height: auto;
-    }
-
-    #resources-view .card-left-section {
-      width: 100%; /* Full width on mobile */
-      padding: 10px 15px;
-      min-height: 70px;
-      order: 1; /* Place left section first */
-      
-    }
-
-    #resources-view .card-right-section {
-      width: 100%; /* Full width on mobile */
-      min-height: 80px;
-      order: 2; /* Place right section second (bottom) */
-      padding-top: 20px;
-    }
-
-    #resources-view .card-symbol-container .material-symbols-outlined {
-      font-size: 2.5rem;
-    }
-
-    #resources-view .card h4 {
-      font-size: 1rem;
-      word-wrap: break-word;
-      white-space: normal;
-    }
-
-    #resources-view .link-button .material-symbols-outlined {
-      font-size: 30px;
-    }
-
-    #resources-view .button-label {
-      font-size: 0.8rem;
-    }
-  }
-
-  /* === LOADER === */
-  #loadingOverlay {
-    position: fixed; inset: 0; z-index: 9999;
-    background: var(--bg); display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    transition: opacity .3s ease, visibility .3s ease;
-  }
-  #loadingOverlay.hidden { opacity: 0; visibility: hidden; }
-  #loadingOverlay .spinner {
-    width: 100px; height: 100px; border: 10px solid rgba(255, 255, 255, 0.068);
-    border-top: 10px solid var(--color); border-radius: 50%;
-    animation: spin 0.3s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loadingOverlay p { margin-top: 16px; opacity: .9; }
-
-
-  /* === TOP NAV === */
-  .top-nav {
-    height: var(--top-nav-h);
-    border-bottom: 1px solid var(--line);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: var(--top-nav-margin)
-  }
-
-  /* === MAIN CONTENT === */
-  .main-content {
-    flex: 1;
-    display: flex; /* Use flexbox for main content area */
-    margin: 20px 0 20px 0;
-    overflow: hidden; /* Prevent main content from scrolling */
-  }
-
-  #live-view {
-    width: 100%;
-    display: flex; /* Arrange left panel and subject details */
-    height: 100%;
-    overflow: hidden; /* Prevent live-view from scrolling */
-  }
-
-    .subjects-panel { /* This will now be the container for the selected subject\'s details */
-
-      flex: 1; /* Take remaining space */
-
-      position: relative;
-
-      overflow-y: auto; /* Allow content to scroll if needed */
-
-      padding: 0 0 0 20px; /* Add some padding */
-
-    }
-
-
-  /* === BOTTOM WEEKS BAR === */
-  .bottom-weeks {
-    height: var(--weeks-bar-h);
-    border-top: 1px solid var(--line);
-    margin: var(--weeks-bar-h-margin);
-  }
-
-  /* === HORIZONTAL SCROLL LIST === */
-  .scroll-wrap{
-    position:relative;
-    width:100%;
-    height:100%;
-  }
-
-  .scroll-list{
-    display:flex;
-    gap:5px;
-    overflow-x:auto;
-    scroll-behavior:smooth;
-    scrollbar-width:none;
-    width:100%;
-    height:100%;
-    position:relative;
-  }
-  .scroll-list::-webkit-scrollbar{display:none;}
-
-  .item{
-    flex:0 0 var(--cardW);
-    height:100%;
-    background:#ffffff0a;
-    border:0px solid transparent;
-    display:flex;
-    justify-content:flex-start;
-    align-items:center;
-    color:#fff;
-    font-weight:700;
-    font-size:1.3rem;
-    cursor:pointer;
-    transition:transform .2s ease,border-color .2s ease,background .2s ease;
-    user-select: none; /* Prevent text selection */
-    padding: 0 20px;
-  }
-
-  .top-nav .item {
-    flex: 1;
-    justify-content: center;
-    padding: 0;
-  }
-
-  .item:hover{background-color:#2b2b2b;}
-  .item.active{background:var(--color);border-color:#000;color: rgb(255, 255, 255);}
-
-  /* Desktop: Non-current active week should be white with black text */
-  @media screen and (min-width: 769px) {
-    #weeksBar .item.active:not(.current-week) {
-      background: #fff;
-      color: #000;
-    }
-  }
-
-  .item.active.current-week {
-    color: #ffffff; /* Black text for active current week */
-  }
-
-  .item.current-week:not(.active){
-    background-color: #ffffff1a;
-  }
-
-  .week-toggle-buttons {
-    display: flex;
-    flex: 0 0 auto; /* Don't grow or shrink, take content width */
-    gap: 2px; /* Small gap between buttons */
-    width: 100%; /* Fill the width of the parent subject-wrapper */
-  }
-
-  .week-toggle-buttons button {
-    flex: 1; /* Make buttons fill available space */
-    height: 40px; /* Fixed height for consistency */
-    background: #ffffff0a; /* Same as .item */
-    border: 0px solid transparent; /* No border */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-weight: 700;
-    font-size: 1rem; /* Slightly smaller font than weeks */
-    cursor: pointer;
-    transition: background .2s ease;
-    border-radius: 0; /* No rounded edges */
-    padding: 30px 0; /* No padding */
-  }
-
-  .week-toggle-buttons button:hover {
-    background-color: #2b2b2b; /* Same as .item:hover */
-  }
-
-  .week-toggle-buttons button.active {
-    background: var(--color); /* Same as .item.active */
-    border-color: #000; /* Same as .item.active */
-    color: #ffffff; /* Black text for active button */
-  }
-
-  .week-toggle-buttons button.next-week-btn.active {
-    background: #ffffff; /* Brighter than default, not red */
-    border-color: transparent; /* No border */
-    color: #000000; /* White text for active next week button */
-  }
-
-  .week-toggle-buttons button.past-day-active {
-    background: #2b2b2b;
-    color: #ffffff;
-    border-color: transparent;
-  }
-
-
-
-  .fade-edge{
-    position:absolute;
-    top:0;
-    bottom:0;
-    width:180px;
-    pointer-events:none;
-    z-index:5;
-  }
-  .fade-edge.left{ left:0; background:transparent; }
-  .fade-edge.right{ right:0; background:transparent; }
-
-  /* === SETTINGS PAGE === */
-  #settings-view {
-    width: 100%;
-    padding: 20px;
-    display: none; /* Hidden by default */
-  }
-  .settings-content {
-      background: transparent;
-      padding: 0;
-      width: 100%;
-      max-width: 1500px; /* Optional: constrain width */
-      height: 100%;
-      margin: 0;
-      border: none;
-  }
-
-  /* === CARDS (NEW STRUCTURE) === */
-  #cardsCanvas {
-    display: flex;
-    gap: 5px;
-    padding: 0 0px;
-    height: 100%;
-    /* Removed align-items: center; to allow children to stretch */
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    transition: opacity 0.1s ease-in-out, filter 0.1s ease-in-out; /* Add transition */
-  }
-  #cardsCanvas::-webkit-scrollbar{display:none;}
-
-  .subject-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Re-add to center toggle buttons and card */
-    gap: 5px;
-    flex-shrink: 0;
-    padding: 0;
-    height: 100%;
-  }
-
-  .card {
-    background: var(--card, hsl(0, 0%, 8%));
-    display: flex;
-    flex-direction: column; /* Main vertical split */
-    width: 550px; 
-    flex: 1; /* Make card fill remaining height of subject-wrapper */
-    flex-shrink: 0;
-    /* Remove padding and gap from here, move to sub-sections */
-  }
-
-  .card-main-top { /* Upper half of the card */
-    flex: 1; /* Take remaining space */
-    display: flex;
-    flex-direction: column; /* For sub-top and sub-bottom */
-    padding: 0; /* Add padding here */
-    gap: 0; /* Add gap here */
-    background: hsl(0, 0%, 13%); /* Background for main top */
-    height: auto;
-  }
-
-
-
-  .card-main-bottom { /* Lower half of the card */
-    height: 15%; /* Fixed height for name/type */
-    display: flex;
-    flex-direction: row; /* Changed to row */
-    align-items: center; /* Align items vertically in the center */
-    background: hsl(0, 0%, 10%); /* Background for main bottom */
-    padding: 0 15px; /* Horizontal padding */
-  }
-
-  .card-symbol-container {
-    width: 50px; /* 1x1 ratio, adjust as needed */
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* Prevent shrinking */
-    margin-right: 20px; /* Space between symbol and text */
-  }
-
-  .card-symbol-container .material-symbols-outlined {
-    font-size: 3.2rem; /* Adjust symbol size within the container */
-    color: #ffffff; /* Default color for the symbol */
-    font-family: 'Material Symbols Outlined';
-
-    font-variation-settings:
-      'FILL' 0,
-      'wght' 200,
-      'GRAD' 200,
-      'opsz' 48
-  }
-
-  .card.upcoming-day .card-symbol-container .material-symbols-outlined {
-    color: #ffffff; /* Black color for upcoming-day cards */
-    font-variation-settings:
-      'FILL' 1,
-      'wght' 400,
-      'GRAD' 200,
-      'opsz' 48
-  }
-
-  .card.upcoming-day .card-main-bottom {
-    background: var(--color); /* Red background */
-  }
-
-  .card.upcoming-day .card-main-bottom h4,
-  .card.upcoming-day .card-main-bottom h5 {
-    color: #ffffff !important; /* Black text for content inside */
-  }
-
-  .card-sub-top { /* Upper part of card-main-top (Topic) */
-    flex: 1; /* Take remaining space */
-    overflow-y: auto; /* Allow topic to scroll */
-    padding: 30px;
-  }
-
-  .card-sub-bottom { /* Lower part of card-main-top (Embeds) */
-    height: 50%; /* Fixed height for buttons */
-    display: flex;
-    gap: 2px;
-  }
-  
-  h4{font-size: 1.2rem;}
-  h5{font-size: 1.1rem;}
-
-
-
-  .topic-text {
-    white-space: pre-wrap; 
-    word-wrap: break-word;
-    line-height: 1.6;
-    font-size: 1.2rem;
-  }
-
-  .link-button {
-    flex: 1;
-    display: flex;
-    flex-direction: column; /* Arrange icon and label vertically */
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: filter 0.2s ease;
-    text-decoration: none;
-    color: white;
-    gap: 5px; /* Space between icon and label */
-    background-color: #3a3a3a;
-    height: 100%;
-  }
-
-  .link-button:hover {
-    filter: brightness(1.2);
-  }
-
-  .link-button .material-symbols-outlined {
-    font-size: 60px; /* Adjusted size to be a little bigger */
-    color: inherit; /* Inherit color from parent link-button */
-  }
-  
-  .button-label {
-    font-size: 1rem; /* Adjusted font size to be a little bigger */
-    opacity: 0.8; /* Slightly less prominent */
-    text-align: center;
-    line-height: 1; /* Compact line height */
-  }
-  
-  .subhead {
-      letter-spacing: 1px;
-      text-align: center;
-      font-weight: 400;
-      opacity: .9;
-      margin-bottom: 10px;
-      font-size: 1.4rem;
-      color: var(--subject-title, #ffd829);
-  }
-
-  .empty { 
-      opacity: .75; 
-      text-align: center; 
-      margin: auto;
-      font-size: 1.2rem;
-  }
-
-  /* === SETTINGS (themed) === */
-  .settings-layout {
-    display: flex;
-    height: 100%;
-    gap: 14px;
-    padding: 16px 0;
-
-  }
-
-  .settings-side-panel {
-    width: 400px; /* Fixed width for the side panel */
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    background: #00000000;
-    border: 1px solid var(--line);
-    padding: 10px;
-    border-right: 1px solid #ffffff21;;
-    gap:20px;
-  }
-
-  .settings-block {
-    display: flex;
-    flex-direction: column;
-    padding: 40px 10px; /* Adjusted padding to match save button */
-    background: transparent; /* Default background transparent */
-    color: #fff; /* Default text color white */
-    border-bottom: 1px solid var(--line); /* Add border-bottom here */
-  }
-
-  .settings-block.settings-nav-item > div {
-    font-size: 1.3rem; /* Make the text bigger */
-  }
-
-  .settings-nav-item {
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease; /* Add color transition */
-    justify-content: center; /* Center the text */
-    align-items: center; /* Center the text */
-  }
-
-  .settings-nav-item:hover {
-    background: #333; /* Subtle darker background on hover */
-  }
-
-  .settings-nav-item.active {
-    background: #ff0000; /* Red background when active */
-    color: #ffffff; /* White text when active */
-  }
-
-  .settings-block:last-child {
-    border-bottom: none; /* No border for the last block */
-  }
-
-  .settings-main-page {
-    flex: 1; /* Take remaining space */
-    background: #00000000;
-    border: 1px solid var(--line);
-    padding: 10px;
-    overflow-y: auto;
-    display: flex; /* For centering content */
-    justify-content: center;
-    align-items: center;
-    position: relative; /* For absolute positioning of content divs */
-  }
-
-  .settings-main-content {
-    position: absolute; /* Position content divs absolutely */
-    inset: 0; /* Fill the parent */
-    padding: 20px;
-    display: none; /* Hidden by default */
-    flex-direction: column; /* Allow content to stack */
-    overflow-y: auto; /* Allow content to scroll */
-  }
-
-  .settings-main-content.active {
-    display: flex; /* Show when active */
-  }
-
-
-  /* Existing rules to keep/adjust */
-  .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:20px;color:var(--text);margin-bottom:40px;font-size:1.2rem;outline:none;}
-  .day-select {
-    background:#1f1f1f;
-    border: 1px solid var(--line);
-    color: #fff;
-    padding: 10px;
-    border-radius: 0;
-    font-size: 1.1rem;
-    margin-top: 6px;
-    flex: 1; /* Allow it to grow */
-    max-width: 150px; /* Limit its width */
-  }
-  #mySubjects{max-height: none; overflow-y: visible;} /* Adjust for new block structure */
-  #catalogList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Gap between subject blocks */
-  }
-
-  #mySubjects {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Gap between subject blocks */
-  }
-
-  .item-settings {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 10px; /* Slightly more horizontal padding */
-    background: #1a1a1a; /* Brighter background */
-    border: 1px solid var(--line); /* Border around the block */
-    flex-wrap: wrap;
-  }
-  .item-settings > div:first-child { flex: 1; }
-  .item-settings button {
-    background: var(--color); /* Red for non-added button */
-    border: 1px solid var(--line);
-    color: #fff;
-    padding: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0;
-    width: 38px;
-    height: 38px;
-    transition: background 0.25s ease;
-  }
-  .item-settings button:hover {
-    background: #c52d2d; /* Darker red on hover for non-added button */
-  }
-  .item-settings .added {
-    background: #222 !important; /* Darker for added button */
-    border-color: var(--line) !important; /* Keep original border color */
-  }
-  .item-settings .added:hover {
-    background: #333 !important; /* Brighter dark on hover for added button */
-  }
-  .save{margin-bottom:30px;margin-top:10px;background:var(--color);color:#fff;border:none;padding:15px;font-weight:700;cursor:pointer;font-size:1.2rem;}
-
-  .settings-action-button {
-    background: transparent;
-    color: #fff;
-    border: none;
-    padding: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 1.3rem;
-    transition: background 0.2s ease;
-    width: 100%; /* Make it full width */
-    text-align: center;
-    
-  }
-
-  .settings-action-button:hover {
-    background: #333; /* Subtle darker background on hover */
-  }
-
-
-  @media screen and (max-width: 768px) {
-      body {
-        margin: 0; /* Remove horizontal margin for phone */
-        overflow-y: auto;
-      }
-    .main-content {
-      flex-direction: column; /* Stack main content vertically */
-      margin: 10px 10px; /* Adjust vertical margin */
-      overflow-y: auto; /* Allow vertical scroll for main content */
-    }
-
-    #live-view, #resources-view, #settings-view {
-      width: 100%; /* Full width for all main views */
-      flex-direction: column; /* Stack elements within live-view vertically */
-      padding: 0;
-      height: 100%; /* Ensure it takes full height */
-    }
-
-    view{padding: 0;}
-
-
-    .subjects-panel {
-      width: 100%; /* Full width for subjects panel */
-      padding: 0; /* Remove padding */
-    }
-
-    #cardsCanvas {
-      flex-direction: column; /* Stack subject cards vertically */
-      align-items: center; /* Center cards */
-      padding: 0; /* Remove padding */
-      overflow-x: hidden; /* No horizontal scroll for cards */
-      overflow-y: auto; /* Allow vertical scroll for cards */
-      gap: 20px; /* Space between cards */
-    }
-
-    .subject-wrapper {
-      width: 100%; /* Full width for subject wrapper */
-      max-width: 400px; /* Limit card width for better readability */
-      margin-bottom: 10px; /* Space between cards */
-      height: auto; /* Ensure it shrinks to content size */
-    }
-
-    .card {
-      width: 100%; /* Full width for card within its wrapper */
-      height: 100%; /* Ensure cards have a minimum height */
-      display: flex; /* Ensure flex properties apply */
-      flex-direction: column; /* Ensure flex properties apply */
-    }
-
-    /* Reorder elements within subject-wrapper */
-    .subject-wrapper .card {
-      order: 1; /* Card comes first */
-    }
-    .subject-wrapper .week-toggle-buttons {
-      order: 2; /* Toggle buttons come second */
-    }
-
-    /* Reorder elements within card */
-    .card .card-main-bottom {
-      order: 1; /* Card main bottom comes first */
-    }
-    .card .card-main-top {
-      order: 2; /* Card main top comes second */
-      
-    }
-
-    /* Reorder elements within card-main-top */
-    .card-main-top {
-      display: flex; /* Ensure flex properties apply */
-      flex-direction: column; /* Ensure flex properties apply */
-    }
-    .card-main-top .card-sub-top {
-      order: 1; /* Topic comes first */
-    }
-    .card-main-top .card-sub-bottom {
-      order: 2; /* Embeds come second */
-      padding: 10px 0px;
-    }
-
-    .card-main-bottom {
-      min-height: 70px; /* Ensure a minimum height for the bottom section */
-      padding: 0 15px; /* Adjust padding */
-    }
-
-    .card-symbol-container {
-      width: 40px; /* Smaller symbol container */
-      margin-right: 15px; /* Adjust margin */
-    }
-
-    .card-symbol-container .material-symbols-outlined {
-      font-size: 2.5rem; /* Smaller symbol size */
-      border-radius: 20px;
-    }
-
-    h4 { font-size: 1rem; } /* Even smaller subject name */
-    h5 { font-size: 0.9rem; } /* Smaller lecture type */
-
-    .card-sub-top {
-      flex: unset; /* Make height adjust to content */
-      padding: 20px; /* Adjust padding */
-    }
-
-    .topic-text {
-      font-size: 1.2rem; /* Smaller topic text */
-    }
-
-    .link-button .material-symbols-outlined {
-      font-size: 40px; /* Smaller embed icon size */
-    }
-
-    .button-label {
-      font-size: 0.8rem; /* Smaller embed label */
-    }
-
-    /* Settings page adjustments for phone */
-  .settings-layout {
-    flex-direction: column;
-    padding: 0; /* Add horizontal padding */
-    height: 100%; /* Ensure it takes full height */
-  }
-
-  .settings-main-content {
-    padding: 0px; /* Adjust padding for content */
-    display: none; /* Hidden by default */
-    flex-direction: column; /* Allow content to stack */
-    overflow-y: auto; /* Allow content to scroll */
-  }
-
-    .settings-side-panel {
-      order: 1; /* Move to top */
-      width: 100%; /* Full width for side panel */
-      border-right: none; /* Remove right border */
-      border-top: none; /* Remove top border */
-      border-bottom: 1px solid var(--line); /* Add bottom border */
-      flex-direction: row; /* Arrange nav items horizontally */
-      justify-content: space-around; /* Distribute items evenly */
-      padding: 0px; /* Adjust padding */
-      box-sizing: border-box; /* Include padding and border in width calculation */
-    }
-
-    .settings-block {
-      flex: 1; /* Make buttons fill horizontal space */
-      border-bottom: none; /* Remove bottom border for nav items */
-      padding: 5px 10px; /* Adjust padding */
-    }
-
-    .settings-main-page {
-      order: 2; /* Move to bottom */
-      width: 100%; /* Full width for main settings content */
-      border-top: none; /* Remove top border */
-      padding: 0; /* Remove padding */
-      display: block; /* Fix for content visibility */
-      /* Removed centering styles */
-      box-sizing: border-box; /* Include padding and border in width calculation */
-    }
-
-    .settings-main-content {
-      padding: 0; /* Adjust padding for content */
-      box-sizing: border-box; /* Include padding in width calculation */
-    }
-
-    .save {
-      margin-bottom: 20px; /* Adjust margin */
-    }
-
-    /* Weeks bar adjustments for phone */
-    .bottom-weeks {
-      height: auto; /* Allow height to adjust */
-      margin: 10px 0; /* Adjust margin */
-      border-top: none; /* Remove top border */
-      border-bottom: 1px solid var(--line); /* Add bottom border */
-    }
-
-    #resources-view #global-resources-list {
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-    #resources-view .subject-wrapper {
-      width: 100%;
-      max-width: 400px;
-      margin-bottom: 10px;
-      height: auto;
-    }
-    #resources-view .card {
-      width: 100%;
-    }
-    #resources-view .card .card-main-bottom {
-      order: 1;
-      height: 70px;
-      padding-top: 10px;
-    }
-    #resources-view .card .card-main-top {
-      order: 2;
-      height: auto;
-    }
-
-    .bottom-weeks .scroll-wrap {
-      height: auto; /* Allow height to adjust */
-    }
-
-    .bottom-weeks .scroll-list {
-      flex-direction: column; /* Stack weeks vertically when expanded */
-      overflow-x: hidden; /* No horizontal scroll */
-      overflow-y: hidden; /* Initially hide vertical scroll */
-      max-height: var(--weeks-bar-h); /* Collapsed height */
-      transition: max-height 0.2s ease-out;
-    }
-
-    .bottom-weeks.expanded .scroll-list {
-      max-height: 300px; /* Expanded height (adjust as needed) */
-      overflow-y: auto; /* Allow vertical scroll when expanded */
-    }
-
-    .bottom-weeks .item {
-      flex: 0 0 auto; /* Don't grow or shrink, take content width */
-      width: 100%; /* Full width for each week item */
-      height: 50px; /* Fixed height for week items */
-      justify-content: flex-start; /* Align text to start */
-      padding-left: 20px; /* Add padding */
-      font-size: 1rem; /* Smaller font size */
-    }
-
-    .top-nav .item {
-      font-size: 0.9rem; /* Smaller font for top nav items */
-    }
-
-    .settings-block div {
-      font-size: 0.9rem; /* Smaller font for settings nav items */
-    }
-
-    .item-settings {
-      font-size: 0.9rem; /* Smaller font for item settings */
-    }
-
-    .settings-action-button {
-      font-size: 0.9rem; /* Smaller font for settings action buttons */
-      padding: 10px; /* Adjust padding */
-    }
-
-    .day-select {
-      font-size: 0.9rem; /* Smaller font for search box and day select */
-      padding: 8px; /* Adjust padding */
-      width: 100%; /* Make it take full width */
-      max-width: none; /* Remove max-width constraint */
-    }
-
-    .bottom-weeks .item.selected-non-current-week {
-      background-color: #fff; /* White background for selected non-current week */
-      color: #000; /* Black text */
-    }
-
-    .bottom-weeks .fade-edge {
-      display: none; /* Hide fade edges on phone */
-    }
-  }
-</style>
-</head>
-<body>
-
-<!-- LOGIN OVERLAY -->
-<div id="login-overlay" style="display: none; position: fixed; inset: 0; background: var(--bg); z-index: 10000; flex-direction: column; align-items: center; justify-content: center;">
-  <h1 style="font-size: 3rem; color: var(--color); margin-bottom: 20px;">Weekge</h1>
-  <button id="signInBtn" style="background: #fff; color: #000; border: none; padding: 15px 30px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="height: 24px;">
-    Sign in with Google
-  </button>
-</div>
-
-<!-- LOADER -->
-<div id="loadingOverlay"><div class="spinner"></div><p>იტვირთება</p></div>
-
-<!-- TOP NAV -->
-<div class="top-nav">
-  <div class="scroll-wrap" style="height: 100%;">
-    <div class="scroll-list" id="main-nav">
-      <div class="item active" data-view="live-view">LIVE</div>
-      <div class="item" data-view="resources-view">Resources</div>
-      <div class="item" data-view="settings-view">Settings</div>
-    </div>
-  </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="main-content">
-    <div id="live-view" class="view">
-
-      <div class="subjects-panel scroll-wrap" style="padding: 0;">
-          <div id="cardsCanvas" class="scroll-list"></div>
-          <div class="fade-edge left"></div>
-          <div class="fade-edge right"></div>
-      </div>
-    </div>
-  
-      <div id="resources-view" class="view" style="display: none; flex-direction: column; padding: 0px 0px 0px 0px;">
-          <div class="subjects-panel" style="flex-grow: 1; padding: 0;">
-              <div class="scroll-wrap" style="height: 100%;">
-                  <div id="global-resources-list" style="display: flex; flex-direction: column; gap: 10px; padding: 0; overflow-y: auto; scrollbar-width: none;">
-                      <!-- Subjects and their global embeds will be rendered here by JS -->
-                      <div class="empty">Loading global resources...</div>
-                  </div>
-
-              </div>
-          </div>
-      </div>
-  <div id="settings-view" class="view" style="display: none;">
-      <div class="settings-content">
-          <div class="settings-layout">
-            <div class="settings-side-panel">
-              <div class="settings-block settings-nav-item active" data-target="my-subjects-content">
-                <div style="font-weight:700;">My Subjects</div>
-              </div>
-              <div class="settings-block settings-nav-item" data-target="catalog-content">
-                <div style="font-weight:700;">Subjects Catalog</div>
-              </div>
-              <div class="settings-block" style="padding: 0;">
-                <button style="font-weight:700;padding: 40px 0px;" id="signOutBtn" class="settings-action-button">Log Out</button>
-              </div>
-            </div>
-            <div class="settings-main-page">
-              <div id="my-subjects-content" class="settings-main-content active">
-                <button id="saveSubjects" class="save">Save</button>
-                <div id="mySubjects"></div>
-              </div>
-              <div id="catalog-content" class="settings-main-content">
-                <input type="text" id="searchCatalog" class="search-box" placeholder="Search subjects...">
-                <div id="catalogList"><div class="empty">Loading...</div></div>
-              </div>
-              <!-- Initial placeholder, will be hidden by JS -->
-              <div class="empty initial-placeholder" style="margin:auto; display:none;">Select a section from the left panel.</div>
-            </div>
-          </div>
-      </div>
-  </div>
-</div>
-
-<!-- BOTTOM WEEKS BAR -->
-<div class="bottom-weeks">
-  <div class="scroll-wrap">
-    <div class="scroll-list" id="weeksBar">
-      <!-- Weeks will be generated by JS -->
-    </div>
-    <div class="fade-edge left"></div>
-    <div class="fade-edge right"></div>
-  </div>
-</div>
-
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Weekge Admin — University Platform</title>
+<link rel="icon" href="https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/logo/weekge%20logo%20admin.png">
+
+<!-- SEO META -->
+<meta name="description" content="Weekge Admin Panel — Manage university syllabus subjects, weeks, slides and videos.">
+<meta name="keywords" content="weekge, week, weekge admin, syllabus editor, study admin, ug, university admin">
+<meta name="author" content="weekge">
+<meta name="theme-color" content="#0B1216">
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<script>
-/* ========== UNIVERSAL HORIZONTAL STEP SCROLL ========== */
-const scrollListeners = {}; // Store listeners to avoid duplicates
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@100..900&display=swap');
 
-function initHorizontalScroll(selector, cardWidth = null, stepDelay = 2){
-  const list = typeof selector === 'string' ? document.querySelector(selector) : selector; // Handle element directly
-  if(!list) return;
-
-  // If listeners were already added for this selector, remove them to prevent duplicates
-  if (scrollListeners[selector]) {
-    list.removeEventListener('mousemove', scrollListeners[selector].move);
-    list.removeEventListener('mouseleave', scrollListeners[selector].leave);
-    list.removeEventListener('wheel', scrollListeners[selector].wheel); // Remove wheel listener
-  }
-
-  const items = [...list.children];
-  if (items.length === 0) return;
-  const EDGE_ZONE = 120;
-  const SMOOTH_FACTOR = 0.05;
-  let dir = 0, stepping = false, smoothDir = 0;
-
-  function getStepSize(){
-    if (cardWidth) return cardWidth;
-    if(items.length < 2)
-      return parseInt(getComputedStyle(list).getPropertyValue('--cardW')) || 320;
-    return items[1].offsetLeft - items[0].offsetLeft;
-  }
-  function nearestIndex(){
-    const step = getStepSize();
-    return Math.round(list.scrollLeft / step);
-  }
-  function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
-  function stepOnce(){
-    if(Math.abs(smoothDir) > 0.1 && dir !== 0){ // Only step if there's a significant smoothDir and edge detection is active
-      const step = getStepSize();
-      const cur = nearestIndex();
-      const next = clamp(cur + (smoothDir>0?1:-1), 0, items.length - 1);
-      const target = next * step;
-      list.scrollTo({ left: target, behavior:'smooth' });
-    }
-  }
-  function disableHover(disabled){
-    items.forEach(el => el.style.pointerEvents = disabled ? "none" : "");
-  }
-  function startStepping(){
-    if(stepping) return;
-    stepping = true;
-    disableHover(true);
-    function loop(){
-      if(Math.abs(smoothDir) > 0.1 && dir !== 0){
-        stepOnce();
-        setTimeout(loop, stepDelay);
-      } else {
-        stepping = false;
-        disableHover(false);
-      }
-    }
-    loop();
-  }
-  
-  const handleMouseMove = e => {
-    const rect = list.getBoundingClientRect();
-    const x = e.clientX;
-    const leftDist = x - rect.left;
-    const rightDist = rect.right - x;
-    let targetDir = 0;
-
-    if(leftDist < EDGE_ZONE && list.scrollLeft > 0) targetDir = -1;
-    else if(rightDist < EDGE_ZONE && list.scrollLeft < list.scrollWidth - list.clientWidth - 1) targetDir = 1;
-
-    smoothDir += (targetDir - smoothDir) * SMOOTH_FACTOR;
-
-    if(targetDir !== 0 && !stepping){
-      dir = targetDir;
-      startStepping();
-    } else if(targetDir === 0){
-      dir = 0;
-    }
-  };
-
-  const handleMouseLeave = () => {
-    dir = 0; smoothDir = 0; stepping = false; disableHover(false);
-  };
-
-  const handleWheel = e => {
-    // Prevent horizontal scrolling from mouse wheel, especially with Shift key
-    if (e.deltaX !== 0 || e.shiftKey) {
-      e.preventDefault();
-    }
-  };
-
-  list.addEventListener('mousemove', handleMouseMove);
-  list.addEventListener('mouseleave', handleMouseLeave);
-  list.addEventListener('wheel', handleWheel, { passive: false }); // Add wheel listener
-
-  // Store the new listeners so they can be removed on re-init
-  scrollListeners[selector] = {
-    move: handleMouseMove,
-    leave: handleMouseLeave,
-    wheel: handleWheel // Store wheel listener
-  };
+:root{
+  --bg:#000000; --surface:#202020; --surface2:#161616; --text:#EDEFF2;
+  --accent:#16b438; --success:#38d98a; --danger:#f12525;
+  --buttontext:#ffffff;--field:#313131;
 }
 
-/* ========== MAIN APP SCRIPT (adapted for new UI) ========== */
+/* Scrollbar */
+::-webkit-scrollbar{width:.35rem}
+::-webkit-scrollbar-thumb{background:#16b438}
+
+/* Base */
+*{box-sizing:border-box;margin:0;padding:0;font-family: "Noto Sans Georgian", sans-serif;}
+img[src$="\.svg"] {
+  filter: invert(1);
+}
+body{background:var(--bg);color:var(--text);height:100vh;display:grid;grid-template-rows:64px 1fr;overflow:hidden;}
+
+  /* === Loading Overlay === */
+  #loadingOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #0B1216;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .3s ease, visibility .3s ease;
+  }
+  #loadingOverlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
+  #loadingOverlay .spinner {
+    width: 100px;
+    height: 100px;
+    border: 10px solid rgba(255,255,255,.15);
+    border-top: 10px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.3s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loadingOverlay p {
+    margin-top: 16px;
+    opacity: .9;
+  }
+
+/* Header */
+header{background:var(--surface);display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #0006;}
+header h1{font-size:1.8rem;color:var(--accent);font-weight:700;pointer-events: none;user-select: none;}
+header .right{display:flex;align-items:center;gap:12px;}
+header button{transition: ease 0.1s;background:var(--accent);color:var(--buttontext);border:none;padding:8px 16px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border-radius:0;}
+header button img{width:18px;height:18px;}
+header button:hover{background-color: var(--accent);}
+#saveStatus{font-weight:600;font-size:18px; margin-right:30px;pointer-events: none;user-select: none;}
+#saveStatus.saving{color:#ffc423}
+#saveStatus.saved{color:var(--success);}
+#saveStatus.error{color:var(--danger);}
+
+/* Layout (dual scroll) */
+main{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 60px);}
+aside{background:#131313;border-right:1px solid #0006;display:flex;flex-direction:column;}
+#sidebarScroll{flex:1;overflow-y:auto;padding:10px;}
+section{overflow-y:auto;height:100%;padding:50px;}
+
+/* Sidebar */
+.search{width:100%;padding:10px;border:none;background:var(--surface);color:#fff;margin-bottom:10px;}
+.subject-item{user-select: none;padding:10px;background:#ffffff18;border:1px solid #0006;margin-bottom:8px;cursor:pointer;font-weight:600; transition: ease-out 0.1s;}
+.subject-item:hover{background:#ffffff22;}
+.subject-item.active{background:#ffffff30;color:#ffffff;}
+.subject-symbol-square {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--field);
+  background-color: var(--field);
+  margin-right: 8px;
+  vertical-align: middle;
+  font-size: 1.2em; /* Adjust symbol size within the square */
+}
+.btn-row{display:flex;gap:10px;margin-top:10px;padding:30px;}
+.btn-row button{flex:1;padding:10px;background:var(--accent);color:#ffffff;border:none;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-row button img{width:20px;height:20px}
+
+.btnLabel{margin: 0;}
+.btnLink{margin: 0;}
+
+
+/* Editor */
+#editor{transition:opacity .1s ease, filter .1s ease;}
+#editor.fadeout{opacity:0;filter:blur(4px);}
+#editor h2{font-size:1.2rem;margin-bottom:10px;color:var(--accent);}
+label{display:block;font-weight:700;margin:0;}
+input,select{width:100%;padding:10px;border:none;background:var(--field);color:var(--buttontext);font-size:1rem;margin-bottom:10px;}
+.symbol-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+#subjectSymbolDisplay {
+  width: 60px; /* Approximately 1x1 square visually */
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--field);
+  font-size: 2.2rem; /* Adjust as needed for visibility */
+  background-color: var(--field);
+  color: var(--buttontext);
+  user-select: none;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+      'FILL' 0,
+      'wght' 300,
+      'GRAD' 0,
+      'opsz' 48
+}
+
+#subjectSymbolName{height: 60px;margin-top: 10px;font-size: 1.4rem;}
+
+
+.week{border:1px solid #0006;background:#141414;padding:18px;margin-bottom:44px;}
+.week h3{margin-bottom:1rem;color:var(--accent);font-size: 1.5rem;}
+.addBtn{transition: 0.2s ease;font-size: 1rem;background:var(--accent);color:var(--buttontext);border:none;padding:10px 20px;cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:6px;}
+.addBtn:hover{background-color: #14862d;}
+
+
+.success{background:var(--success);color:var(--buttontext)}
+.danger{background:var(--danger);color:var(--buttontext);padding: 20px 0;}
+.status{text-align:center;margin-top:10px;}
+.global{border:0;background:#141414;padding:20px;margin: 40px 0;}
+.global h3{color:var(--success);margin-bottom:6px;}
+
+/* Color selector */
+.colorPalette{display:flex;gap:5px;align-items:center;margin-left:10px;}
+
+.colorBox{width:35px;height:35px;border:0;cursor:pointer;transition:.2s ease;filter:brightness(.95);border:rgba(255,255,255,0) 0.2rem solid}
+.colorBox[data-color="yellow"]{background:#ffb20b;}
+.colorBox[data-color="green"]{background:#1fc909;}
+.colorBox[data-color="red"]{background:#ff1f1f;}
+.colorBox[data-color="blue"]{background:#1168ff;}
+.colorBox.active{border:rgb(255, 255, 255) 0.2rem solid;box-sizing:border-box;}
+
+/* Popup (Create Subject) */
+#addPopup{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:2000;}
+#addPopup.active{display:flex;animation:popupIn .18s ease;}
+@keyframes popupIn{from{opacity:0;filter: blur(20px);}to{opacity:1;}}
+.popup-box{background:#121A1F;border:1px solid #0006;width:min(92vw,420px);padding:18px 16px;border-radius:0px;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+.popup-box h3{color:var(--accent);margin-bottom:10px;text-align:center;}
+.popup-box .row{display:grid;gap:6px;margin:8px 0;}
+.popup-box input{width:100%;padding:10px;border:none;background:#23343B;color:#fff;}
+.popup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.popup-actions button{padding:10px;border:none;font-weight:800;cursor:pointer}
+.createBtn{background:var(--accent);color:#ffffff}
+.cancelBtn{background:#333;color:#fff}
+
+
+.removeBtn {
+  background: #e61717;
+  color: #fff;
+  border: none;
+  padding: 0;
+  margin: 0 0 0 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  transition: 0.2s ease;
+  font-weight: 500;
+  font-size: 1rem;
+  min-width: 35px;
+  height: 35px;
+}
+
+.removeBtn:hover {
+  background: #920c0c;
+}
+
+.removeBtn img {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+.topicField {
+  width: 100%;
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--field);
+  color: var(--buttontext);
+  padding: 10px;
+  font-size: 1rem;
+  border: none;
+  outline: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.5;
+  border-radius: 4px;
+}
+.topicField:focus {
+  background: #303840;
+}
+.delete-progress {
+  position:absolute;
+  left:0;
+  top:0;
+  width:0%;
+  height:100%;
+  background-color:rgb(185, 0, 0);
+  pointer-events:none;
+  transition:none;
+  z-index: -1;
+}
+
+#deleteNavBtn{background-color: #ff2e2e;transition: 0.1 ease;user-select: none;}
+#deleteNavBtn:hover{transform: scale(1.02);}
+
+#logoutBtn{background-color: #383838;transition: 0.1 ease;user-select: none;}
+#logoutBtn:hover{transform: scale(1.02);}
+
+
+#applyNavBtn{background-color: #47da1a;transition: 0.1 ease;user-select: none;}
+#applyNavBtn:hover{transform: scale(1.02);}
+
+.customBtnRow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.drag-handle {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    cursor: grab;
+    padding: 0 10px;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.topicField{width:100%;min-height:100px;max-height:300px;overflow-y:auto;background:var(--field);color:var(--buttontext);padding:10px;font-size:1rem;border:none;outline:none;white-space:pre-wrap;word-wrap:break-word;line-height:1.5;border-radius:4px;}
+.topicField:focus{background:#303840;}
+
+.image-upload-container {
+  margin-bottom: 10px;
+  border: 2px dashed var(--field);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  min-height: 150px; /* Minimum height for drop zone */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface2);
+}
+
+.image-upload-container.drag-over {
+  border-color: var(--accent);
+  background-color: #2a2a2a;
+}
+
+.drop-zone {
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.drop-zone .click-to-upload {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.image-preview {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Ensures the image is contained within the element, maintaining its aspect ratio */
+  object-position: center; /* Centers the image */
+}
+
+.delete-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0;
+  transition: background-color 0.2s ease;
+}
+
+.delete-image-btn:hover {
+  background-color: rgba(255, 0, 0, 1);
+}
+
+.delete-image-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* Mobile */
+@media(max-width:900px){
+  main{grid-template-columns:1fr}
+  aside{order:2}
+  section{order:1;padding:18px}
+  .customBtnRow{flex-wrap: wrap;}
+  .colorPalette{grid-column:1 / -1}
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+</head>
+<body>
+
+<!-- Sign-in Overlay -->
+<div id="signin-overlay" style="display: none; position: fixed; inset: 0; background: var(--bg); z-index: 10000; flex-direction: column; align-items: center; justify-content: center;">
+  <h1 style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;">Weekge Admin</h1>
+  <button id="googleSignInBtn" style="background: #fff; color: #000; border: none; padding: 15px 30px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" style="height: 24px;">
+    Sign in with Google
+  </button>
+</div>
+
+<!-- Loading -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>იტვირთება...</p>
+</div>
+
+<header>
+  <h1>Weekge Admin</h1>
+  <div class="right">
+    <div id="saveStatus" class="saved">✅ დამახსოვრებულია</div>
+
+    <!-- NAV: Apply / Delete -->
+    <button id="applyNavBtn" title="Ctrl + S">
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" style="color: white;" alt="">Apply
+    </button>
+    <button id="deleteNavBtn">
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">Delete
+    </button>
+
+    <!-- Auth -->
+    <button id="signinBtn">
+      <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="">Google-ით შესვლა
+    </button>
+    <button id="logoutBtn" style="display:none;">
+      <img src="https://github.com/WEEKGE/live/raw/refs/heads/main/svgs/logout.svg" alt="">გასვლა
+    </button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <div id="sidebarScroll">
+      <input type="search" id="searchBox" class="search" placeholder="მოძებნა">
+      <div id="subjectList"></div>
+    </div>
+    <div class="btn-row">
+      <button id="addSubjectBtn">
+        <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="">საგნის დამატება
+      </button>
+    </div>
+  </aside>
+
+  <section>
+    <h2 id="editorTitle">აირჩიე საგანი გადასაკეთებლად</h2>
+    <div id="editor" style="display:none;">
+      <label>საგნის ID</label>
+      <input id="subjectId" disabled>
+      <label>საგნის სახელი</label>
+      <input id="subjectName">
+      <label style="margin-top:18px;">საგნის სურათი</label>
+      <div id="imageUploadContainer" class="image-upload-container">
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        <div class="drop-zone" id="dropZone">
+          <p>გადმოათრიე სურათი აქ ან <span class="click-to-upload">დააჭირე ასატვირთად</span></p>
+        </div>
+        <div class="image-preview" id="imagePreview" style="display: none;">
+          <img id="uploadedImage" src="" alt="Uploaded Image">
+          <button class="delete-image-btn" id="deleteImageBtn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      </div>
+      <label>საგნის სიმბოლო</label>
+      <div class="symbol-selector">
+        <span class="material-symbols-outlined" id="subjectSymbolDisplay"></span>
+        <input type="text" id="subjectSymbolName" placeholder="სიმბოლოს სახელი (მაგ: home)">
+      </div>
+
+
+      <div class="global">
+        <h3>ზოგადი რესურსები</h3>
+        <div id="globalBtns"></div>
+        <div class="weekBtns" id="globalWeekBtns" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="addBtn slideBtn" data-global="true" style="background-color:#e8980e;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სლაიდის დამატება
+          </button>
+          <button class="addBtn videoBtn" data-global="true" style="background-color:#eb1515;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">ვიდეოს დამატება
+          </button>
+          <button class="addBtn bookBtn" data-global="true" style="background-color:#0e86e8;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">წიგნის დამატება
+          </button>
+          <button class="addBtn addCustom" data-global="true" style="background-color:#323742;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სხვა რესურსის დამატება
+          </button>
+        </div>
+      </div>
+
+      <div id="weeksContainer"></div>
+
+      <!-- Optional local buttons kept (but not autosaving) -->
+      <div class="btn-row" style="padding:0">
+        <button class="success" id="saveBtn">
+          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg" alt="" width="18" height="18">Apply
+        </button>
+        <button class="danger" id="deleteBtn">
+          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="" width="18" height="18">Delete
+        </button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Create Subject Popup -->
+<div id="addPopup">
+  <div class="popup-box">
+    <h3>🆕 ახალი საგანი</h3>
+    <div class="row">
+      <label for="popupName">საგნის სახელი</label>
+      <input id="popupName" placeholder="მაგ: Microeconomics" />
+    </div>
+    <div class="row">
+      <label for="popupId">ID</label>
+      <input id="popupId" placeholder="ECON1234" />
+    </div>
+    <div class="popup-actions">
+      <button class="cancelBtn" id="popupCancel">Cancel</button>
+      <button class="createBtn" id="popupCreate">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
 const overlay = document.getElementById("loadingOverlay");
 
+/* === Firebase init from external config === */
 fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   .then(r => r.json())
-  .then(cfg => {
-    firebase.initializeApp(cfg);
-    startWeekge();
+  .then(cfg => { 
+    firebase.initializeApp(cfg); 
+    startAdmin(); 
   })
   .catch(() => {
-    overlay.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ config.json ვერ ჩაიტვირთა.</h2>";
+    document.body.innerHTML = "<h2 style='color:red;text-align:center;margin-top:30vh;'>⚠️ ბაზა ვერ ჩაიტვირთა.</h2>";
   });
 
-  function startWeekge(){
+function startAdmin(){
   const auth = firebase.auth(), db = firebase.firestore();
-  let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={};
-  let currentWeekData = null; // Global within startWeekge scope
-  let selectedWeekNumber = null; // Global within startWeekge scope
+  let user = null, subjects = [], currentId = null;
+  let isDirty = false; // <- აუტოსეივის ნაცვლად ცვლილების მონიტორი
 
-  const $=s=>document.querySelector(s);
-  const el=(t,p={},kids=[])=>{const e=document.createElement(t);Object.assign(e,p);kids.forEach(k=>e.append(k));return e;};
+  const ADMIN_EMAILS = ["davit.gvakharia@gmail.com"];
+  const $ = s => document.querySelector(s);
+  const el = (t, p = {}, kids = []) => { const e = document.createElement(t); Object.assign(e, p); kids.forEach(k => e.append(k)); return e; };
 
-  // Configuration for delays
-  const WEEKS_BAR_SCROLL_DELAY = 2; // Default delay for weeks bar scroll steps
-  const SUBJECTS_CARD_RENDER_DELAY = 400; // Default delay for subject card rendering
+  const saveStatus = $("#saveStatus");
+  const statusBox = $("#status");
 
-  const todayISO=()=>new Date().toISOString().slice(0,10);
-  const isBetween=(d,s,e)=>d>=s&&d<=e;
-  const fmtRange=(s,e)=>{const f=d=>new Date(d+"T12:00:00").toLocaleString(undefined,{month:"short",day:"numeric"});return f(s)+" → "+f(e);};
-
-  const SEMESTER_WEEKS=[
-    {n:1,start1:"2025-09-22",end1:"2025-09-28",start2:"2026-03-02",end2:"2026-03-08"},
-    {n:2,start1:"2025-09-29",end1:"2025-10-05",start2:"2026-03-09",end2:"2026-03-15"},
-    {n:3,start1:"2025-10-06",end1:"2025-10-12",start2:"2026-03-16",end2:"2026-03-22"},
-    {n:4,start1:"2025-10-13",end1:"2025-10-19",start2:"2026-03-23",end2:"2026-03-29"},
-    {n:5,start1:"2025-10-20",end1:"2025-10-26",start2:"2026-03-30",end2:"2026-04-05"},
-    {n:6,start1:"2025-10-27",end1:"2025-11-02",start2:"2026-04-06",end2:"2026-04-12"},
-    {n:7,start1:"2025-11-03",end1:"2025-11-09",start2:"2026-04-20",end2:"2026-04-26"},
-    {n:8,start1:"2025-11-10",end1:"2025-11-16",start2:"2026-04-27",end2:"2026-05-03"},
-    {n:9,start1:"2025-11-17",end1:"2025-11-23",start2:"2026-05-04",end2:"2026-05-10"},
-    {n:10,start1:"2025-11-24",end1:"2025-11-30",start2:"2026-05-11",end2:"2026-05-17"},
-    {n:11,start1:"2025-12-01",end1:"2025-12-07",start2:"2026-05-18",end2:"2026-05-24"},
-    {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"},
-    {n:13,start1:"2025-12-15",end1:"2025-12-20",start2:"2026-06-01",end2:"2026-06-06"}
-  ];
-  const colorMap = {
-    yellow: ["#ffd600", "#000"],
-    green:  ["#29e131", "#000"],
-    red:    ["#ff1010", "#fff"],
-    blue:   ["#0064ff", "#fff"]
+  const setSaveState = (state, msg) => {
+    saveStatus.className = "";
+    if(state === "wait"){
+      saveStatus.textContent = "⏳ მოითმინე...";
+      saveStatus.classList.add("wait");
+    }else if(state === "saved"){
+      saveStatus.textContent = "✅ დამახსოვრებულია";
+      saveStatus.classList.add("saved");
+      isDirty = false;
+    }else if(state === "error"){
+      saveStatus.textContent = "❌ პრობლემაა";
+      saveStatus.classList.add("error");
+    }else if(state === "dirty"){
+      saveStatus.textContent = "⚠️ შენახული არ არის";
+      saveStatus.classList.add("dirty");
+    }else{
+      if(msg) saveStatus.textContent = msg;
+    }
+    if(msg && statusBox){ statusBox.textContent = msg; }
   };
 
-  function addBtns(container, buttons) { // container is cardSubBottom now
-      container.innerHTML = ''; // Clear previous buttons
-      if (!buttons || buttons.length === 0) {
-          if (isPhoneView()) {
-              container.style.display = 'none'; // Hide for phone
-          } else {
-              container.innerHTML = ''; // Clear content for PC
-              container.style.display = ''; // Ensure visible
-          }
-          return;
-      }
-      container.style.display = ''; // Ensure visible if buttons exist
+  const markDirty = () => {
+    isDirty = true;
+    setSaveState("dirty");
+  };
 
-      const getIcon = (button) => { // Accept the whole button object
-          const type = button.type ? button.type.toLowerCase().trim() : '';
-          console.log("Normalized button type in getIcon: ", type, "for button label:", button.label); // Debugging line
-          switch (type) {
-              case 'slide':
-                  return 'auto_awesome_motion';
-              case 'video':
-                  return 'smart_display';
-              case 'book':
-                  return 'import_contacts';
-              case 'custom':
-              default:
-                  return 'link';
-          }
+  // Image Upload Functionality
+  const imageUploadContainer = $("#imageUploadContainer");
+  const imageInput = $("#imageInput");
+  const dropZone = $("#dropZone");
+  const imagePreview = $("#imagePreview");
+  const uploadedImage = $("#uploadedImage");
+  const deleteImageBtn = $("#deleteImageBtn");
+
+  let currentImageUrl = ""; // To store the image URL for the current subject
+
+  function displayImage(file) {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedImage.src = e.target.result;
+        imagePreview.style.display = "flex";
+        dropZone.style.display = "none";
+        currentImageUrl = e.target.result; // Store the base64 or URL
+        markDirty();
       };
-
-      buttons.forEach(b => {
-          const [bg, txt] = colorMap[b.colorName || b.color || 'green'] || ['#38d98a', '#fff'];
-          const iconName = getIcon(b);
-          
-          let buttonElement;
-          if (b.link && b.link.trim() !== '' && b.link.trim() !== '#') { // Only make it a link if b.link is valid
-              buttonElement = el('a', {
-                  className: 'link-button',
-                  href: b.link,
-                  target: '_blank',
-                  style: `background-color: hsl(0, 0%, 13%);`,
-                  title: b.label
-              });
-          } else { // Otherwise, make it a non-clickable div
-              buttonElement = el('div', {
-                  className: 'link-button', // Keep the styling
-                  style: `background-color: hsl(0, 0%, 13%); cursor: default; opacity: 0.7;`, // Indicate non-clickable
-                  title: b.label + ' (No link provided)'
-              });
-          }
-          
-          buttonElement.innerHTML = `<span class="material-symbols-outlined" style="color: ${bg};">${iconName}</span><span class="button-label">${b.label}</span>`;
-          
-          container.append(buttonElement);
-      });
+      reader.readAsDataURL(file);
+    }
   }
 
-  function todayDayIndex(){
-    const d=new Date().getDay();
-    return d===0?6:d-1;
+  function clearImage() {
+    uploadedImage.src = "";
+    imagePreview.style.display = "none";
+    dropZone.style.display = "flex";
+    currentImageUrl = "";
+    markDirty();
   }
 
-  function sortByDayProximity(subjs){
-    const t=todayDayIndex();
-    return subjs.sort((a,b)=>{
-      const da=(a.dayIndex??7)-t, db=(b.dayIndex??7)-t;
-      const wrapA=da<0?da+7:da, wrapB=db<0?db+7:db;
-
-      if(a.dayIndex===t && b.dayIndex!==t) return -1;
-      if(b.dayIndex===t && a.dayIndex!==t) return 1;
-
-      if (wrapA !== wrapB) {
-        return wrapA-wrapB;
-      }
-
-      // If wrapped days are the same, sort by time
-      const timeA = a.time ? a.time.replace(':', '') : '9999';
-      const timeB = b.time ? b.time.replace(':', '') : '9999';
-      return timeA.localeCompare(timeB);
-    });
-  }
-
-  function sortByDayReverseProximity(subjs){
-    return subjs.sort((a,b)=>{
-      const dayA = a.dayIndex ?? 7; // Assign 7 for subjects with no day
-      const dayB = b.dayIndex ?? 7;
-
-      if (dayA !== dayB) {
-        return dayB - dayA; // Sort in descending order (Sunday to Monday)
-      }
-
-      // If days are the same, sort by time (descending for reverse proximity)
-      const timeA = a.time ? a.time.replace(':', '') : '0000'; // '0000' for subjects without time (should appear first in reverse)
-      const timeB = b.time ? b.time.replace(':', '') : '0000';
-      return timeB.localeCompare(timeA); // Reverse time order
-    });
-  }
-
-  function sortByDayAscending(subjs) {
-    return subjs.sort((a, b) => {
-      const dayA = a.dayIndex ?? 7; // Assign 7 for subjects with no day (will appear last)
-      const dayB = b.dayIndex ?? 7;
-
-      if (dayA !== dayB) {
-        return dayA - dayB;
-      }
-
-      // If days are the same, sort by time
-      const timeA = a.time ? a.time.replace(':', '') : '9999'; // '9999' for subjects without time
-      const timeB = b.time ? b.time.replace(':', '') : '9999';
-      return timeA.localeCompare(timeB);
-    });
-  }
-
-  function sortByDayAndTime(subjs) {
-    const t = todayDayIndex();
-    return subjs.sort((a, b) => {
-      const da = (a.dayIndex ?? 7) - t;
-      const db = (b.dayIndex ?? 7) - t;
-      const wrapA = da < 0 ? da + 7 : da;
-      const wrapB = db < 0 ? db + 7 : db;
-
-      if (wrapA !== wrapB) {
-        return wrapA - wrapB;
-      }
-
-      // If wrapped days are the same, sort by time
-      const timeA = a.time ? a.time.replace(':', '') : '9999';
-      const timeB = b.time ? b.time.replace(':', '') : '9999';
-      return timeA.localeCompare(timeB);
-    });
-  }
-
-  const daysOfWeek=["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
-  const isPhoneView = () => window.matchMedia('(max-width: 768px)').matches;
-
-  const weeksBar=$("#weeksBar");
-
-  auth.onAuthStateChanged(async u=>{
-    user=u||null;
-    const loginOverlay = $("#login-overlay");
-    if(user){
-        if(loginOverlay) loginOverlay.style.display = "none";
-        await bootAfterLogin();
-        overlay.classList.add("hidden");
+  function handleFile(file) {
+    if (file && file.type.startsWith("image/")) {
+      displayImage(file);
     } else {
-        if(loginOverlay) loginOverlay.style.display = "flex";
-        overlay.classList.add("hidden");
+      alert("Please upload an image file.");
+    }
+  }
+
+  // Drag and Drop events
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    imageUploadContainer.classList.add("drag-over");
+  });
+
+  dropZone.addEventListener("dragleave", () => {
+    imageUploadContainer.classList.remove("drag-over");
+  });
+
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    imageUploadContainer.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  });
+
+  // Click to upload
+  dropZone.addEventListener("click", () => {
+    imageInput.click();
+  });
+
+  imageInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    handleFile(file);
+  });
+
+  // Delete image button
+  deleteImageBtn.addEventListener("click", (e) => {
+    e.stopPropagation(); // Prevent triggering dropZone click
+    if (confirm("Are you sure you want to delete this image?")) {
+      clearImage();
     }
   });
 
-  const signInBtn = $("#signInBtn");
-  if(signInBtn) {
-      signInBtn.onclick = async () => {
+  function showToast(m, c = "#fff") {
+    if (statusBox) { statusBox.textContent = m; statusBox.style.color = c; }
+  }
+
+  /* === Auth === */
+  $("#signinBtn").onclick = async () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    overlay.querySelector("p").textContent = "ავტორიზაცია მიმდინარეობს...";
+    overlay.classList.remove("hidden");
+    try{ await auth.signInWithPopup(provider); }
+    catch(err){ console.error("Sign-in error:", err); alert("❌ შესვლისას შეცდომაა"); overlay.classList.add("hidden"); }
+  };
+
+  $("#logoutBtn").onclick = async () => {
+    overlay.querySelector("p").textContent = "გასვლა...";
+    overlay.classList.remove("hidden");
+    try{ await auth.signOut(); }
+    catch(err){ console.error("Logout error:", err); alert("❌ გასვლისას შეცდომაა"); overlay.classList.add("hidden"); }
+  };
+
+  auth.onAuthStateChanged(async u => {
+    user = u || null;
+    const signinOverlay = $("#signin-overlay");
+    if(user){
+      if(signinOverlay) signinOverlay.style.display = "none";
+      $("#signinBtn").style.display = "none";
+      $("#logoutBtn").style.display = "inline-flex";
+
+      if(ADMIN_EMAILS.includes(user.email)){
+        await loadSubjects();
+        overlay.querySelector("p").textContent = "იტვირთება...";
+        setTimeout(() => overlay.classList.add("hidden"), 600);
+      }else{
+        overlay.innerHTML = "<div style='text-align: center;'><h1 style='color:red;'>🚫 Access Denied</h1><button id='accessDeniedLogoutBtn' style='background: #333; color: #fff; border: none; padding: 10px 20px; margin-top: 20px; cursor: pointer;'>Log Out</button></div>";
+        document.getElementById("accessDeniedLogoutBtn").onclick = () => auth.signOut();
+        overlay.classList.remove("hidden");
+      }
+    }else{
+      if(signinOverlay) signinOverlay.style.display = "flex";
+      overlay.classList.add("hidden");
+      $("#signinBtn").style.display = "none";
+      $("#logoutBtn").style.display = "none";
+    }
+  });
+
+  const googleSignInBtn = $("#googleSignInBtn");
+  if(googleSignInBtn) {
+    googleSignInBtn.onclick = async () => {
         const provider = new firebase.auth.GoogleAuthProvider();
         try {
             await auth.signInWithPopup(provider);
-        } catch (err) { 
+        } catch (err) {
             console.error("Sign-in error:", err);
             alert("Sign-in failed. Please try again.");
         }
     };
   }
 
-  const signOutBtn = $("#signOutBtn");
-  if (signOutBtn) {
-      signOutBtn.onclick = async () => {
-          try {
-              await auth.signOut();
-              // Optionally, redirect or update UI after sign out
-              location.reload(); // Reload the page to reflect logged out state
-          } catch (error) {
-              console.error("Error signing out:", error);
-              alert("Error signing out. Please try again.");
-          }
-      };
+  /* === Subjects === */
+  async function loadSubjects(){
+    const snap = await db.collection("subjects").get();
+    subjects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderList();
   }
 
-    async function bootAfterLogin(){
+  function renderList(){
+    const list = $("#subjectList"); 
+    list.innerHTML = "";
+    const q = $("#searchBox").value.toLowerCase();
+    subjects
+      .filter(s => (s.name||"").toLowerCase().includes(q) || (s.id||"").toLowerCase().includes(q))
+      .forEach(s => {
+        const div = el("div",{ className:"subject-item" });
 
-      await loadCatalog();
-
-      await loadUserSelection();
-
-      await ensureSubjectsLoaded();
-
-      flattenWeeks();
-
-      // Initialize currentWeekData and selectedWeekNumber here
-
-      const iso=todayISO();
-
-      currentWeekData = weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
-
-      selectedWeekNumber = currentWeekData ? currentWeekData.n : null;
-
-  
-
-      paintWeeksBar();
-
-      goToday();
-
-  
-
-      // Move bottom-weeks inside live-view for phone version
-
-      if (isPhoneView()) {
-
-        const liveView = $("#live-view");
-
-        const bottomWeeks = $(".bottom-weeks");
-
-        if (liveView && bottomWeeks) {
-
-          liveView.prepend(bottomWeeks);
-
+        const symbolSquare = el("span", { className: "subject-symbol-square material-symbols-outlined", textContent: s.theme || "" });
+        if (!s.theme) {
+          symbolSquare.style.visibility = "hidden"; // Hide if no symbol
         }
+        div.append(symbolSquare);
+        
+        div.append(`${s.name} (${s.id})`);
+        div.onclick = () => openSubject(s.id);
+        if(s.id === currentId) div.classList.add("active");
+        list.append(div);
+      });
+  }
+  $("#searchBox").oninput = renderList;
 
+  /* === Popup create === */
+  const popup = $("#addPopup");
+  $("#addSubjectBtn").onclick = () => { 
+    $("#popupName").value = ""; 
+    $("#popupId").value = ""; 
+    popup.classList.add("active"); 
+    $("#popupName").focus(); 
+  };
+  $("#popupCancel").onclick = () => popup.classList.remove("active");
+  $("#popupCreate").onclick = createSubject;
+  $("#popupId").addEventListener("keydown", e => { if(e.key === "Enter") createSubject(); });
+
+  async function createSubject(){
+    const name = $("#popupName").value.trim();
+    const id = $("#popupId").value.trim();
+    if(!name || !id){ alert("შეიყვანე ორივე ველი: სახელი და ID"); return; }
+    const valid = /^[a-z0-9\-_\.]+$/i.test(id);
+    if(!valid){ alert("ID უნდა შეიცავდეს მხოლოდ ასოებს, ციფრებს, '-', '_' ან '.'"); return; }
+    const doc = await db.collection("subjects").doc(id).get();
+    if(doc.exists){ alert("აიდი დაკავებულია. აირჩიე სხვა ID."); return; }
+
+    const payload = { id, name, theme:"", globalButtons:[], weeks:[] };
+    await db.collection("subjects").doc(id).set(payload);
+    popup.classList.remove("active");
+    await loadSubjects();
+    openSubject(id);
+    showToast("✅ Subject created","#38d98a");
+  }
+
+  function fadeEditor(cb){
+    const ed = $("#editor");
+    ed.classList.add("fadeout");
+    setTimeout(() => { cb(); ed.classList.remove("fadeout"); }, 120);
+  }
+
+  async function openSubject(id){
+    const doc = await db.collection("subjects").doc(id).get();
+    if(!doc.exists){ alert("Not found"); return; }
+    const data = doc.data();
+    currentId = id;
+    isDirty = false;
+    setSaveState("saved");
+
+    document.querySelectorAll(".subject-item").forEach(x => 
+      x.classList.toggle("active", x.textContent.endsWith(`(${id})`))
+    );
+
+    $("#editor").style.display = "block";
+    fadeEditor(() => {
+      $("#editorTitle").textContent = `Editing: ${data.name}`;
+      $("#subjectId").value = id;
+      $("#subjectName").value = data.name || "";
+      const symbol = data.theme || ""; // Repurpose 'theme' for symbol name
+      $("#subjectSymbolName").value = symbol;
+      const symbolDisplay = $("#subjectSymbolDisplay");
+      symbolDisplay.textContent = symbol;
+      if (symbol) {
+        symbolDisplay.classList.add("material-symbols-outlined");
+      } else {
+        symbolDisplay.classList.remove("material-symbols-outlined");
       }
 
-    }
+      // New: Handle subject image
+      if (data.imageUrl) {
+        uploadedImage.src = data.imageUrl;
+        imagePreview.style.display = "flex";
+        dropZone.style.display = "none";
+        currentImageUrl = data.imageUrl;
+      } else {
+        clearImage(); // Ensure no old image is displayed
+      }
 
-  async function loadCatalog(){
-    catalog=[];
-    const snap=await db.collection("subjects").get();
-    snap.forEach(d=>catalog.push({id:d.id,...d.data()}));
-  }
-  async function loadUserSelection(){
-    const snap=await db.collection("users").doc(user.uid).get();
-    const data=snap.exists?snap.data():{};
-    selected=data.subjects||[];
-    // Initialize userDays to handle both day and time
-    userDays = data.days || {};
-    // Ensure userDays entries are objects with day and time properties
-    for (const subjId in userDays) {
-        if (typeof userDays[subjId] === 'string') {
-            userDays[subjId] = { day: userDays[subjId], time: null };
-        } else if (typeof userDays[subjId] !== 'object' || userDays[subjId] === null) {
-            userDays[subjId] = { day: null, time: null };
-        }
-    }
-  }
-  async function ensureSubjectsLoaded(){
-    const toLoad=selected.filter(id=>!cache[id]);
-    for(const id of toLoad){
-      const subj=catalog.find(c=>c.id===id);
-      if(subj) cache[id]=subj;
-    }
-  }
-  function flattenWeeks(){
-    weekDates=[];
-    SEMESTER_WEEKS.forEach(w=>{
-      if(w.start1) weekDates.push({n:w.n,start:w.start1,end:w.end1});
-      if(w.start2) weekDates.push({n:w.n,start:w.start2,end:w.end2});
+      renderGlobal(data.globalButtons || []);
+      renderWeeks(data.weeks || []);
     });
   }
 
-  function renderCollapsedWeekBar(weekNum) {
-    weeksBar.innerHTML = "";
-    const chip = el("div", {className:"item", textContent:`Week ${weekNum}`});
-    chip.dataset.week = weekNum;
+  function updateAddButtonsVisibilityGlobal(){
+    const globalWeekBtnsContainer = document.querySelector(`#globalWeekBtns`);
+    const globalBox = document.querySelector(`#globalBtns`);
+    
+    const slideBtn = globalWeekBtnsContainer.querySelector('.slideBtn');
+    const videoBtn = globalWeekBtnsContainer.querySelector('.videoBtn');
+    const bookBtn = globalWeekBtnsContainer.querySelector('.bookBtn');
+    const customBtn = globalWeekBtnsContainer.querySelector('.addCustom');
 
-    if (currentWeekData && weekNum === currentWeekData.n) {
-      chip.classList.add('active');
-      chip.classList.add('current-week');
-    } else {
-      chip.classList.add('active');
-      chip.classList.add('selected-non-current-week');
-    }
+    const buttons = [...globalBox.querySelectorAll(".customBtnRow")];
+    const hasSlide = buttons.some(row => row.dataset.type === 'slide');
+    const hasVideo = buttons.some(row => row.dataset.type === 'video');
+    const hasBook = buttons.some(row => row.dataset.type === 'book');
+    const embedCount = buttons.filter(row => row.dataset.type !== 'custom').length;
 
-    chip.addEventListener('click', () => {
-      const bottomWeeks = $(".bottom-weeks");
-      bottomWeeks.classList.toggle('expanded');
-      if (bottomWeeks.classList.contains('expanded')) {
-        paintWeeksBar(); // Re-render to expanded state
-      }
-    });
-    weeksBar.append(chip);
-    showWeek(weekNum); // Ensure the selected week's content is shown
+    const limitReached = embedCount >= 3;
+
+    if (slideBtn) slideBtn.style.display = hasSlide || limitReached ? "none" : "inline-flex";
+    if (videoBtn) videoBtn.style.display = hasVideo || limitReached ? "none" : "inline-flex";
+    if (bookBtn) bookBtn.style.display = hasBook || limitReached ? "none" : "inline-flex";
+    if (customBtn) customBtn.style.display = limitReached ? "none" : "inline-flex";
   }
 
-  function paintWeeksBar(){
-    weeksBar.innerHTML="";
-    const isPhone = isPhoneView();
-    const bottomWeeks = $(".bottom-weeks");
+  const COLOR_NAMES = ["yellow","red","blue","green"];
 
-    if (isPhone) {
-      const currentWeekData = weekDates.find(w => isBetween(todayISO(), w.start, w.end)) || weekDates[0];
-      const weekToDisplay = selectedWeekNumber || (currentWeekData ? currentWeekData.n : null);
+function createButtonEditor(b, weekIndex = null, isGlobal = false){
+    const wrap = el("div",{className:"customBtnRow"});
+    const selected = b.colorName || "yellow";
+    const isEmbed = ['slide', 'video', 'book'].includes(b.type);
 
-      if (weekToDisplay) {
-        const chip = el("div", {className:"item", textContent:`Week ${weekToDisplay}`});
-        chip.dataset.week = weekToDisplay;
+    wrap.dataset.type = b.type;
+    wrap.dataset.colorName = selected; // Still store it, even if not shown
 
-        if (weekToDisplay === currentWeekData.n) {
-          chip.classList.add('active');
-          chip.classList.add('current-week');
-        } else {
-          chip.classList.add('active');
-          chip.classList.add('selected-non-current-week');
-        }
+    const labelField = isEmbed 
+        ? `<input class="btnLabel" type="text" value="${b.label||""}" readonly style="background:#222; cursor: default;">`
+        : `<input class="btnLabel" type="text" value="${b.label||""}" placeholder="სახელი">`;
 
-        chip.addEventListener('click', () => {
-          bottomWeeks.classList.toggle('expanded');
+    const colorPalette = isEmbed
+        ? ''
+        : `<div class="colorPalette">
+             ${COLOR_NAMES.map(c=>`<div class="colorBox ${c===selected?"active":""}" data-color="${c}"></div>`).join("")}
+           </div>`;
 
-          if (bottomWeeks.classList.contains('expanded')) {
-            weeksBar.innerHTML = ""; // Clear to re-add in order
-            SEMESTER_WEEKS.forEach(w => {
-              const weekChip = el("div", {className:"item", textContent:`Week ${w.n}`});
-              weekChip.dataset.week = w.n;
-              if (w.n === weekToDisplay) { // Mark the currently selected week as active
-                weekChip.classList.add('active');
-              }
-              if (w.n === currentWeekData.n) { // Mark the actual current week
-                weekChip.classList.add('current-week');
-              }
-              weekChip.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showWeek(w.n);
-                bottomWeeks.classList.remove('expanded');
-                paintWeeksBar(); // Re-render the collapsed state with the newly selected week
-              });
-              weeksBar.append(weekChip);
-            });
-          } else {
-            // Collapse: re-render the collapsed state with the currently selected week
-            paintWeeksBar();
-          }
+    wrap.innerHTML = `
+      <span class="drag-handle">&#x2630;</span>
+      ${labelField}
+      <input class="btnLink" type="text" value="${b.link||""}" placeholder="ლინკი">
+      ${colorPalette}
+      <button class="removeBtn" title="Remove">
+        <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/delete.svg" alt="">
+      </button>
+    `;
+
+    wrap.querySelectorAll("input").forEach(inp => {
+      if (!inp.readOnly) inp.addEventListener("input", markDirty);
+    });
+
+    if (!isEmbed) {
+        wrap.querySelectorAll(".colorBox").forEach(box=>{
+          box.onclick=()=>{
+            wrap.querySelectorAll(".colorBox").forEach(bx=>bx.classList.remove("active"));
+            box.classList.add("active");
+            wrap.dataset.colorName = box.dataset.color;
+            markDirty();
+          };
         });
-        weeksBar.append(chip);
-      }
-    } else {
-      // Desktop view: show all weeks horizontally
-      SEMESTER_WEEKS.forEach(w=>{
-        const text = `Week ${w.n}`;
-        const chip=el("div",{className:"item",textContent:text});
-        chip.dataset.week = w.n;
-        chip.dataset.originalText = text; // Store original text
-        chip.addEventListener('click',()=>showWeek(w.n));
-        weeksBar.append(chip);
-      });
-      initHorizontalScroll("#weeksBar", null, WEEKS_BAR_SCROLL_DELAY);
     }
-  }
 
-  function showWeek(n) {
-      selectedWeekNumber = n; // Update the global selected week number
-      document.querySelectorAll('#weeksBar .item').forEach(item => {
-          item.classList.remove('active');
-      });
-      const selectedItem = document.querySelector(`#weeksBar .item[data-week='${n}']`);
-      if (selectedItem) {
-          selectedItem.classList.add('active');
-      }
-
-      const canvas = $("#cardsCanvas");
-      canvas.style.opacity = "0";
-      canvas.style.filter = "blur(8px)";
-      setTimeout(() => {
-          canvas.innerHTML = "";
-          let any = false;
-          const subs = (() => {
-              const mappedSubjects = selected.map(id => {
-                  const subj = cache[id];
-                  if (!subj) return null;
-                  const dayData = userDays?.[id] ?? { day: null, time: null };
-                  return {
-                      ...subj,
-                      dayIndex: daysOfWeek.indexOf(dayData.day),
-                      time: dayData.time // Add time to the subject object
-                  };
-              }).filter(Boolean);
-
-              const actualCurrentWeekNumber = currentWeekData ? currentWeekData.n : null;
-
-              if (selectedWeekNumber < actualCurrentWeekNumber) {
-                  // For weeks before the current week, sort in reverse day order
-                  return sortByDayReverseProximity(mappedSubjects);
-              } else if (selectedWeekNumber === actualCurrentWeekNumber) {
-                  // For the current week, sort by day proximity
-                  return sortByDayProximity(mappedSubjects);
-              } else {
-                  // For weeks after the current week, sort strictly Monday to Sunday
-                  return sortByDayAscending(mappedSubjects);
-              }
-          })();
-
-          subs.forEach(subj => {
-              const thisWeekData = subj.weeks?.find(w => w.week === n - 1);
-              const nextWeekData = subj.weeks?.find(w => w.week === n);
-
-              if (!thisWeekData && !nextWeekData) return;
-              any = true;
-
-              const wrapper = el("div", { className: "subject-wrapper" });
-              const card = el("div", { className: "card" });
-              const topicText = el("div", { className: "topic-text" });
-
-              const toggleButtons = el("div", { className: "week-toggle-buttons" });
-              const thisWeekBtn = el("button", { textContent: "ამ კვირისთვის" });
-              const nextWeekBtn = el("button", { textContent: "შემდეგი კვირისთვის", className: "next-week-btn" });
-              
-              if (thisWeekData) {
-                toggleButtons.append(thisWeekBtn);
-              }
-              if (nextWeekData) {
-                toggleButtons.append(nextWeekBtn);
-              }
-
-              const updateCardContent = (weekData) => {
-                  card.innerHTML = ''; // Clear the entire card
-
-                  // Create the new nested structure
-                  const cardMainTop = el("div", { className: "card-main-top" });
-                  const cardMainBottom = el("div", { className: "card-main-bottom" });
-                  const cardSubTop = el("div", { className: "card-sub-top" });
-                  const cardSubBottom = el("div", { className: "card-sub-bottom" });
-
-                  cardMainTop.append(cardSubTop, cardSubBottom);
-                  card.append(cardMainTop, cardMainBottom);
-
-                  if (!weekData) {
-                      // Handle no data case
-                      cardMainBottom.append(el("h4", { textContent: subj.name, style: "margin: 0; color: var(--color);" }));
-                      cardSubTop.append(el("div", { textContent: 'No topic available.' }));
-                      addBtns(cardSubBottom, []); // Add empty buttons
-                      return;
-                  }
-
-                  // Content for card-main-bottom (Subject Name & Lecture Type)
-                  const cardSymbolContainer = el("div", { className: "card-symbol-container" });
-                  const symbolSpan = el("span", { className: "material-symbols-outlined", textContent: subj.theme || "" });
-                  if (!subj.theme) {
-                    symbolSpan.style.visibility = "hidden"; // Hide if no symbol
-                  }
-                  cardSymbolContainer.append(symbolSpan);
-                  cardMainBottom.append(cardSymbolContainer);
-
-                  const textContainer = el("div", { style: "display: flex; flex-direction: column; justify-content: center;" });
-                  const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;font-weight: 500;" });
-                  const typeEl = el("h5", { textContent: weekData.type || '', style: "margin: 0; font-weight: 400; opacity: .8;" });
-                  textContainer.append(titleEl, typeEl);
-                  cardMainBottom.append(textContainer);
-
-                  if (!weekData || !weekData.topic) {
-                      if (isPhoneView()) {
-                          cardSubTop.style.display = 'none'; // Hide for phone
-                      } else {
-                          topicText.innerHTML = ''; // Clear content for PC
-                          cardSubTop.style.display = ''; // Ensure visible
-                      }
-                  } else {
-                      topicText.innerHTML = weekData.topic;
-                      cardSubTop.append(topicText);
-                      cardSubTop.style.display = ''; // Ensure visible
-                  }
-
-                  // Content for card-sub-bottom (Buttons)
-                  const allButtons = [...(weekData.buttons || [])];
-                  addBtns(cardSubBottom, allButtons);
-              };
-              
-                            // Default selection logic
-                            const today = new Date().getDay(); // Sunday = 0, Monday = 1, ...
-                            const subjectDay = subj.dayIndex; // Monday = 0, Tuesday = 1, ...
-                            const adjustedToday = today === 0 ? 6 : today - 1;
-              
-                            const actualCurrentWeekNumber = currentWeekData ? currentWeekData.n : null;
-                            const isSelectedWeekCurrent = (n === actualCurrentWeekNumber);
-                            const isSelectedWeekPast = (n < actualCurrentWeekNumber);
-                            const isSelectedWeekFuture = (n > actualCurrentWeekNumber);
-              
-                                          // Clear active states and special styles for both buttons
-                                          thisWeekBtn.classList.remove('active', 'past-day-active', 'neutral-background-active');
-                                          nextWeekBtn.classList.remove('active');
-                            
-                                          // --- NEW LOGIC FOR card-main-bottom ACTIVE STATE ---
-                                          card.classList.remove('upcoming-day'); // Always remove first to reset
-                            
-                                          if (isSelectedWeekPast) {
-                                              // For past weeks, card-main-bottom should NOT be active for all subjects.
-                                              // So, do nothing, ensuring 'upcoming-day' is removed.
-                                          } else if (isSelectedWeekFuture) {
-                                              // For future weeks, card-main-bottom SHOULD be active for all subjects.
-                                              card.classList.add('upcoming-day');
-                                          } else if (isSelectedWeekCurrent) {
-                                              // For the current week, apply original logic: active if subjectDay is today or in future.
-                                              if (subjectDay >= adjustedToday) {
-                                                  let isStillActive = true;
-                                                  if (subjectDay === adjustedToday && subj.time) {
-                                                      const [hour, minute] = subj.time.split(':').map(Number);
-                                                      const subjectDateTime = new Date();
-                                                      subjectDateTime.setHours(hour, minute, 0, 0);
-                                                      const threeHoursLater = new Date(subjectDateTime.getTime() + (3 * 60 * 60 * 1000)); // Add 3 hours
-                                                      const now = new Date();
-                                                      if (now > threeHoursLater) {
-                                                          isStillActive = false;
-                                                      }
-                                                  }
-                                                  if (isStillActive) {
-                                                      card.classList.add('upcoming-day');
-                                                  }
-                                              }
-                                          }
-                                          // --- END NEW LOGIC ---
-                            
-                                          let defaultToThisWeek = false;
-                                          let defaultToNextWeek = false;              
-                            if (isSelectedWeekCurrent) {
-                                if (thisWeekData && adjustedToday <= subjectDay) {
-                                    defaultToThisWeek = true;
-                                } else {
-                                    defaultToNextWeek = true;
-                                }
-                            } else if (isSelectedWeekPast) {
-                                defaultToNextWeek = true; // Always default to nextWeekData for past weeks
-                            } else if (isSelectedWeekFuture) {
-                                defaultToThisWeek = true; // Always default to thisWeekData for future weeks
-                            }
-              
-                                          // Apply content and active state based on decision
-                                          if (defaultToNextWeek && nextWeekData) {
-                                              updateCardContent(nextWeekData);
-                                              nextWeekBtn.classList.add('active');
-                                              nextWeekBtn.classList.add('past-day-active'); // NEW: Always add past-day-active to nextWeekBtn when active
-                                          } else if (defaultToThisWeek && thisWeekData) {
-                                              updateCardContent(thisWeekData);
-                                              thisWeekBtn.classList.add('active');
-                                              if (isSelectedWeekCurrent && adjustedToday > subjectDay) {
-                                                  thisWeekBtn.classList.add('past-day-active');
-                                              } else if (isSelectedWeekPast) {
-                                                  thisWeekBtn.classList.add('past-day-active');
-                                              } else {
-                                                  thisWeekBtn.classList.remove('past-day-active');
-                                              }
-                                          } else if (nextWeekData) { // Fallback if primary default was not possible but nextWeekData exists
-                                              updateCardContent(nextWeekData);
-                                              nextWeekBtn.classList.add('active');
-                                              nextWeekBtn.classList.add('past-day-active'); // NEW: Always add past-day-active to nextWeekBtn when active
-                                          } else if (thisWeekData) { // Fallback if primary default was not possible but thisWeekData exists
-                                              updateCardContent(thisWeekData);
-                                              thisWeekBtn.classList.add('active');
-                                              if (isSelectedWeekPast) {
-                                                  thisWeekBtn.classList.add('past-day-active');
-                                              } else {
-                                                  thisWeekBtn.classList.remove('past-day-active');
-                                              }
-                                          } else { // Absolute fallback, no data
-                                              updateCardContent(thisWeekData); // Will show "No topic available."
-                                              thisWeekBtn.classList.add('active');
-                                              if (isSelectedWeekPast) {
-                                                  thisWeekBtn.classList.add('past-day-active');
-                                              } else {
-                                                  thisWeekBtn.classList.remove('past-day-active');
-                                              }
-                                          }
-                            
-                                          // Update onclick handlers
-                                          thisWeekBtn.onclick = () => {
-                                              updateCardContent(thisWeekData);
-                                              thisWeekBtn.classList.add('active');
-                                              nextWeekBtn.classList.remove('active');
-                                              nextWeekBtn.classList.remove('past-day-active'); // Ensure removed from nextWeekBtn
-                            
-                                              if (isSelectedWeekCurrent && adjustedToday > subjectDay) {
-                                                  thisWeekBtn.classList.add('past-day-active');
-                                              } else if (isSelectedWeekPast) {
-                                                  thisWeekBtn.classList.add('past-day-active');
-                                              } else {
-                                                  thisWeekBtn.classList.remove('past-day-active');
-                                              }
-                                          };
-                            
-                                          nextWeekBtn.onclick = () => {
-                                              updateCardContent(nextWeekData);
-                                              nextWeekBtn.classList.add('active');
-                                              nextWeekBtn.classList.add('past-day-active'); // NEW: Always add past-day-active to nextWeekBtn when active
-                                              thisWeekBtn.classList.remove('active');
-                                              thisWeekBtn.classList.remove('past-day-active'); // Ensure removed from thisWeekBtn
-                                          };
-
-
-              wrapper.append(toggleButtons, card);
-              canvas.append(wrapper);
-          });
-
-          if (!any) canvas.append(el("div", { className: "empty", textContent: "საგნები არ არის. დაამატე პარამეტრებში" }));
-          
-          canvas.style.filter = "blur(0)";
-          canvas.style.opacity = "1";
-          
-          initHorizontalScroll("#cardsCanvas", null, SUBJECTS_CARD_RENDER_DELAY); 
-      }, SUBJECTS_CARD_RENDER_DELAY);
-  }
-
-  function goToday(){
-    const iso=todayISO();
-    const cur=weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
-    if(cur) {
-        showWeek(cur.n);
-
-        const isPhone = isPhoneView();
-
-
-        // Ensure week bar is collapsed on phone view when goToday is called
-        if (isPhone) {
-            const bottomWeeks = $(".bottom-weeks");
-            bottomWeeks.classList.remove('expanded');
-            // Re-paint weeks bar to ensure only current week is shown
-            paintWeeksBar();
-        } else {
-            // De-activate all week items first
-            document.querySelectorAll('#weeksBar .item').forEach(item => {
-                item.classList.remove('active');
-                if (item.classList.contains('current-week')) {
-                    item.innerHTML = item.dataset.originalText;
-                }
-                item.classList.remove('current-week');
-            });
-
-            // Find and activate the current week item
-            const activeItem = document.querySelector(`#weeksBar .item[data-week='${cur.n}']`);
-            if (activeItem) {
-                activeItem.classList.add('active');
-                activeItem.classList.add('current-week');
-
-                const weekText = activeItem.dataset.originalText;
-                activeItem.innerHTML = ''; // Clear the content
-
-                const content = el("div", { style: "display: flex; flex-direction: column; align-items: left; justify-content: center; height: 100%;" });
-                const weekTextEl = el("div", { textContent: weekText });
-                const nowTextEl = el("div", { textContent: "Now", style: "font-size: 0.8rem; opacity: 0.8;" });
-                content.append(weekTextEl, nowTextEl);
-                activeItem.append(content);
-
-                // Scroll the item into view (desktop only)
-                const weeksBar = document.getElementById('weeksBar');
-                const scrollTarget = activeItem.offsetLeft - (weeksBar.clientWidth / 2) + (activeItem.clientWidth / 2);
-                weeksBar.scrollTo({
-                    left: scrollTarget,
-                    behavior: 'smooth'
-                });
-            }
+    wrap.querySelector(".removeBtn").onclick = () => { 
+        wrap.remove(); 
+        if (isGlobal) {
+            updateAddButtonsVisibilityGlobal();
+        } else if (weekIndex !== null) {
+            updateAddButtonsVisibility(weekIndex);
         }
+        markDirty(); 
+    };
+    return wrap;
+  }
+
+  function renderGlobal(btns){
+    const box = $("#globalBtns"); box.innerHTML = "";
+    btns.forEach(b => box.append(createButtonEditor({ ...b, type: b.type || 'custom' }, null, true)));
+    new Sortable(box, {
+        animation: 150,
+        handle: '.drag-handle',
+        onEnd: () => markDirty()
+    });
+
+    const globalWeekBtnsContainer = $("#globalWeekBtns");
+
+    const checkEmbedLimitGlobal = () => {
+      const embedCount = [...box.querySelectorAll(".customBtnRow")].filter(row => row.dataset.type !== 'custom').length;
+      if (embedCount >= 3) {
+          alert("You can add a maximum of 3 embeds (slides, videos, or books) globally.");
+          return false;
+      }
+      return true;
+    };
+
+    globalWeekBtnsContainer.querySelector(".slideBtn").onclick = () => {
+      if (!checkEmbedLimitGlobal()) return;
+      const exists = [...box.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'slide');
+      if(!exists){
+        box.append(createButtonEditor({type: 'slide', label:"სლაიდი", link:"DRIVELINK/preview", colorName:"yellow"}, null, true));
+        updateAddButtonsVisibilityGlobal();
+        markDirty();
+      }
+    };
+    globalWeekBtnsContainer.querySelector(".videoBtn").onclick = () => {
+      if (!checkEmbedLimitGlobal()) return;
+      const exists = [...box.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'video');
+      if(!exists){
+        box.append(createButtonEditor({type: 'video', label:"ვიდეო", link:"", colorName:"red"}, null, true));
+        updateAddButtonsVisibilityGlobal();
+        markDirty();
+      }
+    };
+    globalWeekBtnsContainer.querySelector(".bookBtn").onclick = () => {
+      if (!checkEmbedLimitGlobal()) return;
+      const exists = [...box.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'book');
+      if(!exists){
+        box.append(createButtonEditor({type: 'book', label:"წიგნი", link:"", colorName:"blue"}, null, true));
+        updateAddButtonsVisibilityGlobal();
+        markDirty();
+      }
+    };
+    globalWeekBtnsContainer.querySelector(".addCustom").onclick = () => {
+      box.append(createButtonEditor({type: 'custom', label:"", link:"", colorName:"green"}, null, true));
+      markDirty();
+    };
+
+    updateAddButtonsVisibilityGlobal();
+  }
+
+  function renderWeeks(weeks){
+    const box = $("#weeksContainer"); box.innerHTML = "";
+    for(let i=1;i<=13;i++){ // 12 კვირა
+      const w = weeks.find(x=>x.week===i)||{};
+      const div = el("div",{className:"week"});
+      div.innerHTML = `
+        <h3>კვირა ${i}</h3>
+        <label>თემის სათაური</label>
+        <div id="topic-${i}" class="topicField" contenteditable="true">${w.topic || ""}</div>
+
+        <label style="margin-top:18px;">ლექციის ტიპი</label>
+        <select id="type-${i}" style="background:#23343B;color:var(--buttontext)">
+          <option value="ლექცია"${w.type==="ლექცია"?" selected":""}>ლექცია</option>
+          <option value="ლექცია (ქვიზი)"${w.type==="ლექცია (ქვიზი)"?" selected":""}>ლექცია (ქვიზი)</option>
+          <option value="შუალედური"${w.type==="შუალედური"?" selected":""}>შუალედური</option>
+          <option value="პრეზენტაცია"${w.type==="პრეზენტაცია"?" selected":""}>პრეზენტაცია</option>
+        </select>
+
+        <label style="margin-top:18px;">ბმულები</label>
+        <div id="buttons-${i}"></div>
+
+        <div class="weekBtns" id="weekBtns-${i}" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="addBtn slideBtn" data-week="${i}" style="background-color:#e8980e;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სლაიდის დამატება
+          </button>
+          <button class="addBtn videoBtn" data-week="${i}" style="background-color:#eb1515;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">ვიდეოს დამატება
+          </button>
+          <button class="addBtn bookBtn" data-week="${i}" style="background-color:#0e86e8;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">წიგნის დამატება
+          </button>
+          <button class="addBtn addCustom" data-week="${i}" style="background-color:#323742;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სხვა რესურსის დამატება
+          </button>
+        </div>
+      `;
+      box.append(div);
+
+      const btnBox = div.querySelector(`#buttons-${i}`);
+      (w.buttons||[]).forEach(b => btnBox.append(createButtonEditor(b, i)));
+      new Sortable(btnBox, {
+        animation: 150,
+        handle: '.drag-handle',
+        onEnd: () => markDirty()
+      });
+
+      const topicField = div.querySelector(`#topic-${i}`);
+      topicField.addEventListener("input", markDirty);
+
+      div.querySelector(`#type-${i}`).addEventListener("input", markDirty);
+
+      const checkEmbedLimit = () => {
+          const embedCount = [...btnBox.querySelectorAll(".customBtnRow")].filter(row => row.dataset.type !== 'custom').length;
+          if (embedCount >= 3) {
+              alert("You can add a maximum of 3 embeds (slides, videos, or books).");
+              return false;
+          }
+          return true;
+      };
+
+      div.querySelector(".slideBtn").onclick = () => {
+        if (!checkEmbedLimit()) return;
+        const exists = [...btnBox.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'slide');
+        if(!exists){
+          btnBox.append(createButtonEditor({type: 'slide', label:"სლაიდი", link:"DRIVELINK/preview", colorName:"yellow"}, i));
+          updateAddButtonsVisibility(i);
+          markDirty();
+        }
+      };
+      div.querySelector(".videoBtn").onclick = () => {
+        if (!checkEmbedLimit()) return;
+        const exists = [...btnBox.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'video');
+        if(!exists){
+          btnBox.append(createButtonEditor({type: 'video', label:"ვიდეო", link:"", colorName:"red"}, i));
+          updateAddButtonsVisibility(i);
+          markDirty();
+        }
+      };
+      div.querySelector(".bookBtn").onclick = () => {
+        if (!checkEmbedLimit()) return;
+        const exists = [...btnBox.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'book');
+        if(!exists){
+          btnBox.append(createButtonEditor({type: 'book', label:"წიგნი", link:"", colorName:"blue"}, i));
+          updateAddButtonsVisibility(i);
+          markDirty();
+        }
+      };
+      div.querySelector(".addCustom").onclick = () => {
+        btnBox.append(createButtonEditor({type: 'custom', label:"", link:"", colorName:"green"}, i));
+        markDirty();
+      };
+
+      updateAddButtonsVisibility(i);
     }
   }
 
-  function renderGlobalResources() {
-      const globalResourcesList = $("#global-resources-list");
-      globalResourcesList.innerHTML = ""; // Clear previous content
+  function updateAddButtonsVisibility(i){
+    const weekBtnsContainer = document.querySelector(`#weekBtns-${i}`);
+    const weekBox = document.querySelector(`#buttons-${i}`);
+    
+    const slideBtn = weekBtnsContainer.querySelector('.slideBtn');
+    const videoBtn = weekBtnsContainer.querySelector('.videoBtn');
+    const bookBtn = weekBtnsContainer.querySelector('.bookBtn');
+    const customBtn = weekBtnsContainer.querySelector('.addCustom');
 
-      let anyGlobalResources = false;
+    const buttons = [...weekBox.querySelectorAll(".customBtnRow")];
+    const hasSlide = buttons.some(row => row.dataset.type === 'slide');
+    const hasVideo = buttons.some(row => row.dataset.type === 'video');
+    const hasBook = buttons.some(row => row.dataset.type === 'book');
+    const embedCount = buttons.filter(row => row.dataset.type !== 'custom').length;
 
-      // Iterate through all catalog subjects
-      catalog.forEach(subj => {
-          if (subj.globalButtons && subj.globalButtons.length > 0) {
-              anyGlobalResources = true;
+    const limitReached = embedCount >= 3;
 
-              const wrapper = el("div", { className: "subject-wrapper" });
-              const card = el("div", { className: "card" });
-
-              // Create left section for symbol and name
-              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: hsl(0, 0%, 10%); flex-shrink: 0;" });
-
-              // Create right section for embeds
-              const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: hsl(0, 0%, 13%);" });
-
-              // Append sections to card
-              card.append(cardLeftSection, cardRightSection);
-
-              // --- Populate card-left-section (Symbol and Name) ---
-              const cardSymbolContainer = el("div", { className: "card-symbol-container" });
-              const symbolSpan = el("span", { className: "material-symbols-outlined", textContent: subj.theme || "" });
-              if (!subj.theme) {
-                symbolSpan.style.visibility = "hidden";
-              }
-              cardSymbolContainer.append(symbolSpan);
-              cardLeftSection.append(cardSymbolContainer);
-
-              const textContainer = el("div", { style: "display: flex; flex-direction: column; justify-content: center;" });
-              const titleEl = el("h4", { textContent: subj.name, style: "margin: 0; color: #fff;" });
-              textContainer.append(titleEl);
-              cardLeftSection.append(textContainer);
-
-              // --- Populate card-right-section (Global Buttons) ---
-              addBtns(cardRightSection, subj.globalButtons);
-
-              wrapper.append(card);
-              globalResourcesList.append(wrapper);
-          }
-      });
-
-      if (!anyGlobalResources) {
-          globalResourcesList.append(el("div", { className: "empty", textContent: "No global resources available." }));
-      }
-
-
+    if (slideBtn) slideBtn.style.display = hasSlide || limitReached ? "none" : "inline-flex";
+    if (videoBtn) videoBtn.style.display = hasVideo || limitReached ? "none" : "inline-flex";
+    if (bookBtn) bookBtn.style.display = hasBook || limitReached ? "none" : "inline-flex";
+    if (customBtn) customBtn.style.display = limitReached ? "none" : "inline-flex";
   }
 
-  /* === Profile === */
-  function renderProfile(){
-    const list=$("#catalogList"); list.innerHTML="";
-    const mine=$("#mySubjects"); mine.innerHTML="";
-    catalog.forEach(x=>{
-      const added=selected.includes(x.id);
-      const row=el("div",{className:"item-settings"});
-      const left=el("div",{},[
-        el("div",{textContent:x.name,style:"font-weight:700"}),
-        el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
-      ]);
-      const action=added
-        ? el("button",{className:"added",innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>`})
-        : el("button",{innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg' style='width:25px;height:25px;'>`,onclick:async()=>{
-            if(!selected.includes(x.id)) selected.push(x.id);
-            await saveSelection(true); renderProfile();
-          }});
-      row.append(left,action); list.append(row);
-    });
+  /* === Collect and Save (manual) === */
+  function collectForm(){
+    if(!currentId) return null;
 
-    // Prepare subjects for sorting by adding dayIndex
-    const subjectsWithDay = selected.map(id => {
-      const subj = catalog.find(c => c.id === id);
-      const day = userDays?.[id]?.day ?? null; // Access .day property
-      const time = userDays?.[id]?.time ?? null; // Access .time property
-      return { ...subj, id: id, dayIndex: day !== null ? daysOfWeek.indexOf(day) : 7, time: time }; // Assign 7 for subjects with no day (will appear last)
-    });
+    const globalBtns=[...document.querySelectorAll("#globalBtns .customBtnRow")].map(b=>({
+      type: b.dataset.type,
+      label:b.querySelector(".btnLabel").value,
+      link:b.querySelector(".btnLink").value,
+      colorName:b.dataset.colorName
+    }));
 
-    console.log("Subjects before sorting:", subjectsWithDay);
+    const weeks=[];
+    for(let i=1;i<=13;i++){
+      const topic=(document.querySelector("#topic-"+i)?.innerHTML||"").trim();
+      const type=(document.querySelector("#type-"+i)?.value)||"ლექცია";
+      const weekDiv=document.querySelector("#buttons-"+i);
+      const buttons=[...(weekDiv?.querySelectorAll(".customBtnRow")||[])].map(b=>({
+        type: b.dataset.type,
+        label:b.querySelector(".btnLabel").value,
+        link:b.querySelector(".btnLink").value,
+        colorName:b.dataset.colorName
+      }));
+      const w={week:i,type,buttons};
+      if(topic) w.topic=topic;
+      weeks.push(w);
+    }
 
-    // Sort subjects by dayIndex and then by time using the new function
-    const sortedSubjects = sortByDayAscending(subjectsWithDay);
-    console.log("Subjects after sorting:", sortedSubjects);
+    const name=$("#subjectName").value.trim();
+    const theme=$("#subjectSymbolName").value.trim(); // Repurpose 'theme' for symbol name
 
-    sortedSubjects.forEach(subjData => {
-      const id = subjData.id;
-      const subj = catalog.find(c => c.id === id); // Re-find original subject for full data if needed
-      const row=el("div",{className:"item-settings"});
-      const left=el("div",{},[
-        el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
-        el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
-      ]);
-      const delBtn=el("button",{innerHTML:`<img src='https://raw.githubusercontent.com/WEEKGE/live/ce772a078446be5972f9c7b9f2ff91b0122c1dad/svgs/close.svg' style='width:22px;height:22px;filter:brightness(0) invert(1);'>`,style:"background:var(--remove);color:#fff",onclick:async()=>{
-        selected=selected.filter(s=>s!==id);
-        delete cache[id];
-        await saveSelection(true);
-        renderProfile();
-      }});
-      const select=el("select",{className:"day-select"});
-      daysOfWeek.forEach(d=>{
-        const opt=el("option", {textContent:d, value:d});
-        if(userDays?.[id]?.day===d) opt.selected=true;
-        select.append(opt);
-      });
-      select.onchange=()=>{
-        if (!userDays[id]) userDays[id] = { day: null, time: null };
-        userDays[id].day = select.value;
-        renderProfile();
-      };
-
-      const timeContainer = el("div", { style: "display: flex; align-items: center; gap: 5px;" });
-      const hourSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
-      for (let i = 7; i <= 23; i++) {
-        const hour = String(i).padStart(2, '0');
-        const opt = el("option", { textContent: hour, value: hour });
-        if (userDays?.[id]?.time?.split(':')[0] === hour) opt.selected = true;
-        hourSelect.append(opt);
-      }
-      hourSelect.onchange = () => {
-        if (!userDays[id]) userDays[id] = { day: null, time: null };
-        const currentMinute = userDays[id].time ? userDays[id].time.split(':')[1] : '00';
-        userDays[id].time = `${hourSelect.value}:${currentMinute}`;
-        renderProfile();
-      };
-
-      const minuteSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
-      for (let i = 0; i <= 55; i += 5) {
-        const minute = String(i).padStart(2, '0');
-        const opt = el("option", { textContent: minute, value: minute });
-        if (userDays?.[id]?.time?.split(':')[1] === minute) opt.selected = true;
-        minuteSelect.append(opt);
-      }
-      minuteSelect.onchange = () => {
-        if (!userDays[id]) userDays[id] = { day: null, time: null };
-        const currentHour = userDays[id].time ? userDays[id].time.split(':')[0] : '07'; // Default to 07 if no hour is set
-        userDays[id].time = `${currentHour}:${minuteSelect.value}`;
-        renderProfile();
-      };
-
-      timeContainer.append(hourSelect, el("span", { textContent: ":", style: "font-size: 1.2rem; font-weight: bold;" }), minuteSelect);
-
-      row.append(left, delBtn, select, timeContainer);
-      mine.append(row);
-    });
-    $("#saveSubjects").onclick=async()=>await saveSelection(true);
+    return { id: currentId, name, theme, imageUrl: currentImageUrl, globalButtons: globalBtns, weeks };
   }
 
-  async function saveSelection(immediate=false){
-    if(!user) return;
+  async function saveNow(){
+    if(!currentId){ alert("ჯერ აირჩიე საგანი."); return; }
+    const payload = collectForm();
+    if(!payload) return;
+
     try{
-      // Filter out subjects with no day or time selected before saving
-      const daysToSave = {};
-      for (const subjId in userDays) {
-          if (userDays[subjId].day !== null || userDays[subjId].time !== null) {
-              daysToSave[subjId] = userDays[subjId];
-          }
-      }
-
-      await db.collection("users").doc(user.uid).set(
-        { subjects:selected, days:daysToSave },
-        { merge:true }
-      );
-      if(immediate){
-        await ensureSubjectsLoaded();
-        paintWeeksBar();
-        goToday();
-      }
-    }catch(e){ console.error("User save failed:",e); }
-  }
-
-
-  // UI Switching
-  const mainNav = document.getElementById('main-nav');
-  const liveView = document.getElementById('live-view');
-  const settingsView = document.getElementById('settings-view');
-  const resourcesView = document.getElementById('resources-view');
-  const bottomWeeks = document.querySelector('.bottom-weeks');
-
-  mainNav.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('item')) {
-          const viewId = e.target.dataset.view;
-          
-          // Toggle active class on nav items
-          mainNav.querySelectorAll('.item').forEach(item => item.classList.remove('active'));
-          e.target.classList.add('active');
-
-          // Hide all views first
-          liveView.style.display = 'none';
-          settingsView.style.display = 'none';
-          resourcesView.style.display = 'none'; // NEW
-          bottomWeeks.style.display = 'none';
-
-          if (viewId === 'settings-view') {
-              if (!user) {
-                  try {
-                      const provider = new firebase.auth.GoogleAuthProvider();
-                      await auth.signInWithPopup(provider);
-                  } catch (err) {
-                      console.error("Sign-in error:", err);
-                      alert("Please sign in to access settings.");
-                      mainNav.querySelector('[data-view="live-view"]').classList.add('active');
-                      e.target.classList.remove('active');
-                      liveView.style.display = 'flex'; // Show live view if sign-in fails
-                      bottomWeeks.style.display = 'block'; // Show bottom weeks
-                      return;
-                  }
-              }
-              if (!catalog.length) await loadCatalog();
-              if (!selected.length) await loadUserSelection();
-
-              settingsView.style.display = 'block';
-              renderProfile();
-
-          } else if (viewId === 'resources-view') { // NEW
-              if (!catalog.length) await loadCatalog(); // Ensure catalog is loaded
-              resourcesView.style.display = 'flex';
-              renderGlobalResources(); // Call the new function
-
-              // No bottomWeeks for resources for now, similar to settings
-
-          } else { // Default to live-view
-              liveView.style.display = 'flex';
-              bottomWeeks.style.display = 'block';
-              // Re-initialize scroll on view switch
-              setTimeout(() => initHorizontalScroll("#cardsCanvas", null, SUBJECTS_CARD_RENDER_DELAY), 50);
-          }
-      }
-  });
-
-  // Initialize top nav scroll (disabled by user request)
-  // initHorizontalScroll("#main-nav");
-
-  // Settings side panel navigation
-  const settingsNavItems = document.querySelectorAll('.settings-nav-item');
-  const settingsMainContents = document.querySelectorAll('.settings-main-content');
-  const initialSettingsPlaceholder = $('.settings-main-page .initial-placeholder');
-
-  settingsNavItems.forEach(item => {
-      item.addEventListener('click', () => {
-          // Remove active from all nav items
-          settingsNavItems.forEach(nav => nav.classList.remove('active'));
-          // Add active to clicked nav item
-          item.classList.add('active');
-
-          // Hide initial placeholder if visible
-          if (initialSettingsPlaceholder) {
-              initialSettingsPlaceholder.style.display = 'none';
-          }
-
-          // Hide all main contents
-          settingsMainContents.forEach(content => content.classList.remove('active'));
-
-          // Show the target content
-          const targetId = item.dataset.target;
-          const targetContent = document.getElementById(targetId);
-          if (targetContent) {
-              targetContent.classList.add('active');
-          }
-      });
-  });
-
-  // Initial display for settings main page
-  // If there's an active nav item on load, show its content
-  const activeSettingsNavItem = document.querySelector('.settings-nav-item.active');
-  if (activeSettingsNavItem) {
-      const targetId = activeSettingsNavItem.dataset.target;
-      const targetContent = document.getElementById(targetId);
-      if (targetContent) {
-          targetContent.classList.add('active');
-      }
-  } else if (initialSettingsPlaceholder) {
-      // If no active item, show the placeholder
-      initialSettingsPlaceholder.style.display = 'flex';
-  }
-
-  let wasPhoneView = isPhoneView();
-  window.addEventListener('resize', () => {
-    const isNowPhoneView = isPhoneView();
-    if (wasPhoneView === isNowPhoneView) return;
-
-    const bottomWeeks = document.querySelector('.bottom-weeks');
-    const mainContent = document.querySelector('.main-content');
-    const liveView = document.getElementById('live-view');
-
-    if (isNowPhoneView) {
-      // Switched to Phone View
-      if (bottomWeeks && liveView) {
-        liveView.prepend(bottomWeeks);
-      }
-    } else {
-      // Switched to Desktop View
-      if (bottomWeeks && mainContent) {
-        mainContent.insertAdjacentElement('afterend', bottomWeeks);
-      }
+      setSaveState("wait");
+      await db.collection("subjects").doc(currentId).set(payload, { merge:true });
+      setSaveState("saved");
+      showToast("✅ Changes saved","#38d98a");
+      // განახლდეს სია სახელის ცვლილების შემთხვევაში
+      const idx = subjects.findIndex(s => s.id === currentId);
+      if(idx>-1){ subjects[idx] = {...subjects[idx], ...payload}; renderList(); }
+    }catch(e){
+      console.error(e);
+      setSaveState("error");
+      alert("❌ შენახვისას შეცდომაა");
     }
-    
-    goToday(); // Re-initialize view
-    
-    wasPhoneView = isNowPhoneView;
+  }
+
+  async function deleteCurrent(){
+    if(!currentId){ alert("ჯერ აირჩიე საგანი."); return; }
+    if(!confirm("Delete this subject?")) return;
+    try{
+      setSaveState("wait");
+      await db.collection("subjects").doc(currentId).delete();
+      $("#editor").style.display="none";
+      const removedId = currentId;
+      currentId=null;
+      await loadSubjects();
+      setSaveState("saved");
+      showToast("🗑️ Deleted","#ed3737");
+      // აქტიური highlight მოხდეს
+      document.querySelectorAll(".subject-item").forEach(x=>x.classList.remove("active"));
+    }catch(e){
+      console.error(e);
+      setSaveState("error");
+      alert("❌ წაშლისას შეცდომაა");
+    }
+  }
+
+/* === Hold-to-Delete Delay Setup === */
+  function addHoldToDelete(btn, action) {
+    let progress = 0, interval;
+    // create progress overlay if not exists
+    let bar = btn.querySelector(".delete-progress");
+    if (!bar) {
+      bar = document.createElement("span");
+      bar.className = "delete-progress";
+      btn.prepend(bar);
+    }
+
+    btn.addEventListener("mousedown", () => {
+      progress = 0;
+      bar.style.width = "0%";
+      interval = setInterval(() => {
+        progress += 100 / 20; // fill over ~3s
+        bar.style.width = progress + "%";
+        if (progress >= 100) {
+          clearInterval(interval);
+          bar.style.width = "100%";
+          action(); // perform delete
+        }
+      }, 50);
+    });
+
+    ["mouseup", "mouseleave"].forEach(ev => {
+      btn.addEventListener(ev, () => {
+        clearInterval(interval);
+        bar.style.width = "0%";
+      });
+    });
+  }
+
+  /* === Wire buttons === */
+  $("#saveBtn").onclick = saveNow;
+  $("#applyNavBtn").onclick = saveNow;
+
+  // replace direct delete click with hold-to-delete
+  addHoldToDelete($("#deleteBtn"), deleteCurrent);
+  addHoldToDelete($("#deleteNavBtn"), deleteCurrent);
+
+  // ველების ცვლილებაზე მონიშვნა dirty
+  ["#subjectName","#subjectSymbolName"].forEach(sel=>{
+    $(sel).addEventListener("input", (e) => {
+      markDirty();
+      if (sel === "#subjectSymbolName") {
+        const symbolDisplay = $("#subjectSymbolDisplay");
+        symbolDisplay.textContent = e.target.value;
+        if (e.target.value) {
+          symbolDisplay.classList.add("material-symbols-outlined");
+        } else {
+          symbolDisplay.classList.remove("material-symbols-outlined");
+        }
+      }
+    });
+  });
+
+  // Ctrl+S => Apply
+  document.addEventListener("keydown", (e)=>{
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="s"){
+      e.preventDefault();
+      saveNow();
+    }
+  });
+
+  /* --- Formatting shortcuts (bold/italic/underline) --- */
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey && ["b","i","u"].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+      const cmd = e.key.toLowerCase() === "b" ? "bold" :
+                  e.key.toLowerCase() === "i" ? "italic" : "underline";
+      document.execCommand(cmd, false, null);
+      markDirty();
+    }
   });
 }
 </script>
+
 </body>
 </html>
-
