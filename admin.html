@@ -442,9 +442,20 @@ input,select{width:100%;padding:10px;border:none;background:var(--field);color:v
       <div class="global">
         <h3>ზოგადი რესურსები</h3>
         <div id="globalBtns"></div>
-        <button class="addBtn" id="addGlobalBtn">
-          <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" alt="" width="18" height="18">ზოგადი რესურსის დამატება
-        </button>
+        <div class="weekBtns" id="globalWeekBtns" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="addBtn slideBtn" data-global="true" style="background-color:#e8980e;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სლაიდის დამატება
+          </button>
+          <button class="addBtn videoBtn" data-global="true" style="background-color:#eb1515;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">ვიდეოს დამატება
+          </button>
+          <button class="addBtn bookBtn" data-global="true" style="background-color:#0e86e8;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">წიგნის დამატება
+          </button>
+          <button class="addBtn addCustom" data-global="true" style="background-color:#323742;">
+            <img src="https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/add.svg" width="18" height="18" alt="">სხვა რესურსის დამატება
+          </button>
+        </div>
       </div>
 
       <div id="weeksContainer"></div>
@@ -774,9 +785,32 @@ function startAdmin(){
     });
   }
 
+  function updateAddButtonsVisibilityGlobal(){
+    const globalWeekBtnsContainer = document.querySelector(`#globalWeekBtns`);
+    const globalBox = document.querySelector(`#globalBtns`);
+    
+    const slideBtn = globalWeekBtnsContainer.querySelector('.slideBtn');
+    const videoBtn = globalWeekBtnsContainer.querySelector('.videoBtn');
+    const bookBtn = globalWeekBtnsContainer.querySelector('.bookBtn');
+    const customBtn = globalWeekBtnsContainer.querySelector('.addCustom');
+
+    const buttons = [...globalBox.querySelectorAll(".customBtnRow")];
+    const hasSlide = buttons.some(row => row.dataset.type === 'slide');
+    const hasVideo = buttons.some(row => row.dataset.type === 'video');
+    const hasBook = buttons.some(row => row.dataset.type === 'book');
+    const embedCount = buttons.filter(row => row.dataset.type !== 'custom').length;
+
+    const limitReached = embedCount >= 3;
+
+    if (slideBtn) slideBtn.style.display = hasSlide || limitReached ? "none" : "inline-flex";
+    if (videoBtn) videoBtn.style.display = hasVideo || limitReached ? "none" : "inline-flex";
+    if (bookBtn) bookBtn.style.display = hasBook || limitReached ? "none" : "inline-flex";
+    if (customBtn) customBtn.style.display = limitReached ? "none" : "inline-flex";
+  }
+
   const COLOR_NAMES = ["yellow","red","blue","green"];
 
-function createButtonEditor(b, weekIndex = null){
+function createButtonEditor(b, weekIndex = null, isGlobal = false){
     const wrap = el("div",{className:"customBtnRow"});
     const selected = b.colorName || "yellow";
     const isEmbed = ['slide', 'video', 'book'].includes(b.type);
@@ -821,7 +855,9 @@ function createButtonEditor(b, weekIndex = null){
 
     wrap.querySelector(".removeBtn").onclick = () => { 
         wrap.remove(); 
-        if (weekIndex !== null) {
+        if (isGlobal) {
+            updateAddButtonsVisibilityGlobal();
+        } else if (weekIndex !== null) {
             updateAddButtonsVisibility(weekIndex);
         }
         markDirty(); 
@@ -831,16 +867,57 @@ function createButtonEditor(b, weekIndex = null){
 
   function renderGlobal(btns){
     const box = $("#globalBtns"); box.innerHTML = "";
-    btns.forEach(b => box.append(createButtonEditor({ ...b, type: b.type || 'custom' })));
+    btns.forEach(b => box.append(createButtonEditor({ ...b, type: b.type || 'custom' }, null, true)));
     new Sortable(box, {
         animation: 150,
         handle: '.drag-handle',
         onEnd: () => markDirty()
     });
-    $("#addGlobalBtn").onclick = () => {
-      box.append(createButtonEditor({type: 'custom', label:"New", link:"", colorName:"yellow"}));
+
+    const globalWeekBtnsContainer = $("#globalWeekBtns");
+
+    const checkEmbedLimitGlobal = () => {
+      const embedCount = [...box.querySelectorAll(".customBtnRow")].filter(row => row.dataset.type !== 'custom').length;
+      if (embedCount >= 3) {
+          alert("You can add a maximum of 3 embeds (slides, videos, or books) globally.");
+          return false;
+      }
+      return true;
+    };
+
+    globalWeekBtnsContainer.querySelector(".slideBtn").onclick = () => {
+      if (!checkEmbedLimitGlobal()) return;
+      const exists = [...box.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'slide');
+      if(!exists){
+        box.append(createButtonEditor({type: 'slide', label:"სლაიდი", link:"DRIVELINK/preview", colorName:"yellow"}, null, true));
+        updateAddButtonsVisibilityGlobal();
+        markDirty();
+      }
+    };
+    globalWeekBtnsContainer.querySelector(".videoBtn").onclick = () => {
+      if (!checkEmbedLimitGlobal()) return;
+      const exists = [...box.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'video');
+      if(!exists){
+        box.append(createButtonEditor({type: 'video', label:"ვიდეო", link:"", colorName:"red"}, null, true));
+        updateAddButtonsVisibilityGlobal();
+        markDirty();
+      }
+    };
+    globalWeekBtnsContainer.querySelector(".bookBtn").onclick = () => {
+      if (!checkEmbedLimitGlobal()) return;
+      const exists = [...box.querySelectorAll(".customBtnRow")].some(row => row.dataset.type === 'book');
+      if(!exists){
+        box.append(createButtonEditor({type: 'book', label:"წიგნი", link:"", colorName:"blue"}, null, true));
+        updateAddButtonsVisibilityGlobal();
+        markDirty();
+      }
+    };
+    globalWeekBtnsContainer.querySelector(".addCustom").onclick = () => {
+      box.append(createButtonEditor({type: 'custom', label:"", link:"", colorName:"green"}, null, true));
       markDirty();
     };
+
+    updateAddButtonsVisibilityGlobal();
   }
 
   function renderWeeks(weeks){
