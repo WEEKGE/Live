@@ -262,6 +262,14 @@
   .item:hover{background-color:#2b2b2b;}
   .item.active{background:var(--color);border-color:#000;color: rgb(255, 255, 255);}
 
+  /* Desktop: Non-current active week should be white with black text */
+  @media screen and (min-width: 769px) {
+    #weeksBar .item.active:not(.current-week) {
+      background: #fff;
+      color: #000;
+    }
+  }
+
   .item.active.current-week {
     color: #ffffff; /* Black text for active current week */
   }
@@ -554,8 +562,8 @@
   }
 
   .settings-nav-item.active {
-    background: #ff0000; /* White background when active */
-    color: #ffffff; /* Black text when active */
+    background: #ff0000; /* Red background when active */
+    color: #ffffff; /* White text when active */
   }
 
   .settings-block:last-child {
