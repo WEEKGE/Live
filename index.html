@@ -304,6 +304,12 @@
     color: #fff; /* White text for active next week button */
   }
 
+  .week-toggle-buttons button.past-day-active {
+    background: #fff;
+    color: #000;
+    border-color: transparent;
+  }
+
 
   .fade-edge{
     position:absolute;
@@ -447,8 +453,8 @@
   .topic-text {
     white-space: pre-wrap; 
     word-wrap: break-word;
-    line-height: 1.5;
-    font-size: 1.5rem;
+    line-height: 1.6;
+    font-size: 1.2rem;
   }
 
   .link-button {
@@ -1458,8 +1464,8 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
           }).filter(Boolean));
 
           subs.forEach(subj => {
-              const thisWeekData = subj.weeks?.find(w => w.week === n);
-              const nextWeekData = subj.weeks?.find(w => w.week === n + 1);
+              const thisWeekData = subj.weeks?.find(w => w.week === n - 1);
+              const nextWeekData = subj.weeks?.find(w => w.week === n);
 
               if (!thisWeekData && !nextWeekData) return;
               any = true;
@@ -1523,16 +1529,26 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                   addBtns(cardSubBottom, allButtons);
               };
               
+              const updateThisWeekBtnStyle = () => {
+                  if (thisWeekBtn.classList.contains('active') && adjustedToday > subjectDay) {
+                      thisWeekBtn.classList.add('past-day-active');
+                  } else {
+                      thisWeekBtn.classList.remove('past-day-active');
+                  }
+              };
+
               thisWeekBtn.onclick = () => {
                   updateCardContent(thisWeekData);
                   thisWeekBtn.classList.add('active');
                   nextWeekBtn.classList.remove('active');
+                  updateThisWeekBtnStyle();
               };
 
               nextWeekBtn.onclick = () => {
                   updateCardContent(nextWeekData);
                   nextWeekBtn.classList.add('active');
                   thisWeekBtn.classList.remove('active');
+                  updateThisWeekBtnStyle();
               };
 
               // Default selection logic
@@ -1540,15 +1556,22 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               const subjectDay = subj.dayIndex; // Monday = 0, Tuesday = 1, ...
               const adjustedToday = today === 0 ? 6 : today - 1;
 
-              if (thisWeekData && (!nextWeekData || adjustedToday <= subjectDay)) {
+              if (thisWeekData && adjustedToday <= subjectDay) {
                   updateCardContent(thisWeekData);
                   thisWeekBtn.classList.add('active');
+                  updateThisWeekBtnStyle();
               } else if (nextWeekData) {
                   updateCardContent(nextWeekData);
                   nextWeekBtn.classList.add('active');
+                  updateThisWeekBtnStyle();
+              } else if (thisWeekData) {
+                  updateCardContent(thisWeekData);
+                  thisWeekBtn.classList.add('active');
+                  updateThisWeekBtnStyle();
               } else {
                   updateCardContent(thisWeekData);
                   thisWeekBtn.classList.add('active');
+                  updateThisWeekBtnStyle();
               }
 
               // Add upcoming-day class if subjectDay is current day or in the future
