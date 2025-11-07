@@ -16,7 +16,7 @@
 <style>
   :root{
     --bg:#0c0c0c;
-    --color:#ff0f0f;
+    --color:#eb1313;
     --gap:0px;
     --cardW:233px;
     --top-nav-h: 60px;
@@ -548,6 +548,10 @@
     background: transparent; /* Default background transparent */
     color: #fff; /* Default text color white */
     border-bottom: 1px solid var(--line); /* Add border-bottom here */
+  }
+
+  .settings-block.settings-nav-item > div {
+    font-size: 1.3rem; /* Make the text bigger */
   }
 
   .settings-nav-item {
@@ -1674,7 +1678,20 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                                           } else if (isSelectedWeekCurrent) {
                                               // For the current week, apply original logic: active if subjectDay is today or in future.
                                               if (subjectDay >= adjustedToday) {
-                                                  card.classList.add('upcoming-day');
+                                                  let isStillActive = true;
+                                                  if (subjectDay === adjustedToday && subj.time) {
+                                                      const [hour, minute] = subj.time.split(':').map(Number);
+                                                      const subjectDateTime = new Date();
+                                                      subjectDateTime.setHours(hour, minute, 0, 0);
+                                                      const threeHoursLater = new Date(subjectDateTime.getTime() + (3 * 60 * 60 * 1000)); // Add 3 hours
+                                                      const now = new Date();
+                                                      if (now > threeHoursLater) {
+                                                          isStillActive = false;
+                                                      }
+                                                  }
+                                                  if (isStillActive) {
+                                                      card.classList.add('upcoming-day');
+                                                  }
                                               }
                                           }
                                           // --- END NEW LOGIC ---
