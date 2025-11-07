@@ -1580,8 +1580,19 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       row.append(left,action); list.append(row);
     });
 
-    selected.forEach(id=>{
-      const subj=catalog.find(c=>c.id===id);
+    // Prepare subjects for sorting by adding dayIndex
+    const subjectsWithDay = selected.map(id => {
+      const subj = catalog.find(c => c.id === id);
+      const day = userDays?.[id] ?? null;
+      return { ...subj, id: id, dayIndex: day !== null ? daysOfWeek.indexOf(day) : 7 }; // Assign 7 for subjects with no day (will appear last)
+    });
+
+    // Sort subjects by dayIndex
+    subjectsWithDay.sort((a, b) => a.dayIndex - b.dayIndex);
+
+    subjectsWithDay.forEach(subjData => {
+      const id = subjData.id;
+      const subj = catalog.find(c => c.id === id); // Re-find original subject for full data if needed
       const row=el("div",{className:"item-settings"});
       const left=el("div",{},[
         el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
@@ -1599,7 +1610,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         if(userDays?.[id]===d) opt.selected=true;
         select.append(opt);
       });
-      select.onchange=()=>{userDays[id]=select.value;};
+      select.onchange=()=>{userDays[id]=select.value; renderProfile();};
       row.append(left,delBtn,select);
       mine.append(row);
     });
