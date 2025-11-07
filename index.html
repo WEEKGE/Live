@@ -1631,7 +1631,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                   const textContainer = el("div", { style: "display: flex; flex-direction: column; justify-content: center;" });
                   const titleEl = el("h4", { textContent: subjectObj.name, style: "margin: 0; color: #fff;font-weight: 500;" });
                   // Find the week data for the currently selected week (n) to get the fixed lecture type
-                  const fixedLectureWeekData = subjectObj.weeks?.find(w => w.week === currentSelectedWeekNumber - 1);
+                  const fixedLectureWeekData = subjectObj.weeks?.find(w => w.week === currentSelectedWeekNumber);
                   const typeEl = el("h5", { textContent: fixedLectureWeekData?.type || '', style: "margin: 0; font-weight: 400; opacity: .8;" });
                   textContainer.append(titleEl, typeEl);
                   cardMainBottom.append(textContainer);
