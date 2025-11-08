@@ -15,12 +15,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 <style>
 
-::-webkit-scrollbar{width:.35rem}
-::-webkit-scrollbar-thumb{background:var(--color)}
 
+  ::-webkit-scrollbar{width:.35rem}
+  ::-webkit-scrollbar-thumb{background:var(--color)}
+
+  
   :root{
     --bg:#0c0c0c;
-    --color:#eb1313;
+    --color:#ff2121;
     --gap:0px;
     --cardW:233px;
     --top-nav-h: 60px;
@@ -38,7 +40,7 @@
     flex-direction: column;
     height:100vh;
     overflow:hidden;
-    font-family:Inter,system-ui,Arial,sans-serif;
+    font-family:Inter,sans-serif;
   }
 
   /* === RESOURCES VIEW === */
@@ -264,7 +266,7 @@
   }
 
   .item:hover{background-color:#2b2b2b;}
-  .item.active{background:var(--color);border-color:#000;color: rgb(255, 255, 255);}
+  .item.active{background:var(--color);border-color:#000;color: var(--colortext);}
 
   /* Desktop: Non-current active week should be white with black text */
   @media screen and (min-width: 769px) {
@@ -285,7 +287,7 @@
   .week-toggle-buttons {
     display: flex;
     flex: 0 0 auto; /* Don't grow or shrink, take content width */
-    gap: 2px; /* Small gap between buttons */
+    gap: 5px; /* Small gap between buttons */
     width: 100%; /* Fill the width of the parent subject-wrapper */
   }
 
@@ -313,7 +315,7 @@
   .week-toggle-buttons button.active {
     background: var(--color); /* Same as .item.active */
     border-color: #000; /* Same as .item.active */
-    color: #ffffff; /* Black text for active button */
+    color: var(--colortext); /* Black text for active button */
   }
 
   .week-toggle-buttons button.next-week-btn.active {
@@ -435,7 +437,7 @@
   }
 
   .card.upcoming-day .card-symbol-container .material-symbols-outlined {
-    color: #ffffff; /* Black color for upcoming-day cards */
+    color: var(--colortext); /* Black color for upcoming-day cards */
     font-variation-settings:
       'FILL' 1,
       'wght' 400,
@@ -449,7 +451,7 @@
 
   .card.upcoming-day .card-main-bottom h4,
   .card.upcoming-day .card-main-bottom h5 {
-    color: #ffffff !important; /* Black text for content inside */
+    color: var(--colortext) !important; /* Black text for content inside */
   }
 
   .card-sub-top { /* Upper part of card-main-top (Topic) */
@@ -570,8 +572,8 @@
   }
 
   .settings-nav-item.active {
-    background: #ff0000; /* Red background when active */
-    color: #ffffff; /* White text when active */
+    background: var(--color); /* Red background when active */
+    color: var(--colortext); /* White text when active */
   }
 
   .settings-block:last-child {
@@ -601,6 +603,25 @@
 
   .settings-main-content.active {
     display: flex; /* Show when active */
+  }
+
+  /* Color selection boxes */
+  .color-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .color-box:hover {
+    transform: scale(1.1);
+  }
+
+  .color-box.active {
+    border-color: #fff; /* White border for active color */
+    transform: scale(1.1);
   }
 
 
@@ -652,10 +673,10 @@
     border-radius: 0;
     width: 38px;
     height: 38px;
-    transition: background 0.25s ease;
+    transition: 0.1s ease;
   }
   .item-settings button:hover {
-    background: #c52d2d; /* Darker red on hover for non-added button */
+    filter: opacity(0.8); /* Darker red on hover for non-added button */
   }
   .item-settings .added {
     background: #222 !important; /* Darker for added button */
@@ -664,7 +685,7 @@
   .item-settings .added:hover {
     background: #333 !important; /* Brighter dark on hover for added button */
   }
-  .save{margin-bottom:30px;margin-top:10px;background:var(--color);color:#fff;border:none;padding:15px;font-weight:700;cursor:pointer;font-size:1.2rem;}
+  .save{margin-bottom:30px;margin-top:10px;background:var(--color);color:var(--colortext);border:none;padding:15px;font-weight:700;cursor:pointer;font-size:1.2rem;}
 
   .settings-action-button {
     background: transparent;
@@ -688,7 +709,7 @@
   @media screen and (max-width: 768px) {
       body {
         margin: 0; /* Remove horizontal margin for phone */
-        overflow-y: hidden;
+        overflow-y: auto;
       }
     .main-content {
       flex-direction: column; /* Stack main content vertically */
@@ -726,9 +747,6 @@
       margin-bottom: 10px; /* Space between cards */
       height: auto; /* Ensure it shrinks to content size */
     }
-    .subject-wrapper:last-child {
-      margin-bottom: 200px; /* Add margin to the last card for phone version */
-    }
 
     .card {
       width: 100%; /* Full width for card within its wrapper */
@@ -745,14 +763,13 @@
       order: 2; /* Toggle buttons come second */
     }
 
-
     /* Reorder elements within card */
     .card .card-main-bottom {
       order: 1; /* Card main bottom comes first */
     }
-    .card-main-top {
+    .card .card-main-top {
       order: 2; /* Card main top comes second */
-      flex: none; /* Allow height to be determined by content */
+      
     }
 
     /* Reorder elements within card-main-top */
@@ -762,7 +779,6 @@
     }
     .card-main-top .card-sub-top {
       order: 1; /* Topic comes first */
-      overflow-y: visible; /* Allow content to expand fully */
     }
     .card-main-top .card-sub-bottom {
       order: 2; /* Embeds come second */
@@ -915,10 +931,6 @@
       font-size: 1rem; /* Smaller font size */
     }
 
-    .top-nav {
-      margin: 0;
-    }
-
     .top-nav .item {
       font-size: 0.9rem; /* Smaller font for top nav items */
     }
@@ -1011,6 +1023,9 @@
               <div class="settings-block settings-nav-item" data-target="catalog-content">
                 <div style="font-weight:700;">Subjects Catalog</div>
               </div>
+              <div class="settings-block settings-nav-item" data-target="display-content">
+                <div style="font-weight:700;">Display</div>
+              </div>
               <div class="settings-block" style="padding: 0;">
                 <button style="font-weight:700;padding: 40px 0px;" id="signOutBtn" class="settings-action-button">Log Out</button>
               </div>
@@ -1018,11 +1033,25 @@
             <div class="settings-main-page">
               <div id="my-subjects-content" class="settings-main-content active">
                 <button id="saveSubjects" class="save">Save</button>
+                <div id="global-time-chooser-container" style="padding: 0 10px; margin-bottom: 20px;"></div>
                 <div id="mySubjects"></div>
               </div>
               <div id="catalog-content" class="settings-main-content">
                 <input type="text" id="searchCatalog" class="search-box" placeholder="Search subjects...">
                 <div id="catalogList"><div class="empty">Loading...</div></div>
+              </div>
+              <div id="display-content" class="settings-main-content">
+                <div class="settings-block">
+                  <h4 style="margin-bottom: 15px;">Theme Color</h4>
+                  <div id="theme-color-selector" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <!-- Color boxes will be rendered here by JS -->
+                  </div>
+                </div>
+                <div class="settings-block">
+                  <h4 style="margin-bottom: 15px;">Other Display Settings</h4>
+                  <!-- Other settings can go here later -->
+                  <p style="opacity: 0.7;">More display options coming soon...</p>
+                </div>
               </div>
               <!-- Initial placeholder, will be hidden by JS -->
               <div class="empty initial-placeholder" style="margin:auto; display:none;">Select a section from the left panel.</div>
@@ -1167,7 +1196,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
   function startWeekge(){
   const auth = firebase.auth(), db = firebase.firestore();
-  let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={};
+  let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={}, globalSubjectTime = null, userCustomThemeName = null;
   let currentWeekData = null; // Global within startWeekge scope
   let selectedWeekNumber = null; // Global within startWeekge scope
 
@@ -1177,6 +1206,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   // Configuration for delays
   const WEEKS_BAR_SCROLL_DELAY = 2; // Default delay for weeks bar scroll steps
   const SUBJECTS_CARD_RENDER_DELAY = 400; // Default delay for subject card rendering
+  const UPDATE_INTERVAL_MS = 60 * 1000; // Check every minute
 
   const todayISO=()=>new Date().toISOString().slice(0,10);
   const isBetween=(d,s,e)=>d>=s&&d<=e;
@@ -1197,12 +1227,70 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     {n:12,start1:"2025-12-08",end1:"2025-12-14",start2:"2026-05-25",end2:"2026-05-31"},
     {n:13,start1:"2025-12-15",end1:"2025-12-20",start2:"2026-06-01",end2:"2026-06-06"}
   ];
+
+  const THEME_COLORS = [
+    { name: "Red", value: "#ff121a", textColor: "white" },
+    { name: "Blue", value: "#007bff", textColor: "white" },
+    { name: "Green", value: "#14db49", textColor: "black" },
+    { name: "Yellow", value: "#ebab0c", textColor: "black" },
+    { name: "Purple", value: "#a010de", textColor: "white" },
+    { name: "Cyan", value: "#0ae2fa", textColor: "black" }
+  ];
   const colorMap = {
     yellow: ["#ffd600", "#000"],
     green:  ["#29e131", "#000"],
     red:    ["#ff1010", "#fff"],
     blue:   ["#0064ff", "#fff"]
   };
+
+  function renderThemeColorSelector() {
+    const selectorDiv = $("#theme-color-selector");
+    if (!selectorDiv) return;
+
+    selectorDiv.innerHTML = ''; // Clear existing content
+
+    THEME_COLORS.forEach(color => {
+      const colorBox = el('div', {
+        className: 'color-box',
+        title: color.name,
+        style: `background-color: ${color.value};`
+      });
+
+      if (userCustomThemeName === color.name) {
+        colorBox.classList.add('active');
+      }
+
+      colorBox.addEventListener('click', async () => {
+        if (userCustomThemeName === color.name) return; // Already selected
+
+        // Show loading overlay with the new color
+        overlay.classList.remove('hidden');
+        overlay.querySelector('p').textContent = 'ფერის შეცვლა...'; // "Changing color..."
+
+        // Update active class
+        document.querySelectorAll('.color-box').forEach(box => box.classList.remove('active'));
+        colorBox.classList.add('active');
+
+        // Apply new color to CSS variable
+        document.documentElement.style.setProperty('--color', color.value);
+        document.documentElement.style.setProperty('--colortext', color.textColor);
+        userCustomThemeName = color.name;
+
+        // Save to Firebase
+        if (user) {
+          await db.collection("users").doc(user.uid).set({ userCustomThemeName: color.name }, { merge: true });
+        }
+
+        // Hide loading overlay after a short delay
+        setTimeout(() => {
+          overlay.classList.add('hidden');
+          overlay.style.backgroundColor = 'var(--bg)'; // Reset overlay background
+          overlay.querySelector('p').textContent = 'იტვირთება'; // Reset text
+        }, 500); // Short delay for visual effect
+      });
+      selectorDiv.append(colorBox);
+    });
+  }
 
   function addBtns(container, buttons) { // container is cardSubBottom now
       container.innerHTML = ''; // Clear previous buttons
@@ -1317,24 +1405,90 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     });
   }
 
-  function sortByDayAndTime(subjs) {
-    const t = todayDayIndex();
-    return subjs.sort((a, b) => {
-      const da = (a.dayIndex ?? 7) - t;
-      const db = (b.dayIndex ?? 7) - t;
-      const wrapA = da < 0 ? da + 7 : da;
-      const wrapB = db < 0 ? db + 7 : db;
+  function isSubjectEnded(subject, currentTime, durationMs) {
+    if (!subject.time) return false; // If no time, assume not ended for sorting purposes
 
-      if (wrapA !== wrapB) {
-        return wrapA - wrapB;
+    const [hour, minute] = subject.time.split(':').map(Number);
+    const subjectStart = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), hour, minute, 0, 0);
+    const subjectEnd = new Date(subjectStart.getTime() + durationMs);
+
+    return currentTime > subjectEnd;
+  }
+
+  function sortByWeekdayTimeAndStatus(subjs, selectedWeekNumber, currentWeekData, globalSubjectTime) {
+    const now = new Date();
+    const todayDayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0=Mon, 6=Sun
+
+    let lectureDurationMs = 3 * 60 * 60 * 1000; // Default 3 hours
+    if (globalSubjectTime) {
+        const [hours, minutes] = globalSubjectTime.split(':').map(Number);
+        if (!isNaN(hours) && !isNaN(minutes)) {
+            lectureDurationMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+        }
+    }
+
+    const actualCurrentWeekNumber = currentWeekData ? currentWeekData.n : null;
+    const isSelectedWeekCurrent = (selectedWeekNumber === actualCurrentWeekNumber);
+
+    return subjs.sort((a, b) => {
+      // If it's the current week, apply the new sorting logic
+      if (isSelectedWeekCurrent) {
+        const isEndedA = isSubjectEnded(a, now, lectureDurationMs);
+        const isEndedB = isSubjectEnded(b, now, lectureDurationMs);
+
+        // 1. Sort by "Ended status" (not ended first)
+        if (isEndedA !== isEndedB) {
+          return isEndedA ? 1 : -1; // If A is ended and B is not, A goes right (1). If B is ended and A is not, A goes left (-1).
+        }
+
+        // If both are ended or both are not ended
+        if (isEndedA && isEndedB) { // Both are ended, apply reverse weekday sort
+          const dayA = a.dayIndex ?? 7;
+          const dayB = b.dayIndex ?? 7;
+          if (dayA !== dayB) {
+            return dayB - dayA; // Reverse weekday order (Sunday to Monday)
+          }
+          // If days are the same, then sort by time (descending for consistency with reverse day)
+          const timeA = a.time ? a.time.replace(':', '') : '0000'; // '0000' for subjects without time (should appear first in reverse)
+          const timeB = b.time ? b.time.replace(':', '') : '0000';
+          return timeB.localeCompare(timeA); // Reverse time order
+        } else { // Both are not ended, apply original time then weekday sort
+          // 2. Sort by Start Time
+          const timeA = a.time ? a.time.replace(':', '') : '9999';
+          const timeB = b.time ? b.time.replace(':', '') : '9999';
+          if (timeA !== timeB) {
+            return timeA.localeCompare(timeB);
+          }
+
+          // 3. Sort by Weekday
+          const dayA = a.dayIndex ?? 7;
+          const dayB = b.dayIndex ?? 7;
+          if (dayA !== dayB) {
+            return dayA - dayB;
+          }
+        }
+      } else {
+        // For other weeks (past/future), use the original sorting logic
+        // 1. Sort by Weekday (Monday to Sunday)
+        const dayA = a.dayIndex ?? 7; // Subjects without a day go to the end
+        const dayB = b.dayIndex ?? 7;
+        if (dayA !== dayB) {
+          return dayA - dayB;
+        }
+
+        // 2. Sort by Start Time
+        const timeA = a.time ? a.time.replace(':', '') : '9999'; // Subjects without a time go to the end
+        const timeB = b.time ? b.time.replace(':', '') : '9999';
+        if (timeA !== timeB) {
+          return timeA.localeCompare(timeB);
+        }
       }
 
-      // If wrapped days are the same, sort by time
-      const timeA = a.time ? a.time.replace(':', '') : '9999';
-      const timeB = b.time ? b.time.replace(':', '') : '9999';
-      return timeA.localeCompare(timeB);
+      return 0; // Maintain original order if all criteria are equal
     });
   }
+
+
 
   const daysOfWeek=["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი","კვირა"];
   const isPhoneView = () => window.matchMedia('(max-width: 768px)').matches;
@@ -1389,21 +1543,37 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
       await ensureSubjectsLoaded();
 
+      renderThemeColorSelector(); // Render color selector on boot
+
       flattenWeeks();
 
       // Initialize currentWeekData and selectedWeekNumber here
 
-      const iso=todayISO();
+            const iso=todayISO();
 
-      currentWeekData = weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
+      
 
-      selectedWeekNumber = currentWeekData ? currentWeekData.n : null;
+            currentWeekData = weekDates.find(w=>isBetween(iso,w.start,w.end))||weekDates[0];
 
-  
+      
 
-      paintWeeksBar();
+            selectedWeekNumber = currentWeekData ? currentWeekData.n : null;
 
-      goToday();
+            lastCheckedWeekNumber = selectedWeekNumber; // Initialize lastCheckedWeekNumber
+
+      
+
+            paintWeeksBar();
+
+      
+
+            goToday();
+
+      
+
+            // Start periodic updates
+
+            setInterval(checkAndUpdateSubjects, UPDATE_INTERVAL_MS);
 
   
 
@@ -1434,6 +1604,15 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     const snap=await db.collection("users").doc(user.uid).get();
     const data=snap.exists?snap.data():{};
     selected=data.subjects||[];
+    globalSubjectTime = data.globalSubjectTime || null;
+    userCustomThemeName = data.userCustomThemeName || null;
+    if (userCustomThemeName) {
+        const selectedTheme = THEME_COLORS.find(theme => theme.name === userCustomThemeName);
+        if (selectedTheme) {
+            document.documentElement.style.setProperty('--color', selectedTheme.value);
+            document.documentElement.style.setProperty('--colortext', selectedTheme.textColor);
+        }
+    }
     // Initialize userDays to handle both day and time
     userDays = data.days || {};
     // Ensure userDays entries are objects with day and time properties
@@ -1564,6 +1743,15 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       setTimeout(() => {
           canvas.innerHTML = "";
           let any = false;
+
+          let lectureDurationMs = 3 * 60 * 60 * 1000; // Default 3 hours
+          if (globalSubjectTime) {
+              const [hours, minutes] = globalSubjectTime.split(':').map(Number);
+              if (!isNaN(hours) && !isNaN(minutes)) {
+                  lectureDurationMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+              }
+          }
+
           const subs = (() => {
               const mappedSubjects = selected.map(id => {
                   const subj = cache[id];
@@ -1576,18 +1764,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                   };
               }).filter(Boolean);
 
-              const actualCurrentWeekNumber = currentWeekData ? currentWeekData.n : null;
-
-              if (selectedWeekNumber < actualCurrentWeekNumber) {
-                  // For weeks before the current week, sort in reverse day order
-                  return sortByDayReverseProximity(mappedSubjects);
-              } else if (selectedWeekNumber === actualCurrentWeekNumber) {
-                  // For the current week, sort by day proximity
-                  return sortByDayProximity(mappedSubjects);
-              } else {
-                  // For weeks after the current week, sort strictly Monday to Sunday
-                  return sortByDayAscending(mappedSubjects);
-              }
+              return sortByWeekdayTimeAndStatus(mappedSubjects, selectedWeekNumber, currentWeekData, globalSubjectTime);
           })();
 
           subs.forEach(subj => {
@@ -1698,9 +1875,9 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                                                       const [hour, minute] = subj.time.split(':').map(Number);
                                                       const subjectDateTime = new Date();
                                                       subjectDateTime.setHours(hour, minute, 0, 0);
-                                                      const threeHoursLater = new Date(subjectDateTime.getTime() + (3 * 60 * 60 * 1000)); // Add 3 hours
+                                                      const timeLater = new Date(subjectDateTime.getTime() + lectureDurationMs); // Use the new variable
                                                       const now = new Date();
-                                                      if (now > threeHoursLater) {
+                                                      if (now > timeLater) {
                                                           isStillActive = false;
                                                       }
                                                   }
@@ -1713,17 +1890,21 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                             
                                           let defaultToThisWeek = false;
                                           let defaultToNextWeek = false;              
-                            if (isSelectedWeekCurrent) {
-                                if (thisWeekData && adjustedToday <= subjectDay) {
-                                    defaultToThisWeek = true;
-                                } else {
-                                    defaultToNextWeek = true;
-                                }
-                            } else if (isSelectedWeekPast) {
-                                defaultToNextWeek = true; // Always default to nextWeekData for past weeks
-                            } else if (isSelectedWeekFuture) {
-                                defaultToThisWeek = true; // Always default to thisWeekData for future weeks
-                            }
+                                          if (card.classList.contains('upcoming-day')) {
+                                              defaultToThisWeek = true;
+                                          } else {
+                                              defaultToNextWeek = true;
+                                          }
+                                          // Ensure that if thisWeekData is not available, it defaults to nextWeekData if available
+                                          if (!thisWeekData && nextWeekData) {
+                                              defaultToThisWeek = false;
+                                              defaultToNextWeek = true;
+                                          }
+                                          // Ensure that if nextWeekData is not available, it defaults to thisWeekData if available
+                                          if (!nextWeekData && thisWeekData) {
+                                              defaultToThisWeek = true;
+                                              defaultToNextWeek = false;
+                                          }
               
                                           // Apply content and active state based on decision
                                           if (defaultToNextWeek && nextWeekData) {
@@ -1852,6 +2033,87 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     }
   }
 
+  let lastCheckedDay = todayISO();
+  let lastCheckedWeekNumber = null;
+  let lastTriggeredSubjectEndTime = 0; // Initialize to a past time
+
+  function checkAndUpdateSubjects() {
+      const currentDay = todayISO();
+      const actualCurrentWeek = weekDates.find(w => isBetween(currentDay, w.start, w.end)) || weekDates[0];
+      const actualCurrentWeekNumber = actualCurrentWeek ? actualCurrentWeek.n : null;
+
+      let needsReRender = false;
+
+      // Check for day change
+      if (currentDay !== lastCheckedDay) {
+          console.log("Day changed, re-rendering subjects.");
+          lastCheckedDay = currentDay;
+          needsReRender = true;
+      }
+
+      // Check for week change
+      if (actualCurrentWeekNumber !== lastCheckedWeekNumber) {
+          console.log("Week changed, calling goToday.");
+          lastCheckedWeekNumber = actualCurrentWeekNumber;
+          goToday(); // goToday will handle showWeek and weeksBar update
+          return; // Exit early as goToday will handle everything
+      }
+
+      // Check if any subject has ended (only for the currently selected week if it's the actual current week)
+      if (selectedWeekNumber === actualCurrentWeekNumber) {
+          const now = new Date();
+          
+          let lectureDurationMs = 3 * 60 * 60 * 1000; // Default 3 hours
+          if (globalSubjectTime) {
+              const [hours, minutes] = globalSubjectTime.split(':').map(Number);
+              if (!isNaN(hours) && !isNaN(minutes)) {
+                  lectureDurationMs = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000);
+              }
+          }
+
+          const mappedSubjects = selected.map(id => {
+              const subj = cache[id];
+              if (!subj) return null;
+              const dayData = userDays?.[id] ?? { day: null, time: null };
+              return {
+                  ...subj,
+                  dayIndex: daysOfWeek.indexOf(dayData.day),
+                  time: dayData.time
+              };
+          }).filter(Boolean);
+
+          const sortedSubjects = sortByWeekdayTimeAndStatus(mappedSubjects, selectedWeekNumber, actualCurrentWeek, globalSubjectTime);
+
+          // Find the end time of the *next* subject that is currently unended
+          let nextUnendedSubjectEndTime = Infinity;
+          for (const subj of sortedSubjects) {
+              const todayDayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1;
+              if (subj.dayIndex === todayDayIndex && subj.time) {
+                  const [hour, minute] = subj.time.split(':').map(Number);
+                  const subjectStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
+                  const subjectEnd = new Date(subjectStart.getTime() + lectureDurationMs);
+
+                  // If this subject has not yet ended, its end time is a candidate
+                  if (subjectEnd.getTime() > now.getTime()) {
+                      nextUnendedSubjectEndTime = Math.min(nextUnendedSubjectEndTime, subjectEnd.getTime());
+                  }
+              }
+          }
+
+          // If the current time has passed the next unended subject's end time,
+          // AND we haven't already triggered a re-render for this specific end time, re-render.
+          if (nextUnendedSubjectEndTime !== Infinity && now.getTime() >= nextUnendedSubjectEndTime && nextUnendedSubjectEndTime > lastTriggeredSubjectEndTime) {
+              console.log("A subject has just ended, re-rendering subjects.");
+              needsReRender = true;
+              lastTriggeredSubjectEndTime = nextUnendedSubjectEndTime; // Update the last triggered time
+          }
+      }
+
+      if (needsReRender) {
+          showWeek(selectedWeekNumber);
+      }
+  }
+
   function renderGlobalResources() {
       const globalResourcesList = $("#global-resources-list");
       globalResourcesList.innerHTML = ""; // Clear previous content
@@ -1911,6 +2173,46 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   function renderProfile(){
     const list=$("#catalogList"); list.innerHTML="";
     const mine=$("#mySubjects"); mine.innerHTML="";
+    const globalTimeContainer = $("#global-time-chooser-container"); globalTimeContainer.innerHTML = "";
+
+    // Create and append global time chooser
+    const timeTitle = el("h4", { textContent: "Global Subject Time", style:"margin-bottom: 10px; font-weight: 700;" });
+    const timeContainer = el("div", { style: "display: flex; align-items: center; gap: 5px; margin-bottom: 20px;" });
+    
+    let initialHour = '3';
+    let initialMinute = '00';
+
+    if (globalSubjectTime) {
+        [initialHour, initialMinute] = globalSubjectTime.split(':');
+    }
+
+    const hourSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
+    for (let i = 0; i <= 4; i++) {
+      const hour = String(i);
+      const opt = el("option", { textContent: hour, value: hour });
+      if (hour === initialHour) opt.selected = true;
+      hourSelect.append(opt);
+    }
+    hourSelect.onchange = () => {
+      const currentMinute = globalSubjectTime ? globalSubjectTime.split(':')[1] : initialMinute;
+      globalSubjectTime = `${hourSelect.value}:${currentMinute}`;
+    };
+
+    const minuteSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
+    for (let i = 0; i <= 55; i += 5) {
+      const minute = String(i).padStart(2, '0');
+      const opt = el("option", { textContent: minute, value: minute });
+      if (minute === initialMinute) opt.selected = true;
+      minuteSelect.append(opt);
+    }
+    minuteSelect.onchange = () => {
+      const currentHour = globalSubjectTime ? globalSubjectTime.split(':')[0] : initialHour;
+      globalSubjectTime = `${currentHour}:${minuteSelect.value}`;
+    };
+
+    timeContainer.append(hourSelect, el("span", { textContent: "h"}), minuteSelect, el("span", { textContent: "m"}));
+    globalTimeContainer.append(timeTitle, timeContainer);
+
     catalog.forEach(x=>{
       const added=selected.includes(x.id);
       const row=el("div",{className:"item-settings"});
@@ -2005,8 +2307,54 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     $("#saveSubjects").onclick=async()=>await saveSelection(true);
   }
 
+  function renderDisplaySettings() {
+    const displayContent = $("#display-content");
+    displayContent.innerHTML = ""; // Clear previous content
+
+    const title = el("h4", { textContent: "Choose Theme Color", style: "margin-bottom: 20px; font-weight: 700;" });
+    displayContent.append(title);
+
+    const colorOptions = [
+      "#eb1313", // Default red
+      "#ffd600", // Yellow
+      "#29e131", // Green
+      "#0064ff", // Blue
+      "#9932CC", // Dark Orchid
+      "#FF4500"  // Orange Red
+    ];
+
+    const colorGrid = el("div", { style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 300px;" });
+
+    colorOptions.forEach(color => {
+      const colorBox = el("div", {
+        style: `width: 50px; height: 50px; background-color: ${color}; cursor: pointer; border: 2px solid transparent;`,
+        className: "color-box",
+        onclick: () => {
+          userCustomColor = color;
+          document.documentElement.style.setProperty('--color', userCustomColor);
+          // Visually indicate selected color
+          document.querySelectorAll('.color-box').forEach(box => {
+            box.style.borderColor = 'transparent';
+          });
+          colorBox.style.borderColor = '#fff'; // White border for selected
+        }
+      });
+      if (userCustomColor === color) {
+        colorBox.style.borderColor = '#fff'; // Set initial border for selected color
+      }
+      colorGrid.append(colorBox);
+    });
+
+    displayContent.append(colorGrid);
+  }
+
   async function saveSelection(immediate=false){
     if(!user) return;
+    if (globalSubjectTime === "0:00") {
+        alert("Global subject time cannot be 0 hours and 0 minutes.");
+        return;
+    }
+    const timeToSave = globalSubjectTime || "3:00";
     try{
       // Filter out subjects with no day or time selected before saving
       const daysToSave = {};
@@ -2017,7 +2365,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       }
 
       await db.collection("users").doc(user.uid).set(
-        { subjects:selected, days:daysToSave },
+        { subjects:selected, days:daysToSave, globalSubjectTime: timeToSave, userCustomColor: userCustomColor },
         { merge:true }
       );
       if(immediate){
@@ -2077,6 +2425,10 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               renderGlobalResources(); // Call the new function
 
               // No bottomWeeks for resources for now, similar to settings
+
+          } else if (viewId === 'display-content') { // NEW
+              settingsView.style.display = 'block'; // Display settings view
+              renderDisplaySettings(); // Render the new display settings
 
           } else { // Default to live-view
               liveView.style.display = 'flex';
@@ -2151,7 +2503,6 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       // Switched to Desktop View
       if (bottomWeeks && mainContent) {
         mainContent.insertAdjacentElement('afterend', bottomWeeks);
-        bottomWeeks.classList.remove('expanded'); // Ensure it's not expanded on desktop
       }
     }
     
