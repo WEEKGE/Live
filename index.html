@@ -277,7 +277,7 @@
   }
 
   .item.active.current-week {
-    color: #ffffff; /* Black text for active current week */
+    color: var(--colortext); /* Black text for active current week */
   }
 
   .item.current-week:not(.active){
@@ -1079,6 +1079,28 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
+/* ========== COOKIE UTILITIES ========== */
+function setCookie(name, value, days) {
+  let expires = "";
+  if (days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
+function getCookie(name) {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
 /* ========== UNIVERSAL HORIZONTAL STEP SCROLL ========== */
 const scrollListeners = {}; // Store listeners to avoid duplicates
 
@@ -1280,6 +1302,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         if (user) {
           await db.collection("users").doc(user.uid).set({ userCustomThemeName: color.name }, { merge: true });
         }
+        setCookie('userCustomThemeName', color.name, 365); // Save to cookie for 1 year
 
         // Hide loading overlay after a short delay
         setTimeout(() => {
@@ -1601,8 +1624,41 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     snap.forEach(d=>catalog.push({id:d.id,...d.data()}));
   }
   async function loadUserSelection(){
-    const snap=await db.collection("users").doc(user.uid).get();
-    const data=snap.exists?snap.data():{};
+    let data = {};
+    if (user) {
+      const snap=await db.collection("users").doc(user.uid).get();
+      data=snap.exists?snap.data():{};
+    } else {
+      // Load from cookies if not logged in
+      const cookieTheme = getCookie('userCustomThemeName');
+      if (cookieTheme) {
+        data.userCustomThemeName = cookieTheme;
+      }
+      // Also load other data from cookies if they exist
+      const cookieSelected = getCookie('selectedSubjects');
+      if (cookieSelected) {
+        try {
+          data.subjects = JSON.parse(cookieSelected);
+        } catch (e) {
+          console.error("Error parsing selectedSubjects cookie:", e);
+          data.subjects = [];
+        }
+      }
+      const cookieGlobalSubjectTime = getCookie('globalSubjectTime');
+      if (cookieGlobalSubjectTime) {
+        data.globalSubjectTime = cookieGlobalSubjectTime;
+      }
+      const cookieUserDays = getCookie('userDays');
+      if (cookieUserDays) {
+        try {
+          data.days = JSON.parse(cookieUserDays);
+        } catch (e) {
+          console.error("Error parsing userDays cookie:", e);
+          data.days = {};
+        }
+      }
+    }
+
     selected=data.subjects||[];
     globalSubjectTime = data.globalSubjectTime || null;
     userCustomThemeName = data.userCustomThemeName || null;
@@ -2196,6 +2252,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     hourSelect.onchange = () => {
       const currentMinute = globalSubjectTime ? globalSubjectTime.split(':')[1] : initialMinute;
       globalSubjectTime = `${hourSelect.value}:${currentMinute}`;
+      setCookie('globalSubjectTime', globalSubjectTime, 365); // Save to cookie
     };
 
     const minuteSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
@@ -2364,10 +2421,21 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
           }
       }
 
-      await db.collection("users").doc(user.uid).set(
-        { subjects:selected, days:daysToSave, globalSubjectTime: timeToSave, userCustomColor: userCustomColor },
-        { merge:true }
-      );
+      if (user) {
+        await db.collection("users").doc(user.uid).set({
+          subjects: subjectsToSave,
+          days: daysToSave,
+          globalSubjectTime: globalSubjectTime
+        }, { merge: true });
+      }
+      // Always save to cookies
+      setCookie('selectedSubjects', JSON.stringify(subjectsToSave), 365);
+      setCookie('userDays', JSON.stringify(daysToSave), 365);
+      if (globalSubjectTime) {
+        setCookie('globalSubjectTime', globalSubjectTime, 365);
+      } else {
+        setCookie('globalSubjectTime', '', 365); // Clear cookie if globalSubjectTime is null
+      }
       if(immediate){
         await ensureSubjectsLoaded();
         paintWeeksBar();
