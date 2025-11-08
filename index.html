@@ -24,7 +24,7 @@
     --bg:#0c0c0c;
     --color:#ff2121;
     --gap:0px;
-    --cardW:233px;
+    --cardW:300px;
     --top-nav-h: 60px;
     --top-nav-margin: 50px 0 0 0;
     --weeks-bar-h: 80px;
@@ -54,7 +54,7 @@
   #resources-view #global-resources-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
     padding: 0;
     overflow-y: auto;
     scrollbar-width: none;
@@ -94,11 +94,18 @@
   }
 
   #resources-view .card-symbol-container .material-symbols-outlined {
-    font-size: 3rem; /* Adjust symbol size */
+    font-size: 4rem; /* Adjust symbol size */
+    padding: 0;
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 300,
+      'GRAD' 200,
+      'opsz' 48
+      ;
   }
 
   #resources-view .card h4 {
-    font-size: 1.2rem;
+    font-size: 1.6rem;
   }
 
   #resources-view .link-button {
@@ -106,11 +113,17 @@
   }
 
   #resources-view .link-button .material-symbols-outlined {
-    font-size: 40px;
+    font-size: 3.5rem;
+        font-variation-settings:
+      'FILL' 1,
+      'wght' 300,
+      'GRAD' 200,
+      'opsz' 48
+      ;
   }
 
   #resources-view .button-label {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
   }
 
   @media screen and (max-width: 768px) {
@@ -422,6 +435,10 @@
     justify-content: center;
     flex-shrink: 0; /* Prevent shrinking */
     margin-right: 20px; /* Space between symbol and text */
+  }
+
+  #resources-view .card-symbol-container {
+    width: 90px;
   }
 
   .card-symbol-container .material-symbols-outlined {
@@ -2582,7 +2599,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
   // Anti-console abuse script
   (function() {
-    const enabled = 1; // SSSSSS
+    const enabled = 0; // SSSSSS
 
     if (!enabled) {
       return;
