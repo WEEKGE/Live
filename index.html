@@ -2579,8 +2579,40 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     
     wasPhoneView = isNowPhoneView;
   });
+
+  // Anti-console abuse script
+  (function() {
+    const enabled = 1; // Set to 0 (false) to disable, 1 (true) to enable
+
+    if (!enabled) {
+      return;
+    }
+
+    const body = document.body;
+    const threshold = 170; // Threshold for detection
+    let checkInterval;
+
+    function checkDevTools() {
+      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+      if (widthThreshold || heightThreshold) {
+        // DevTools is likely open
+        if (!body.classList.contains('devtools-open')) {
+          body.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100vh; font-size: 2rem; color: var(--color);">Please close the developer console to continue.</div>';
+          body.classList.add('devtools-open');
+        }
+      } else {
+        if (body.classList.contains('devtools-open')) {
+          // DevTools is closed, reload the page to restore content
+          location.reload();
+        }
+      }
+    }
+
+    checkInterval = setInterval(checkDevTools, 1000);
+  })();
 }
 </script>
 </body>
 </html>
-
