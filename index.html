@@ -31,6 +31,11 @@
     --weeks-bar-h-margin: 0 0 50px 0;
     --line: #ffffff00;
     --background-image: none;
+
+    --bg2: hsla(0, 0%, 5%, 0.5);
+    --bg2hover: hsla(0, 0%, 10%, 0.5);
+
+    --bg3: hsla(0, 0%, 10%, 0.4);
   }
 
   body{
@@ -108,7 +113,7 @@
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    background: hsla(0, 0%, 13%, 0.315);
+    background: var(--bg2);
   }
 
   #resources-view .card-symbol-container .material-symbols-outlined {
@@ -201,7 +206,7 @@
   }
   #loadingOverlay.hidden { opacity: 0; visibility: hidden; }
   #loadingOverlay .spinner {
-    width: 100px; height: 100px; border: 10px solid rgba(255, 255, 255, 0.068);
+    width: 100px; height: 100px; border: 10px solid var(--bg2);
     border-top: 10px solid var(--color); border-radius: 50%;
     animation: spin 0.3s linear infinite;
   }
@@ -276,7 +281,7 @@
   .item{
     flex:0 0 var(--cardW);
     height:100%;
-    background:hsla(0, 0%, 100%, 0.05);
+    background:var(--bg2);
     border:0px solid transparent;
     display:flex;
     justify-content:flex-start;
@@ -296,7 +301,7 @@
     padding: 0;
   }
 
-  .item:hover{background-color:hsla(0, 0%, 100%, 0.1);}
+  .item:hover{background-color:hsla(0, 0%, 20%, 0.4);}
   .item.active{background:var(--color);border-color:#000;color: var(--colortext);}
 
   /* Desktop: Non-current active week should be white with black text */
@@ -312,7 +317,7 @@
   }
 
   .item.current-week:not(.active){
-    background-color: #ffffff1a;
+    background-color: var(--bg2hover);
   }
 
   .week-toggle-buttons {
@@ -325,7 +330,7 @@
   .week-toggle-buttons button {
     flex: 1; /* Make buttons fill available space */
     height: 40px; /* Fixed height for consistency */
-    background: #5050503a; /* Same as .item */
+    background: var(--bg2); /* Same as .item */
     border: 0px solid transparent; /* No border */
     display: flex;
     justify-content: center;
@@ -340,7 +345,7 @@
   }
 
   .week-toggle-buttons button:hover {
-    background-color: #8181813a; /* Same as .item:hover */
+    background-color: var(--bg2hover); /* Same as .item:hover */
   }
 
   .week-toggle-buttons button.active {
@@ -430,7 +435,7 @@
     flex-direction: column; /* For sub-top and sub-bottom */
     padding: 0; /* Add padding here */
     gap: 0; /* Add gap here */
-    background: hsla(0, 0%, 10%, 0.4); /* Background for main top */
+    background: var(--bg2); /* Background for main top */
     height: auto;
   }
 
@@ -441,7 +446,7 @@
     display: flex;
     flex-direction: row; /* Changed to row */
     align-items: center; /* Align items vertically in the center */
-    background: hsla(0, 0%, 10%, 0.8); /* Background for main bottom */
+    background: var(--bg2); /* Background for main bottom */
     padding: 0 15px; /* Horizontal padding */
   }
 
@@ -525,7 +530,7 @@
     text-decoration: none;
     color: white;
     gap: 5px; /* Space between icon and label */
-    background-color: #44444433;
+    background-color: var(--bg3);
     height: 100%;
   }
 
@@ -604,7 +609,7 @@
   }
 
   .settings-nav-item:hover {
-    background: #333; /* Subtle darker background on hover */
+    background: var(--bg2hover); /* Subtle darker background on hover */
   }
 
   .settings-nav-item.active {
@@ -685,7 +690,7 @@
 
 
   /* Existing rules to keep/adjust */
-  .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:20px;color:var(--text);margin-bottom:40px;font-size:1.2rem;outline:none;}
+  .search-box{background:var(--bg2);border: 1px solid var(--line);padding:20px;color:var(--text);margin-bottom:40px;font-size:1.2rem;outline:none;}
   .day-select {
     background:#1f1f1f;
     border: 1px solid var(--line);
@@ -715,7 +720,7 @@
     align-items: center;
     gap: 20px;
     padding: 10px; /* Slightly more horizontal padding */
-    background: #66666628; /* Brighter background */
+    background: var(--bg2); /* Brighter background */
     border: 1px solid var(--line); /* Border around the block */
     flex-wrap: wrap;
     font-size: 1.4rem;
@@ -739,7 +744,7 @@
     filter: opacity(0.8); /* Darker red on hover for non-added button */
   }
   .item-settings .added {
-    background: #222 !important; /* Darker for added button */
+    background: var(--bg3) !important; /* Darker for added button */
     border-color: var(--line) !important; /* Keep original border color */
   }
   .item-settings .added:hover {
@@ -1343,9 +1348,11 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   const BACKGROUND_IMAGES = [
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%203.jpg",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%202.jpg",
-    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%204.jpg",
-    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%205.jpg",
-    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%206.jpg"
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%209.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%2010.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%208.jpeg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%2011.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%206.jpg",
   ];
 
   function renderBackgroundSelector() {
@@ -2327,10 +2334,10 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               const card = el("div", { className: "card" });
 
               // Create left section for symbol and name
-              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: hsla(0, 0%, 10%, 0.3); flex-shrink: 0;" });
+              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: var(--bg2); flex-shrink: 0;" });
 
               // Create right section for embeds
-              const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: hsla(0, 0%, 30%, 0.3);" });
+              const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: var(--bg2);" });
 
               // Append sections to card
               card.append(cardLeftSection, cardRightSection);
