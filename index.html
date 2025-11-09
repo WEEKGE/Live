@@ -1296,7 +1296,15 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   const SUBJECTS_CARD_RENDER_DELAY = 400; // Default delay for subject card rendering
   const UPDATE_INTERVAL_MS = 60 * 1000; // Check every minute
 
-  const todayISO=()=>new Date().toISOString().slice(0,10);
+  const todayISO=()=>{
+    const now = new Date();
+    // Set to noon UTC to avoid timezone issues affecting the date part
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const day = now.getDate();
+    const noonUTC = new Date(Date.UTC(year, month, day, 12, 0, 0));
+    return noonUTC.toISOString().slice(0,10);
+  };
   const isBetween=(d,s,e)=>d>=s&&d<=e;
   const fmtRange=(s,e)=>{const f=d=>new Date(d+"T12:00:00").toLocaleString(undefined,{month:"short",day:"numeric"});return f(s)+" → "+f(e);};
 
@@ -2319,10 +2327,10 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               const card = el("div", { className: "card" });
 
               // Create left section for symbol and name
-              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: hsl(0, 0%, 10%); flex-shrink: 0;" });
+              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: hsla(0, 0%, 10%, 0.3); flex-shrink: 0;" });
 
               // Create right section for embeds
-              const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: hsl(0, 0%, 13%);" });
+              const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: hsla(0, 0%, 30%, 0.3);" });
 
               // Append sections to card
               card.append(cardLeftSection, cardRightSection);
@@ -2716,7 +2724,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
   // Anti-console abuse script
   (function() {
-    const enabled = 1; // SSSSSS
+    const enabled = 0; // SSSSSS
 
     if (!enabled) {
       return;
