@@ -30,7 +30,7 @@
     --weeks-bar-h: 80px;
     --weeks-bar-h-margin: 0 0 50px 0;
     --line: #ffffff00;
-    --background-image: url('https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%203.jpg');
+    --background-image: none;
   }
 
   body{
@@ -57,7 +57,6 @@
     background-position: center;
     filter: blur(8px) brightness(70%);
     z-index: -1;
-    transition: 0.2s;
   }
 
   /* === RESOURCES VIEW === */
@@ -82,6 +81,7 @@
     width: 100%;
     margin: 0 auto; /* Center the cards */
     height: auto; /* Allow height to adjust based on content */
+    background-color: transparent;
   }
 
   #resources-view .card {
@@ -90,6 +90,7 @@
     justify-content: space-between;
     align-items: stretch;
     min-height: 120px; /* Minimum height for resource cards */
+    background-color: transparent;
   }
 
   #resources-view .card-left-section {
@@ -97,7 +98,7 @@
     flex-direction: row;
     align-items: center;
     padding: 0 20px;
-    background: hsl(0, 0%, 10%);
+    background: rgb(255, 255, 255);
     width: 50%; /* Allocate 25% width for left section */
     flex-shrink: 0;
   }
@@ -107,7 +108,7 @@
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    background: hsl(0, 0%, 13%);
+    background: hsla(0, 0%, 13%, 0.315);
   }
 
   #resources-view .card-symbol-container .material-symbols-outlined {
@@ -126,7 +127,7 @@
   }
 
   #resources-view .link-button {
-    background-color: hsl(0, 0%, 13%);
+    background-color: hsl(0, 0%, 54%);
   }
 
   #resources-view .link-button .material-symbols-outlined {
@@ -275,7 +276,7 @@
   .item{
     flex:0 0 var(--cardW);
     height:100%;
-    background:hsla(0, 0%, 100%, 0.02);
+    background:hsla(0, 0%, 100%, 0.05);
     border:0px solid transparent;
     display:flex;
     justify-content:flex-start;
@@ -429,7 +430,7 @@
     flex-direction: column; /* For sub-top and sub-bottom */
     padding: 0; /* Add padding here */
     gap: 0; /* Add gap here */
-    background: hsla(0, 0%, 100%, 0.02); /* Background for main top */
+    background: hsla(0, 0%, 10%, 0.4); /* Background for main top */
     height: auto;
   }
 
@@ -440,7 +441,7 @@
     display: flex;
     flex-direction: row; /* Changed to row */
     align-items: center; /* Align items vertically in the center */
-    background: hsl(0, 0%, 10%); /* Background for main bottom */
+    background: hsla(0, 0%, 10%, 0.8); /* Background for main bottom */
     padding: 0 15px; /* Horizontal padding */
   }
 
@@ -1334,7 +1335,6 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
   const BACKGROUND_IMAGES = [
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%203.jpg",
-    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%201.png",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%202.jpg",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%204.jpg",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%205.jpg",
@@ -1633,7 +1633,19 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     if(user){
         if(loginOverlay) loginOverlay.style.display = "none";
         await bootAfterLogin();
-        overlay.classList.add("hidden");
+        
+        const bgImageUrl = userBackgroundImage || BACKGROUND_IMAGES[0];
+        const bgImage = new Image();
+        bgImage.src = bgImageUrl; // Start loading the image
+
+        try {
+            await bgImage.decode(); // Wait for the image to be decoded
+            overlay.classList.add("hidden");
+        } catch (error) {
+            console.error("Error decoding background image:", error);
+            overlay.classList.add("hidden"); // Hide anyway on error
+        }
+
     } else {
         if(loginOverlay) loginOverlay.style.display = "flex";
         overlay.classList.add("hidden");
