@@ -621,7 +621,7 @@
     background: #00000000;
     border: 1px solid var(--line);
     padding: 10px;
-    overflow-y: auto;
+    /* overflow-y: auto; */ /* REMOVED to allow inner content to manage its own scroll */
     display: flex; /* For centering content */
     justify-content: center;
     align-items: center;
@@ -702,23 +702,28 @@
     display: flex;
     flex-direction: column;
     gap: 10px; /* Gap between subject blocks */
+    flex: 1;
+    overflow-y: auto;
   }
 
   #mySubjects {
     display: flex;
     flex-direction: column;
     gap: 15px; /* Gap between subject blocks */
+    flex: 1; /* Allow it to grow and take available space */
+    overflow-y: auto; /* Make only the subject list scrollable */
   }
 
   .item-settings {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 20px 20px; /* Slightly more horizontal padding */
+    padding: 10px 20px; /* Slightly more horizontal padding */
     background: #66666628; /* Brighter background */
     border: 1px solid var(--line); /* Border around the block */
     flex-wrap: wrap;
     font-size: 1.4rem;
+    font-weight: 700;
   }
   .item-settings > div:first-child { flex: 1; }
   .item-settings button {
@@ -734,6 +739,7 @@
     width: 42px;
     height: 42px;
     transition: 0.1s ease;
+    font-size: 1.5rem;
   }
   .item-settings button:hover {
     filter: opacity(0.8); /* Darker red on hover for non-added button */
@@ -1676,9 +1682,20 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       };
   }
 
+  const searchBox=$("#searchCatalog");
+  if(searchBox){
+    searchBox.oninput=()=>{
+      const q=searchBox.value.toLowerCase();
+      const filtered=catalog.filter(s=>s.name.toLowerCase().includes(q) || (s.lecturer && s.lecturer.toLowerCase().includes(q)));
+      paintCatalog(filtered);
+    };
+  }
+
     async function bootAfterLogin(){
 
       await loadCatalog();
+
+      paintCatalog(catalog);
 
       await loadUserSelection();
 
@@ -1822,6 +1839,54 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       if(w.start1) weekDates.push({n:w.n,start:w.start1,end:w.end1});
       if(w.start2) weekDates.push({n:w.n,start:w.start2,end:w.end2});
     });
+  }
+
+  function paintCatalog(subjects) {
+    const list = $("#catalogList");
+    list.innerHTML = "";
+    if (!list) return;
+    if (subjects.length === 0) {
+        list.append(el("div", { className: "empty", textContent: "საგნები ვერ მოიძებნა." }));
+        return;
+    }
+    subjects.forEach(s => {
+        const isAdded = selected.includes(s.id);
+        const item = el("div", { className: "item-settings" }, [
+            el("div", {}, [
+                el("div", { textContent: s.name }),
+                el("div", { style: "font-size:1.5rem; opacity:1;", textContent: s.lecturer })
+            ]),
+            el("button", {
+                className: isAdded ? "added" : "",
+                innerHTML: isAdded ? "✓" : "+",
+                onclick: () => toggleSubject(s.id)
+            })
+        ]);
+        list.append(item);
+    });
+  }
+
+  function toggleSubject(id) {
+      const index = selected.indexOf(id);
+      if (index > -1) {
+          selected.splice(index, 1);
+          delete userDays[id];
+      } else {
+          selected.push(id);
+      }
+      
+      if (typeof paintMySubjects === 'function') {
+        paintMySubjects();
+      }
+
+      const searchBox = $("#searchCatalog");
+      if (searchBox) {
+        const q = searchBox.value.toLowerCase();
+        const filtered = catalog.filter(s => s.name.toLowerCase().includes(q) || (s.lecturer && s.lecturer.toLowerCase().includes(q)));
+        paintCatalog(filtered);
+      } else {
+        paintCatalog(catalog);
+      }
   }
 
   function renderCollapsedWeekBar(weekNum) {
@@ -2396,15 +2461,15 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       globalSubjectTime = `${currentHour}:${minuteSelect.value}`;
     };
 
-    timeContainer.append(hourSelect, el("span", { textContent: "h"}), minuteSelect, el("span", { textContent: "m"}));
+    timeContainer.append(hourSelect, el("span", { textContent: ":"}), minuteSelect, el("span"));
     globalTimeContainer.append(timeTitle, timeContainer);
 
     catalog.forEach(x=>{
       const added=selected.includes(x.id);
       const row=el("div",{className:"item-settings"});
       const left=el("div",{},[
-        el("div",{textContent:x.name,style:"font-weight:700"}),
-        el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
+        el("div",{textContent:x.name,style:"font-weight:600"}),
+        el("div",{textContent:x.id,style:"font-size:15px;opacity:.7"})
       ]);
       const action=added
         ? el("button",{className:"added",innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>`})
@@ -2434,8 +2499,8 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       const subj = catalog.find(c => c.id === id); // Re-find original subject for full data if needed
       const row=el("div",{className:"item-settings"});
       const left=el("div",{},[
-        el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
-        el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
+        el("div",{textContent:subj?subj.name:id,style:"font-weight:600"}),
+        el("div",{textContent:id,style:"font-size:15px;opacity:.7"})
       ]);
       const delBtn=el("button",{innerHTML:`<img src='https://raw.githubusercontent.com/WEEKGE/live/ce772a078446be5972f9c7b9f2ff91b0122c1dad/svgs/close.svg' style='width:22px;height:22px;filter:brightness(0) invert(1);'>`,style:"background:var(--remove);color:#fff",onclick:async()=>{
         selected=selected.filter(s=>s!==id);
