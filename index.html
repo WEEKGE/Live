@@ -55,7 +55,7 @@
     background-image: var(--background-image);
     background-size: cover;
     background-position: center;
-    filter: blur(8px) brightness(50%);
+    filter: blur(8px) brightness(70%);
     z-index: -1;
   }
 
@@ -572,13 +572,13 @@
   }
 
   .settings-side-panel {
-    width: 300px; /* Fixed width for the side panel */
+    width: 400px; /* Fixed width for the side panel */
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     background: #00000000;
     border: 1px solid var(--line);
-    padding: 0 10px;
+    padding: 10px;
     border-right: 1px solid #ffffff21;;
     gap:20px;
   }
@@ -586,14 +586,14 @@
   .settings-block {
     display: flex;
     flex-direction: column;
-    padding: 20px 10px; /* Adjusted padding to match save button */
+    padding: 40px 10px; /* Adjusted padding to match save button */
     background: transparent; /* Default background transparent */
     color: #fff; /* Default text color white */
     border-bottom: 1px solid var(--line); /* Add border-bottom here */
   }
 
   .settings-block.settings-nav-item > div {
-    font-size: 1.4rem; /* Make the text bigger */
+    font-size: 1.3rem; /* Make the text bigger */
   }
 
   .settings-nav-item {
@@ -621,7 +621,7 @@
     background: #00000000;
     border: 1px solid var(--line);
     padding: 10px;
-    /* overflow-y: auto; */ /* REMOVED to allow inner content to manage its own scroll */
+    overflow-y: auto;
     display: flex; /* For centering content */
     justify-content: center;
     align-items: center;
@@ -631,7 +631,7 @@
   .settings-main-content {
     position: absolute; /* Position content divs absolutely */
     inset: 0; /* Fill the parent */
-    padding: 0 20px;
+    padding: 20px;
     display: none; /* Hidden by default */
     flex-direction: column; /* Allow content to stack */
     overflow-y: auto; /* Allow content to scroll */
@@ -645,7 +645,7 @@
   .color-box {
     width: 40px;
     height: 40px;
-    border-radius: 0;
+    border-radius: 50%;
     cursor: pointer;
     border: 2px solid transparent;
     transition: border-color 0.2s ease, transform 0.2s ease;
@@ -674,6 +674,7 @@
 
   #background-image-selector .background-option.active {
     border-color: #fff;
+    transform: scale(1.05);
   }
 
   #background-image-selector .background-option img {
@@ -702,28 +703,23 @@
     display: flex;
     flex-direction: column;
     gap: 10px; /* Gap between subject blocks */
-    flex: 1;
-    overflow-y: auto;
   }
 
   #mySubjects {
     display: flex;
     flex-direction: column;
     gap: 15px; /* Gap between subject blocks */
-    flex: 1; /* Allow it to grow and take available space */
-    overflow-y: auto; /* Make only the subject list scrollable */
   }
 
   .item-settings {
     display: flex;
     align-items: center;
     gap: 20px;
-    padding: 10px 20px; /* Slightly more horizontal padding */
+    padding: 10px; /* Slightly more horizontal padding */
     background: #66666628; /* Brighter background */
     border: 1px solid var(--line); /* Border around the block */
     flex-wrap: wrap;
     font-size: 1.4rem;
-    font-weight: 700;
   }
   .item-settings > div:first-child { flex: 1; }
   .item-settings button {
@@ -736,10 +732,9 @@
     align-items: center;
     justify-content: center;
     border-radius: 0;
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     transition: 0.1s ease;
-    font-size: 1.5rem;
   }
   .item-settings button:hover {
     filter: opacity(0.8); /* Darker red on hover for non-added button */
@@ -1050,9 +1045,9 @@
 <div class="top-nav">
   <div class="scroll-wrap" style="height: 100%;">
     <div class="scroll-list" id="main-nav">
-      <div class="item active" data-view="live-view">მთავარი</div>
-      <div class="item" data-view="resources-view">რესურსები</div>
-      <div class="item" data-view="settings-view">პარამეტრები</div>
+      <div class="item active" data-view="live-view">LIVE</div>
+      <div class="item" data-view="resources-view">Resources</div>
+      <div class="item" data-view="settings-view">Settings</div>
     </div>
   </div>
 </div>
@@ -1103,7 +1098,7 @@
                 <div id="mySubjects"></div>
               </div>
               <div id="catalog-content" class="settings-main-content">
-                <input type="text" id="searchCatalog" class="search-box" placeholder="მოძებნა...">
+                <input type="text" id="searchCatalog" class="search-box" placeholder="Search subjects...">
                 <div id="catalogList"><div class="empty">იტვირთება...</div></div>
               </div>
               <div id="display-content" class="settings-main-content">
@@ -1115,11 +1110,14 @@
                 </div>
                 <div class="settings-block">
                   <h4 style="margin-bottom: 15px;">Background Image</h4>
-                  <div id="background-image-selector" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 5px;">
+                  <div id="background-image-selector" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
                     <!-- Background images will be rendered here by JS -->
                   </div>
                 </div>
                 <div class="settings-block">
+                  <h4 style="margin-bottom: 15px;">Other Display Settings</h4>
+                  <!-- Other settings can go here later -->
+                  <p style="opacity: 0.7;">More display options coming soon...</p>
                 </div>
               </div>
               <!-- Initial placeholder, will be hidden by JS -->
@@ -1340,8 +1338,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%202.jpg",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%204.jpg",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%205.jpg",
-    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%206.jpg",
-    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%207.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%206.jpg"
   ];
 
   function renderBackgroundSelector() {
@@ -1682,20 +1679,9 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       };
   }
 
-  const searchBox=$("#searchCatalog");
-  if(searchBox){
-    searchBox.oninput=()=>{
-      const q=searchBox.value.toLowerCase();
-      const filtered=catalog.filter(s=>s.name.toLowerCase().includes(q) || (s.lecturer && s.lecturer.toLowerCase().includes(q)));
-      paintCatalog(filtered);
-    };
-  }
-
     async function bootAfterLogin(){
 
       await loadCatalog();
-
-      paintCatalog(catalog);
 
       await loadUserSelection();
 
@@ -1841,57 +1827,9 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     });
   }
 
-  function paintCatalog(subjects) {
-    const list = $("#catalogList");
-    list.innerHTML = "";
-    if (!list) return;
-    if (subjects.length === 0) {
-        list.append(el("div", { className: "empty", textContent: "საგნები ვერ მოიძებნა." }));
-        return;
-    }
-    subjects.forEach(s => {
-        const isAdded = selected.includes(s.id);
-        const item = el("div", { className: "item-settings" }, [
-            el("div", {}, [
-                el("div", { textContent: s.name }),
-                el("div", { style: "font-size:1.5rem; opacity:1;", textContent: s.lecturer })
-            ]),
-            el("button", {
-                className: isAdded ? "added" : "",
-                innerHTML: isAdded ? "✓" : "+",
-                onclick: () => toggleSubject(s.id)
-            })
-        ]);
-        list.append(item);
-    });
-  }
-
-  function toggleSubject(id) {
-      const index = selected.indexOf(id);
-      if (index > -1) {
-          selected.splice(index, 1);
-          delete userDays[id];
-      } else {
-          selected.push(id);
-      }
-      
-      if (typeof paintMySubjects === 'function') {
-        paintMySubjects();
-      }
-
-      const searchBox = $("#searchCatalog");
-      if (searchBox) {
-        const q = searchBox.value.toLowerCase();
-        const filtered = catalog.filter(s => s.name.toLowerCase().includes(q) || (s.lecturer && s.lecturer.toLowerCase().includes(q)));
-        paintCatalog(filtered);
-      } else {
-        paintCatalog(catalog);
-      }
-  }
-
   function renderCollapsedWeekBar(weekNum) {
     weeksBar.innerHTML = "";
-    const chip = el("div", {className:"item", textContent:`კვირა ${weekNum}`});
+    const chip = el("div", {className:"item", textContent:`Week ${weekNum}`});
     chip.dataset.week = weekNum;
 
     if (currentWeekData && weekNum === currentWeekData.n) {
@@ -1923,7 +1861,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       const weekToDisplay = selectedWeekNumber || (currentWeekData ? currentWeekData.n : null);
 
       if (weekToDisplay) {
-        const chip = el("div", {className:"item", textContent:`კვირა ${weekToDisplay}`});
+        const chip = el("div", {className:"item", textContent:`Week ${weekToDisplay}`});
         chip.dataset.week = weekToDisplay;
 
         if (weekToDisplay === currentWeekData.n) {
@@ -1940,7 +1878,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
           if (bottomWeeks.classList.contains('expanded')) {
             weeksBar.innerHTML = ""; // Clear to re-add in order
             SEMESTER_WEEKS.forEach(w => {
-              const weekChip = el("div", {className:"item", textContent:`კვირა ${w.n}`});
+              const weekChip = el("div", {className:"item", textContent:`Week ${w.n}`});
               weekChip.dataset.week = w.n;
               if (w.n === weekToDisplay) { // Mark the currently selected week as active
                 weekChip.classList.add('active');
@@ -1966,7 +1904,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     } else {
       // Desktop view: show all weeks horizontally
       SEMESTER_WEEKS.forEach(w=>{
-        const text = `კვირა ${w.n}`;
+        const text = `Week ${w.n}`;
         const chip=el("div",{className:"item",textContent:text});
         chip.dataset.week = w.n;
         chip.dataset.originalText = text; // Store original text
@@ -2029,8 +1967,8 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               const topicText = el("div", { className: "topic-text" });
 
               const toggleButtons = el("div", { className: "week-toggle-buttons" });
-              const thisWeekBtn = el("button", { textContent: "ამ კვირის" });
-              const nextWeekBtn = el("button", { textContent: "შემდეგი კვირის", className: "next-week-btn" });
+              const thisWeekBtn = el("button", { textContent: "ამ კვირისთვის" });
+              const nextWeekBtn = el("button", { textContent: "შემდეგი კვირისთვის", className: "next-week-btn" });
               
               if (thisWeekData) {
                 toggleButtons.append(thisWeekBtn);
@@ -2267,7 +2205,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
                 const content = el("div", { style: "display: flex; flex-direction: column; align-items: left; justify-content: center; height: 100%;" });
                 const weekTextEl = el("div", { textContent: weekText });
-                const nowTextEl = el("div", { textContent: "მიმდინარე", style: "font-size: 0.8rem; opacity: 0.8;" });
+                const nowTextEl = el("div", { textContent: "Now", style: "font-size: 0.8rem; opacity: 0.8;" });
                 content.append(weekTextEl, nowTextEl);
                 activeItem.append(content);
 
@@ -2426,7 +2364,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     const globalTimeContainer = $("#global-time-chooser-container"); globalTimeContainer.innerHTML = "";
 
     // Create and append global time chooser
-    const timeTitle = el("h4", { textContent: "ლექციების ხანგრძლივობა", style:"margin-bottom: 10px; font-weight: 700;" });
+    const timeTitle = el("h4", { textContent: "Global Subject Time", style:"margin-bottom: 10px; font-weight: 700;" });
     const timeContainer = el("div", { style: "display: flex; align-items: center; gap: 5px; margin-bottom: 20px;" });
     
     let initialHour = '3';
@@ -2443,10 +2381,10 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       if (hour === initialHour) opt.selected = true;
       hourSelect.append(opt);
     }
-    hourSelect.onchange = () => {
+    hourSelect.onchange = async () => {
       const currentMinute = globalSubjectTime ? globalSubjectTime.split(':')[1] : initialMinute;
       globalSubjectTime = `${hourSelect.value}:${currentMinute}`;
-      setCookie('globalSubjectTime', globalSubjectTime, 365); // Save to cookie
+      await saveSelection(true);
     };
 
     const minuteSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
@@ -2456,20 +2394,21 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       if (minute === initialMinute) opt.selected = true;
       minuteSelect.append(opt);
     }
-    minuteSelect.onchange = () => {
+    minuteSelect.onchange = async () => {
       const currentHour = globalSubjectTime ? globalSubjectTime.split(':')[0] : initialHour;
       globalSubjectTime = `${currentHour}:${minuteSelect.value}`;
+      await saveSelection(true);
     };
 
-    timeContainer.append(hourSelect, el("span", { textContent: ":"}), minuteSelect, el("span"));
+    timeContainer.append(hourSelect, el("span", { textContent: "h"}), minuteSelect, el("span", { textContent: "m"}));
     globalTimeContainer.append(timeTitle, timeContainer);
 
     catalog.forEach(x=>{
       const added=selected.includes(x.id);
       const row=el("div",{className:"item-settings"});
       const left=el("div",{},[
-        el("div",{textContent:x.name,style:"font-weight:600"}),
-        el("div",{textContent:x.id,style:"font-size:15px;opacity:.7"})
+        el("div",{textContent:x.name,style:"font-weight:700"}),
+        el("div",{textContent:x.id,style:"font-size:12px;opacity:.7"})
       ]);
       const action=added
         ? el("button",{className:"added",innerHTML:`<img src='https://github.com/WEEKGE/weeksy-assets00002222/raw/refs/heads/main/svgs/check.svg' style='width:25px;height:25px;filter:brightness(0) invert(1);'>`})
@@ -2499,8 +2438,8 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       const subj = catalog.find(c => c.id === id); // Re-find original subject for full data if needed
       const row=el("div",{className:"item-settings"});
       const left=el("div",{},[
-        el("div",{textContent:subj?subj.name:id,style:"font-weight:600"}),
-        el("div",{textContent:id,style:"font-size:15px;opacity:.7"})
+        el("div",{textContent:subj?subj.name:id,style:"font-weight:700"}),
+        el("div",{textContent:id,style:"font-size:12px;opacity:.7"})
       ]);
       const delBtn=el("button",{innerHTML:`<img src='https://raw.githubusercontent.com/WEEKGE/live/ce772a078446be5972f9c7b9f2ff91b0122c1dad/svgs/close.svg' style='width:22px;height:22px;filter:brightness(0) invert(1);'>`,style:"background:var(--remove);color:#fff",onclick:async()=>{
         selected=selected.filter(s=>s!==id);
@@ -2515,24 +2454,26 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         if(userDays?.[id]?.day===d) opt.selected=true;
         select.append(opt);
       });
-      select.onchange=()=>{
+      select.onchange=async()=>{
         if (!userDays[id]) userDays[id] = { day: null, time: null };
         userDays[id].day = select.value;
+        await saveSelection(true);
         renderProfile();
       };
 
       const timeContainer = el("div", { style: "display: flex; align-items: center; gap: 5px;" });
       const hourSelect = el("select", { className: "day-select", style: "max-width: 70px;" });
-      for (let i = 8; i <= 21; i++) {
+      for (let i = 7; i <= 23; i++) {
         const hour = String(i).padStart(2, '0');
         const opt = el("option", { textContent: hour, value: hour });
         if (userDays?.[id]?.time?.split(':')[0] === hour) opt.selected = true;
         hourSelect.append(opt);
       }
-      hourSelect.onchange = () => {
+      hourSelect.onchange = async () => {
         if (!userDays[id]) userDays[id] = { day: null, time: null };
         const currentMinute = userDays[id].time ? userDays[id].time.split(':')[1] : '00';
         userDays[id].time = `${hourSelect.value}:${currentMinute}`;
+        await saveSelection(true);
         renderProfile();
       };
 
@@ -2543,10 +2484,11 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         if (userDays?.[id]?.time?.split(':')[1] === minute) opt.selected = true;
         minuteSelect.append(opt);
       }
-      minuteSelect.onchange = () => {
+      minuteSelect.onchange = async () => {
         if (!userDays[id]) userDays[id] = { day: null, time: null };
         const currentHour = userDays[id].time ? userDays[id].time.split(':')[0] : '07'; // Default to 07 if no hour is set
         userDays[id].time = `${currentHour}:${minuteSelect.value}`;
+        await saveSelection(true);
         renderProfile();
       };
 
@@ -2617,7 +2559,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
       if (user) {
         await db.collection("users").doc(user.uid).set({
-          subjects: subjectsToSave,
+          subjects: selected,
           days: daysToSave,
           globalSubjectTime: globalSubjectTime
         }, { merge: true });
@@ -2792,7 +2734,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       if (widthThreshold || heightThreshold) {
         // DevTools is likely open
         if (!body.classList.contains('devtools-open')) {
-          body.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100vh; font-size: 2rem; color: var(--color);">ნწ ნწ ნწ</div>';
+          body.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100vh; font-size: 2rem; color: var(--color);">Please close the developer console to continue.</div>';
           body.classList.add('devtools-open');
         }
       } else {
