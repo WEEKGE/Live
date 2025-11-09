@@ -30,6 +30,7 @@
     --weeks-bar-h: 80px;
     --weeks-bar-h-margin: 0 0 50px 0;
     --line: #ffffff00;
+    --background-image: url('https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%203.jpg');
   }
 
   body{
@@ -41,6 +42,22 @@
     height:100vh;
     overflow:hidden;
     font-family:Inter,sans-serif;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: var(--background-image);
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px) brightness(70%);
+    z-index: -1;
+    transition: 0.2s;
   }
 
   /* === RESOURCES VIEW === */
@@ -258,7 +275,7 @@
   .item{
     flex:0 0 var(--cardW);
     height:100%;
-    background:#ffffff0a;
+    background:hsla(0, 0%, 100%, 0.02);
     border:0px solid transparent;
     display:flex;
     justify-content:flex-start;
@@ -278,7 +295,7 @@
     padding: 0;
   }
 
-  .item:hover{background-color:#2b2b2b;}
+  .item:hover{background-color:hsla(0, 0%, 100%, 0.1);}
   .item.active{background:var(--color);border-color:#000;color: var(--colortext);}
 
   /* Desktop: Non-current active week should be white with black text */
@@ -307,7 +324,7 @@
   .week-toggle-buttons button {
     flex: 1; /* Make buttons fill available space */
     height: 40px; /* Fixed height for consistency */
-    background: #ffffff0a; /* Same as .item */
+    background: #5050503a; /* Same as .item */
     border: 0px solid transparent; /* No border */
     display: flex;
     justify-content: center;
@@ -322,7 +339,7 @@
   }
 
   .week-toggle-buttons button:hover {
-    background-color: #2b2b2b; /* Same as .item:hover */
+    background-color: #8181813a; /* Same as .item:hover */
   }
 
   .week-toggle-buttons button.active {
@@ -397,7 +414,7 @@
   }
 
   .card {
-    background: var(--card, hsl(0, 0%, 8%));
+    background: #00000000;
     display: flex;
     flex-direction: column; /* Main vertical split */
     width: 550px; 
@@ -412,7 +429,7 @@
     flex-direction: column; /* For sub-top and sub-bottom */
     padding: 0; /* Add padding here */
     gap: 0; /* Add gap here */
-    background: hsl(0, 0%, 13%); /* Background for main top */
+    background: hsla(0, 0%, 100%, 0.02); /* Background for main top */
     height: auto;
   }
 
@@ -479,7 +496,7 @@
   }
 
   .card-sub-bottom { /* Lower part of card-main-top (Embeds) */
-    height: 50%; /* Fixed height for buttons */
+    height: 30%; /* Fixed height for buttons */
     display: flex;
     gap: 2px;
   }
@@ -503,16 +520,16 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: filter 0.2s ease;
+    transition: 0.2s ease;
     text-decoration: none;
     color: white;
     gap: 5px; /* Space between icon and label */
-    background-color: #3a3a3a;
+    background-color: #44444433;
     height: 100%;
   }
 
   .link-button:hover {
-    filter: brightness(1.2);
+    filter: brightness(1.5);
   }
 
   .link-button .material-symbols-outlined {
@@ -522,7 +539,7 @@
   
   .button-label {
     font-size: 1rem; /* Adjusted font size to be a little bigger */
-    opacity: 0.8; /* Slightly less prominent */
+    opacity: 1; /* Slightly less prominent */
     text-align: center;
     line-height: 1; /* Compact line height */
   }
@@ -642,6 +659,30 @@
     transform: scale(1.1);
   }
 
+  #background-image-selector .background-option {
+    aspect-ratio: 16 / 9;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.1s ease;
+    overflow: hidden;
+  }
+
+  #background-image-selector .background-option:hover {
+    filter: brightness(1.3);
+  }
+
+  #background-image-selector .background-option.active {
+    border-color: #fff;
+    transform: scale(1.05);
+  }
+
+  #background-image-selector .background-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+
 
   /* Existing rules to keep/adjust */
   .search-box{background:#1f1f1f;border: 1px solid var(--line);padding:20px;color:var(--text);margin-bottom:40px;font-size:1.2rem;outline:none;}
@@ -674,9 +715,10 @@
     align-items: center;
     gap: 20px;
     padding: 10px; /* Slightly more horizontal padding */
-    background: #1a1a1a; /* Brighter background */
+    background: #66666628; /* Brighter background */
     border: 1px solid var(--line); /* Border around the block */
     flex-wrap: wrap;
+    font-size: 1.4rem;
   }
   .item-settings > div:first-child { flex: 1; }
   .item-settings button {
@@ -1066,6 +1108,12 @@
                   </div>
                 </div>
                 <div class="settings-block">
+                  <h4 style="margin-bottom: 15px;">Background Image</h4>
+                  <div id="background-image-selector" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
+                    <!-- Background images will be rendered here by JS -->
+                  </div>
+                </div>
+                <div class="settings-block">
                   <h4 style="margin-bottom: 15px;">Other Display Settings</h4>
                   <!-- Other settings can go here later -->
                   <p style="opacity: 0.7;">More display options coming soon...</p>
@@ -1236,7 +1284,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
 
   function startWeekge(){
   const auth = firebase.auth(), db = firebase.firestore();
-  let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={}, globalSubjectTime = null, userCustomThemeName = null;
+  let user=null, catalog=[], selected=[], cache={}, weekDates=[], userDays={}, globalSubjectTime = null, userCustomThemeName = null, userBackgroundImage = null;
   let currentWeekData = null; // Global within startWeekge scope
   let selectedWeekNumber = null; // Global within startWeekge scope
 
@@ -1269,12 +1317,13 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   ];
 
   const THEME_COLORS = [
-    { name: "Red", value: "#ff121a", textColor: "white" },
-    { name: "Blue", value: "#007bff", textColor: "white" },
-    { name: "Green", value: "#14db49", textColor: "black" },
-    { name: "Yellow", value: "#ebab0c", textColor: "black" },
-    { name: "Purple", value: "#a010de", textColor: "white" },
-    { name: "Cyan", value: "#0ae2fa", textColor: "black" }
+    { name: "Red", value: "#ED1111", textColor: "white" },
+    { name: "Blue", value: "#1F40ED", textColor: "white" },
+    { name: "Green", value: "#23D929", textColor: "black" },
+    { name: "Yellow", value: "#FFBD24", textColor: "black" },
+    { name: "Purple", value: "#591AB0", textColor: "white" },
+    { name: "Cyan", value: "#1DE0C9", textColor: "black" },
+    { name: "Pink", value: "#FF0D52", textColor: "black" }
   ];
   const colorMap = {
     yellow: ["#ffd600", "#000"],
@@ -1282,6 +1331,48 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     red:    ["#ff1010", "#fff"],
     blue:   ["#0064ff", "#fff"]
   };
+
+  const BACKGROUND_IMAGES = [
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%203.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%201.png",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%202.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%204.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%205.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%206.jpg"
+  ];
+
+  function renderBackgroundSelector() {
+    const selectorDiv = $("#background-image-selector");
+    if (!selectorDiv) return;
+
+    selectorDiv.innerHTML = ''; // Clear existing content
+
+    BACKGROUND_IMAGES.forEach(imageUrl => {
+      const optionDiv = el('div', { className: 'background-option' });
+      const img = el('img', { src: imageUrl });
+      optionDiv.append(img);
+
+      if (userBackgroundImage === imageUrl) {
+        optionDiv.classList.add('active');
+      }
+
+      optionDiv.addEventListener('click', async () => {
+        if (userBackgroundImage === imageUrl) return;
+
+        document.documentElement.style.setProperty('--background-image', `url('${imageUrl}')`);
+        userBackgroundImage = imageUrl;
+
+        document.querySelectorAll('#background-image-selector .background-option').forEach(opt => opt.classList.remove('active'));
+        optionDiv.classList.add('active');
+
+        if (user) {
+          await db.collection("users").doc(user.uid).set({ userBackgroundImage: imageUrl }, { merge: true });
+        }
+        setCookie('userBackgroundImage', imageUrl, 365);
+      });
+      selectorDiv.append(optionDiv);
+    });
+  }
 
   function renderThemeColorSelector() {
     const selectorDiv = $("#theme-color-selector");
@@ -1372,13 +1463,13 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                   className: 'link-button',
                   href: b.link,
                   target: '_blank',
-                  style: `background-color: hsl(0, 0%, 13%);`,
+                  style: `background-color:   #00000000;`,
                   title: b.label
               });
           } else { // Otherwise, make it a non-clickable div
               buttonElement = el('div', {
                   className: 'link-button', // Keep the styling
-                  style: `background-color: hsl(0, 0%, 13%); cursor: default; opacity: 0.7;`, // Indicate non-clickable
+                  style: `background-color: #00000000; cursor: default; opacity: 1;`, // Indicate non-clickable
                   title: b.label + ' (No link provided)'
               });
           }
@@ -1585,6 +1676,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       await ensureSubjectsLoaded();
 
       renderThemeColorSelector(); // Render color selector on boot
+      renderBackgroundSelector(); // Render background selector on boot
 
       flattenWeeks();
 
@@ -1675,11 +1767,21 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
           data.days = {};
         }
       }
+      const cookieBackgroundImage = getCookie('userBackgroundImage');
+      if (cookieBackgroundImage) {
+        data.userBackgroundImage = cookieBackgroundImage;
+      }
     }
 
     selected=data.subjects||[];
     globalSubjectTime = data.globalSubjectTime || null;
     userCustomThemeName = data.userCustomThemeName || null;
+    userBackgroundImage = data.userBackgroundImage || BACKGROUND_IMAGES[0];
+    
+    if (userBackgroundImage) {
+        document.documentElement.style.setProperty('--background-image', `url('${userBackgroundImage}')`);
+    }
+
     if (userCustomThemeName) {
         const selectedTheme = THEME_COLORS.find(theme => theme.name === userCustomThemeName);
         if (selectedTheme) {
