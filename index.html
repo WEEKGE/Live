@@ -1134,15 +1134,15 @@
     <div class="scroll-list" id="main-nav">
       <div class="item active" data-view="live-view">
         <div class="nav-item-symbol-container"><span class="material-symbols-outlined">sensors</span></div>
-        <div class="nav-item-text-container">LIVE</div>
+        <div class="nav-item-text-container">მთავარი</div>
       </div>
       <div class="item" data-view="resources-view">
         <div class="nav-item-symbol-container"><span class="material-symbols-outlined">widgets</span></div>
-        <div class="nav-item-text-container">Resources</div>
+        <div class="nav-item-text-container">რესურსები</div>
       </div>
       <div class="item" data-view="settings-view">
         <div class="nav-item-symbol-container"><span class="material-symbols-outlined">settings</span></div>
-        <div class="nav-item-text-container">Settings</div>
+        <div class="nav-item-text-container">პარამეტრები</div>
       </div>
     </div>
   </div>
@@ -1194,7 +1194,7 @@
                 <div id="mySubjects"></div>
               </div>
               <div id="catalog-content" class="settings-main-content">
-                <input type="text" id="searchCatalog" class="search-box" placeholder="Search subjects...">
+                <input type="text" id="searchCatalog" class="search-box" placeholder="მოძებნა...">
                 <div id="catalogList"><div class="empty">იტვირთება...</div></div>
               </div>
               <div id="display-content" class="settings-main-content">
@@ -1205,7 +1205,7 @@
                   </div>
                 </div>
                 <div class="settings-block">
-                  <h4 style="margin-bottom: 15px;">Background Image</h4>
+                  <h4 style="margin-bottom: 15px;">ფონი</h4>
                   <div id="background-image-selector" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
                     <!-- Background images will be rendered here by JS -->
                   </div>
@@ -1442,6 +1442,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%208.jpeg",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%2011.jpg",
     "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%206.jpg",
+    "https://raw.githubusercontent.com/WEEKGE/live/refs/heads/main/wallpapers/WGW%2012.jpg",
   ];
 
   function renderBackgroundSelector() {
@@ -2446,7 +2447,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     const globalTimeContainer = $("#global-time-chooser-container"); globalTimeContainer.innerHTML = "";
 
     // Create and append global time chooser
-    const timeTitle = el("h4", { textContent: "Global Subject Time", style:"margin: 0; font-weight: 700;" });
+    const timeTitle = el("h4", { textContent: "ლექციის ხანგრძლივობა", style:"margin: 0; font-weight: 700;" });
     const timeContainer = el("div", { style: "display: flex; align-items: center; gap: 5px; margin-bottom: 0;" });
     
     let initialHour = '3';
