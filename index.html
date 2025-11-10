@@ -1130,9 +1130,6 @@
                   </div>
                 </div>
                 <div class="settings-block">
-                  <h4 style="margin-bottom: 15px;">Other Display Settings</h4>
-                  <!-- Other settings can go here later -->
-                  <p style="opacity: 0.7;">More display options coming soon...</p>
                 </div>
               </div>
               <!-- Initial placeholder, will be hidden by JS -->
@@ -1310,7 +1307,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   // Configuration for delays
   const WEEKS_BAR_SCROLL_DELAY = 2; // Default delay for weeks bar scroll steps
   const SUBJECTS_CARD_RENDER_DELAY = 400; // Default delay for subject card rendering
-  const UPDATE_INTERVAL_MS = 60 * 1000; // Check every minute
+  const UPDATE_INTERVAL_MS = 5000; // Check every 5 seconds
 
   const todayISO=()=>{
     const now = new Date();
@@ -1563,11 +1560,23 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   }
 
   function isSubjectEnded(subject, currentTime, durationMs) {
-    if (!subject.time) return false; // If no time, assume not ended for sorting purposes
+    if (!subject.time || subject.dayIndex === -1 || subject.dayIndex === undefined) return false;
+
+    const nowDayIndex = currentTime.getDay() === 0 ? 6 : currentTime.getDay() - 1;
+
+    if (subject.dayIndex > nowDayIndex) {
+        return false; // Subject is on a future day of the week
+    }
 
     const [hour, minute] = subject.time.split(':').map(Number);
-    const subjectStart = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), hour, minute, 0, 0);
-    const subjectEnd = new Date(subjectStart.getTime() + durationMs);
+
+    // Create a date object for the subject's lecture this week
+    const subjectDate = new Date(currentTime);
+    const dayDifference = subject.dayIndex - nowDayIndex;
+    subjectDate.setDate(subjectDate.getDate() + dayDifference);
+    subjectDate.setHours(hour, minute, 0, 0);
+
+    const subjectEnd = new Date(subjectDate.getTime() + durationMs);
 
     return currentTime > subjectEnd;
   }
@@ -1588,60 +1597,27 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
     const isSelectedWeekCurrent = (selectedWeekNumber === actualCurrentWeekNumber);
 
     return subjs.sort((a, b) => {
-      // If it's the current week, apply the new sorting logic
       if (isSelectedWeekCurrent) {
         const isEndedA = isSubjectEnded(a, now, lectureDurationMs);
         const isEndedB = isSubjectEnded(b, now, lectureDurationMs);
 
-        // 1. Sort by "Ended status" (not ended first)
+        // Move ended subjects to the right
         if (isEndedA !== isEndedB) {
-          return isEndedA ? 1 : -1; // If A is ended and B is not, A goes right (1). If B is ended and A is not, A goes left (-1).
-        }
-
-        // If both are ended or both are not ended
-        if (isEndedA && isEndedB) { // Both are ended, apply reverse weekday sort
-          const dayA = a.dayIndex ?? 7;
-          const dayB = b.dayIndex ?? 7;
-          if (dayA !== dayB) {
-            return dayB - dayA; // Reverse weekday order (Sunday to Monday)
-          }
-          // If days are the same, then sort by time (descending for consistency with reverse day)
-          const timeA = a.time ? a.time.replace(':', '') : '0000'; // '0000' for subjects without time (should appear first in reverse)
-          const timeB = b.time ? b.time.replace(':', '') : '0000';
-          return timeB.localeCompare(timeA); // Reverse time order
-        } else { // Both are not ended, apply original time then weekday sort
-          // 2. Sort by Start Time
-          const timeA = a.time ? a.time.replace(':', '') : '9999';
-          const timeB = b.time ? b.time.replace(':', '') : '9999';
-          if (timeA !== timeB) {
-            return timeA.localeCompare(timeB);
-          }
-
-          // 3. Sort by Weekday
-          const dayA = a.dayIndex ?? 7;
-          const dayB = b.dayIndex ?? 7;
-          if (dayA !== dayB) {
-            return dayA - dayB;
-          }
-        }
-      } else {
-        // For other weeks (past/future), use the original sorting logic
-        // 1. Sort by Weekday (Monday to Sunday)
-        const dayA = a.dayIndex ?? 7; // Subjects without a day go to the end
-        const dayB = b.dayIndex ?? 7;
-        if (dayA !== dayB) {
-          return dayA - dayB;
-        }
-
-        // 2. Sort by Start Time
-        const timeA = a.time ? a.time.replace(':', '') : '9999'; // Subjects without a time go to the end
-        const timeB = b.time ? b.time.replace(':', '') : '9999';
-        if (timeA !== timeB) {
-          return timeA.localeCompare(timeB);
+          return isEndedA ? 1 : -1;
         }
       }
 
-      return 0; // Maintain original order if all criteria are equal
+      // For all other cases (not current week, or items with same "ended" status)
+      // sort by day, then time.
+      const dayA = a.dayIndex ?? 7;
+      const dayB = b.dayIndex ?? 7;
+      if (dayA !== dayB) {
+        return dayA - dayB;
+      }
+
+      const timeA = a.time ? a.time.replace(':', '') : '9999';
+      const timeB = b.time ? b.time.replace(':', '') : '9999';
+      return timeA.localeCompare(timeB);
     });
   }
 
@@ -2572,7 +2548,6 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         alert("Global subject time cannot be 0 hours and 0 minutes.");
         return;
     }
-    const timeToSave = globalSubjectTime || "3:00";
     try{
       // Filter out subjects with no day or time selected before saving
       const daysToSave = {};
@@ -2590,7 +2565,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
         }, { merge: true });
       }
       // Always save to cookies
-      setCookie('selectedSubjects', JSON.stringify(subjectsToSave), 365);
+      setCookie('selectedSubjects', JSON.stringify(selected), 365);
       setCookie('userDays', JSON.stringify(daysToSave), 365);
       if (globalSubjectTime) {
         setCookie('globalSubjectTime', globalSubjectTime, 365);
@@ -2599,8 +2574,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
       }
       if(immediate){
         await ensureSubjectsLoaded();
-        paintWeeksBar();
-        goToday();
+        showWeek(selectedWeekNumber); // Refresh the currently viewed week
       }
     }catch(e){ console.error("User save failed:",e); }
   }
