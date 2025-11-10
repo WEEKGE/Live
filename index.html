@@ -160,7 +160,7 @@
 
   @media screen and (max-width: 768px) {
     #resources-view {
-      padding: 10px; /* Adjust padding for mobile */
+      padding: 0; /* Adjust padding for mobile */
     }
 
     #resources-view .subject-wrapper {
@@ -174,7 +174,7 @@
 
     #resources-view .card-left-section {
       width: 100%; /* Full width on mobile */
-      padding: 10px 15px;
+      padding: 0;
       min-height: 70px;
       order: 1; /* Place left section first */
       
@@ -189,6 +189,7 @@
 
     #resources-view .card-symbol-container .material-symbols-outlined {
       font-size: 2.5rem;
+      padding: 0;
     }
 
     #resources-view .card h4 {
@@ -198,11 +199,12 @@
     }
 
     #resources-view .link-button .material-symbols-outlined {
-      font-size: 30px;
+      font-size: 3rem;
     }
 
     #resources-view .button-label {
-      font-size: 0.8rem;
+      font-size: 1.3rem;
+      margin-bottom: 20px;
     }
   }
 
@@ -306,8 +308,37 @@
 
   .top-nav .item {
     flex: 1;
+    justify-content: flex-start;
+    padding: 0 30px;
+    gap: 15px;
+  }
+
+  .nav-item-symbol-container {
+    height: 65%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 0;
+    background: transparent;
+    transition: background .2s ease;
+  }
+
+  .nav-item-symbol-container .material-symbols-outlined {
+    font-size: 2.3rem;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 200,
+      'GRAD' 0,
+      'opsz' 40;
+    transition: font-variation-settings .2s ease;
+  }
+
+  .item.active .nav-item-symbol-container .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 200,
+      'GRAD' 0,
+      'opsz' 40;
   }
 
   .item:hover{background-color:hsla(0, 0%, 20%, 0.4);}
@@ -595,7 +626,7 @@
     border: 1px solid var(--line);
     padding: 0 10px;
     border-right: 1px solid #ffffff21;;
-    gap:20px;
+    gap:5px;
   }
 
   .settings-block {
@@ -789,9 +820,14 @@
       }
     .main-content {
       flex-direction: column; /* Stack main content vertically */
-      margin: 10px 10px; /* Adjust vertical margin */
+      margin: 10px 0; /* Remove horizontal margin for full width */
       overflow-y: auto; /* Allow vertical scroll for main content */
     }
+
+      .top-nav {
+        margin: 0;
+        width: 100%;
+      }
 
     #live-view, #resources-view, #settings-view {
       width: 100%; /* Full width for all main views */
@@ -822,6 +858,15 @@
       /* max-width: 400px; */ /* Limit card width for better readability */
       margin-bottom: 10px; /* Space between cards */
       height: auto; /* Ensure it shrinks to content size */
+    }
+
+    #cardsCanvas .subject-wrapper:last-child {
+      margin-bottom: 100px;
+    }
+
+    .week-toggle-buttons button {
+      font-size: 0.8rem;
+      font-weight: 400;
     }
 
     .card {
@@ -855,10 +900,13 @@
     }
     .card-main-top .card-sub-top {
       order: 1; /* Topic comes first */
+      min-height: auto;
+      padding: 10px;
     }
     .card-main-top .card-sub-bottom {
       order: 2; /* Embeds come second */
       padding: 10px 0px;
+      height: 100px;
     }
 
     .card-main-bottom {
@@ -910,22 +958,26 @@
     overflow-y: auto; /* Allow content to scroll */
   }
 
+  .settings-block.settings-nav-item > div {
+    font-size: 1rem; /* Make the text bigger */
+  }
+
     .settings-side-panel {
-      order: 1; /* Move to top */
-      width: 100%; /* Full width for side panel */
-      border-right: none; /* Remove right border */
-      border-top: none; /* Remove top border */
-      border-bottom: 1px solid var(--line); /* Add bottom border */
-      flex-direction: row; /* Arrange nav items horizontally */
-      justify-content: space-around; /* Distribute items evenly */
-      padding: 0px; /* Adjust padding */
-      box-sizing: border-box; /* Include padding and border in width calculation */
+      order: 1;
+      width: 100%;
+      border-right: none;
+      border-top: none;
+      border-bottom: 2px solid #ffffff36;
+      flex-direction: column; /* Arrange nav items vertically */
+      padding: 0px;
+      box-sizing: border-box;
+
     }
 
     .settings-block {
-      flex: 1; /* Make buttons fill horizontal space */
-      border-bottom: none; /* Remove bottom border for nav items */
-      padding: 5px 10px; /* Adjust padding */
+      /* flex: 1 is removed to prevent buttons from filling height */
+      border-bottom: 1px solid var(--line); /* Add border between items */
+      padding: 10px 15px; /* Adjust padding for vertical layout */
     }
 
     .settings-main-page {
@@ -1008,7 +1060,27 @@
     }
 
     .top-nav .item {
-      font-size: 0.9rem; /* Smaller font for top nav items */
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 10px;
+      gap: 4px;
+      font-size: 1rem;
+    }
+
+    /* Override the desktop styles for the symbol container on mobile */
+    .nav-item-symbol-container {
+      height: auto;
+      aspect-ratio: unset;
+      background: transparent;
+    }
+
+    .item:hover .nav-item-symbol-container,
+    .item.active .nav-item-symbol-container {
+      background: transparent;
+    }
+
+    .nav-item-symbol-container .material-symbols-outlined {
+      font-size: 1.6rem;
     }
 
     .settings-block div {
@@ -1021,7 +1093,7 @@
 
     .settings-action-button {
       font-size: 0.9rem; /* Smaller font for settings action buttons */
-      padding: 10px; /* Adjust padding */
+      padding: 5px; /* Adjust padding */
     }
 
     .day-select {
@@ -1060,9 +1132,18 @@
 <div class="top-nav">
   <div class="scroll-wrap" style="height: 100%;">
     <div class="scroll-list" id="main-nav">
-      <div class="item active" data-view="live-view">LIVE</div>
-      <div class="item" data-view="resources-view">Resources</div>
-      <div class="item" data-view="settings-view">Settings</div>
+      <div class="item active" data-view="live-view">
+        <div class="nav-item-symbol-container"><span class="material-symbols-outlined">sensors</span></div>
+        <div class="nav-item-text-container">LIVE</div>
+      </div>
+      <div class="item" data-view="resources-view">
+        <div class="nav-item-symbol-container"><span class="material-symbols-outlined">widgets</span></div>
+        <div class="nav-item-text-container">Resources</div>
+      </div>
+      <div class="item" data-view="settings-view">
+        <div class="nav-item-symbol-container"><span class="material-symbols-outlined">settings</span></div>
+        <div class="nav-item-text-container">Settings</div>
+      </div>
     </div>
   </div>
 </div>
@@ -2321,7 +2402,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
               const card = el("div", { className: "card" });
 
               // Create left section for symbol and name
-              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0 20px; background: var(--bg2); flex-shrink: 0;" });
+              const cardLeftSection = el("div", { className: "card-left-section", style: "display: flex; flex-direction: row; align-items: center; padding: 0; background: var(--bg2); flex-shrink: 0;" });
 
               // Create right section for embeds
               const cardRightSection = el("div", { className: "card-right-section", style: "flex: 1; display: flex; flex-direction: row; align-items: stretch; background: var(--bg2);" });
@@ -2588,12 +2669,13 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
   const bottomWeeks = document.querySelector('.bottom-weeks');
 
   mainNav.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('item')) {
-          const viewId = e.target.dataset.view;
+      const targetItem = e.target.closest('.item'); // Find the clicked item
+      if (targetItem) {
+          const viewId = targetItem.dataset.view;
           
           // Toggle active class on nav items
           mainNav.querySelectorAll('.item').forEach(item => item.classList.remove('active'));
-          e.target.classList.add('active');
+          targetItem.classList.add('active');
 
           // Hide all views first
           liveView.style.display = 'none';
@@ -2610,7 +2692,7 @@ fetch("https://raw.githubusercontent.com/WEEKGE/live/main/config.json")
                       console.error("Sign-in error:", err);
                       alert("Please sign in to access settings.");
                       mainNav.querySelector('[data-view="live-view"]').classList.add('active');
-                      e.target.classList.remove('active');
+                      targetItem.classList.remove('active');
                       liveView.style.display = 'flex'; // Show live view if sign-in fails
                       bottomWeeks.style.display = 'block'; // Show bottom weeks
                       return;
